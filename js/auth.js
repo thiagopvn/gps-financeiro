@@ -34,11 +34,16 @@ export const loginWithEmail = async (email, password) => {
         showLoading('Entrando...');
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-        // Check if user document exists
-        const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-        if (!userDoc.exists()) {
-            // Create user document if it doesn't exist (for migrated users)
-            await createUserDocument(userCredential.user);
+        // Check if user document exists (with timeout to handle network issues)
+        try {
+            const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+            if (!userDoc.exists()) {
+                // Create user document if it doesn't exist (for migrated users)
+                await createUserDocument(userCredential.user);
+            }
+        } catch (firestoreError) {
+            // Log but don't block login if Firestore has issues
+            console.warn('Firestore check failed, proceeding with login:', firestoreError);
         }
 
         hideLoading();
@@ -46,6 +51,7 @@ export const loginWithEmail = async (email, password) => {
         return { success: true, user: userCredential.user };
     } catch (error) {
         hideLoading();
+        console.error('Login error:', error);
         const message = getAuthErrorMessage(error.code);
         showToast(message, 'error');
         return { success: false, error: message };
