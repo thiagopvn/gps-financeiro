@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dashboard Admin - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { min-height: 100dvh; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased">
+    <div class="min-h-screen max-w-4xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-bold">Painel Admin</h1>
+                <p class="text-slate-400 text-sm">GPS Financeiro</p>
+            </div>
+            <button id="logoutBtn" class="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 transition-colors">
+                <span class="material-symbols-outlined text-lg">logout</span>
+                <span class="text-sm font-semibold">Sair</span>
+            </button>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-white/5">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-blue-400 text-2xl">group</span>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-sm">Total Usuários</p>
+                        <p id="totalUsers" class="text-2xl font-bold">--</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-white/5">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-red-400 text-2xl">admin_panel_settings</span>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-sm">Administradores</p>
+                        <p id="totalAdmins" class="text-2xl font-bold">--</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-white/5">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-green-400 text-2xl">trending_up</span>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-sm">Usuários Ativos</p>
+                        <p id="activeUsers" class="text-2xl font-bold">--</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <h2 class="text-lg font-bold mb-4">Ações Rápidas</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <a href="/admin/usergerenciamento/usergerenciamento.html" class="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-white/5 hover:border-primary transition-colors flex flex-col items-center gap-3">
+                <span class="material-symbols-outlined text-3xl text-blue-400">people</span>
+                <span class="text-sm font-semibold text-center">Gerenciar Usuários</span>
+            </a>
+            <a href="/admin/newuser/newuser.html" class="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-white/5 hover:border-primary transition-colors flex flex-col items-center gap-3">
+                <span class="material-symbols-outlined text-3xl text-green-400">person_add</span>
+                <span class="text-sm font-semibold text-center">Criar Usuário</span>
+            </a>
+            <a href="/admin/admins/admins.html" class="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-white/5 hover:border-primary transition-colors flex flex-col items-center gap-3">
+                <span class="material-symbols-outlined text-3xl text-red-400">shield_person</span>
+                <span class="text-sm font-semibold text-center">Administradores</span>
+            </a>
+            <a href="/admin/newadmin/newadmin.html" class="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-white/5 hover:border-primary transition-colors flex flex-col items-center gap-3">
+                <span class="material-symbols-outlined text-3xl text-purple-400">add_moderator</span>
+                <span class="text-sm font-semibold text-center">Novo Admin</span>
+            </a>
+        </div>
+
+        <!-- Recent Users -->
+        <h2 class="text-lg font-bold mb-4">Usuários Recentes</h2>
+        <div id="recentUsers" class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden">
+            <div class="flex items-center justify-center py-12 text-slate-400">
+                <span class="material-symbols-outlined animate-spin text-2xl mr-2">progress_activity</span>
+                Carregando...
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { auth } from '/js/firebase-config.js';
+        import { isAdmin, logout } from '/js/auth.js';
+        import { getAdminStats, getAllUsers } from '/js/db.js';
+        import { showToast, formatRelativeDate } from '/js/utils.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Check admin auth
+        onAuthStateChanged(auth, async (user) => {
+            if (user === null) {
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+                return;
+            }
+            const adminCheck = await isAdmin();
+            if (adminCheck === false) {
+                showToast('Acesso não autorizado', 'error');
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+            }
+        });
+
+        // DOM Elements
+        const totalUsersEl = document.getElementById('totalUsers');
+        const totalAdminsEl = document.getElementById('totalAdmins');
+        const activeUsersEl = document.getElementById('activeUsers');
+        const recentUsersEl = document.getElementById('recentUsers');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Load stats
+        async function loadStats() {
+            try {
+                const stats = await getAdminStats();
+                totalUsersEl.textContent = stats.totalUsers || 0;
+                totalAdminsEl.textContent = stats.totalAdmins || 0;
+                activeUsersEl.textContent = stats.activeUsers || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load recent users
+        async function loadRecentUsers() {
+            try {
+                const users = await getAllUsers(5);
+
+                if (users.length === 0) {
+                    recentUsersEl.innerHTML = '<div class="flex items-center justify-center py-12 text-slate-400">Nenhum usuário encontrado</div>';
+                    return;
+                }
+
+                let html = '';
+                users.forEach(user => {
+                    const hasPhoto = user.photoURL ? true : false;
+                    const photoStyle = hasPhoto ? 'background-image: url(' + user.photoURL + ')' : '';
+                    const iconHtml = hasPhoto ? '' : '<span class="material-symbols-outlined text-slate-400">person</span>';
+                    const dateStr = user.createdAt ? formatRelativeDate(user.createdAt.toDate()) : 'Data desconhecida';
+
+                    html += '<div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5 last:border-0">';
+                    html += '<div class="flex items-center gap-3">';
+                    html += '<div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center bg-cover bg-center" style="' + photoStyle + '">';
+                    html += iconHtml;
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<p class="font-semibold">' + (user.name || 'Sem nome') + '</p>';
+                    html += '<p class="text-sm text-slate-400">' + user.email + '</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<span class="text-xs text-slate-400">' + dateStr + '</span>';
+                    html += '</div>';
+                });
+                recentUsersEl.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading recent users:', error);
+                recentUsersEl.innerHTML = '<div class="flex items-center justify-center py-12 text-red-400">Erro ao carregar usuários</div>';
+            }
+        }
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await logout();
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+            } catch (error) {
+                showToast('Erro ao sair', 'error');
+            }
+        });
+
+        // Initialize
+        loadStats();
+        loadRecentUsers();
+    </script>
+</body>
+</html>

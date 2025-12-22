@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Gerenciar Usuários - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>body { min-height: 100dvh; }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased">
+    <div class="min-h-screen max-w-4xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <a href="/admin/dashadmin/dashadmin.html" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold">Gerenciar Usuários</h1>
+                    <p class="text-slate-400 text-sm">Lista de motoristas cadastrados</p>
+                </div>
+            </div>
+            <a href="/admin/newuser/newuser.html" class="flex items-center gap-2 px-4 py-2 bg-primary text-background-dark rounded-xl font-semibold hover:bg-primary/90 transition-colors">
+                <span class="material-symbols-outlined text-lg">add</span>
+                <span class="text-sm">Novo Usuário</span>
+            </a>
+        </header>
+
+        <!-- Search -->
+        <div class="mb-6">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                <input id="searchInput" type="text" placeholder="Buscar por nome ou email..." class="w-full bg-white dark:bg-surface-dark rounded-xl pl-12 pr-4 py-3 border-none focus:ring-2 focus:ring-primary"/>
+            </div>
+        </div>
+
+        <!-- Users List -->
+        <div id="usersList" class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden">
+            <div class="flex items-center justify-center py-12 text-slate-400">
+                <span class="material-symbols-outlined animate-spin text-2xl mr-2">progress_activity</span>
+                Carregando...
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
+            <h3 class="text-lg font-bold mb-2">Excluir usuário?</h3>
+            <p class="text-slate-400 text-sm mb-6">Esta ação não pode ser desfeita. Todos os dados do usuário serão perdidos.</p>
+            <div class="flex gap-3">
+                <button id="cancelDelete" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">Cancelar</button>
+                <button id="confirmDelete" class="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { auth } from '/js/firebase-config.js';
+        import { isAdmin } from '/js/auth.js';
+        import { getAllUsers } from '/js/db.js';
+        import { showToast, formatRelativeDate } from '/js/utils.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { db } from '/js/firebase-config.js';
+
+        // Check admin auth
+        onAuthStateChanged(auth, async (user) => {
+            if (user === null) {
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+                return;
+            }
+            const adminCheck = await isAdmin();
+            if (adminCheck === false) {
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+            }
+        });
+
+        // State
+        let allUsers = [];
+        let userToDelete = null;
+
+        // DOM Elements
+        const usersList = document.getElementById('usersList');
+        const searchInput = document.getElementById('searchInput');
+        const deleteModal = document.getElementById('deleteModal');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+
+        // Load users
+        async function loadUsers() {
+            try {
+                allUsers = await getAllUsers();
+                renderUsers(allUsers);
+            } catch (error) {
+                console.error('Error loading users:', error);
+                usersList.innerHTML = '<div class="flex items-center justify-center py-12 text-red-400">Erro ao carregar usuários</div>';
+            }
+        }
+
+        // Render users
+        function renderUsers(users) {
+            if (users.length === 0) {
+                usersList.innerHTML = '<div class="flex items-center justify-center py-12 text-slate-400">Nenhum usuário encontrado</div>';
+                return;
+            }
+
+            let html = '';
+            users.forEach(user => {
+                const hasPhoto = user.photoURL ? true : false;
+                const photoStyle = hasPhoto ? 'background-image: url(' + user.photoURL + ')' : '';
+                const iconHtml = hasPhoto ? '' : '<span class="material-symbols-outlined text-slate-400">person</span>';
+                const dateStr = user.createdAt ? formatRelativeDate(user.createdAt.toDate()) : 'Data desconhecida';
+
+                html += '<div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5 last:border-0">';
+                html += '<div class="flex items-center gap-3">';
+                html += '<div class="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center bg-cover bg-center" style="' + photoStyle + '">' + iconHtml + '</div>';
+                html += '<div>';
+                html += '<p class="font-semibold">' + (user.name || 'Sem nome') + '</p>';
+                html += '<p class="text-sm text-slate-400">' + user.email + '</p>';
+                if (user.vehicle) html += '<p class="text-xs text-slate-500">' + user.vehicle + (user.plate ? ' - ' + user.plate : '') + '</p>';
+                html += '</div></div>';
+                html += '<div class="flex items-center gap-2">';
+                html += '<span class="text-xs text-slate-400 hidden md:block">' + dateStr + '</span>';
+                html += '<button class="delete-btn p-2 rounded-full hover:bg-red-500/10 text-red-400 transition-colors" data-id="' + user.id + '" data-name="' + (user.name || user.email) + '">';
+                html += '<span class="material-symbols-outlined">delete</span>';
+                html += '</button></div></div>';
+            });
+            usersList.innerHTML = html;
+
+            // Add delete handlers
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    userToDelete = btn.dataset.id;
+                    deleteModal.classList.remove('hidden');
+                    deleteModal.classList.add('flex');
+                });
+            });
+        }
+
+        // Search
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allUsers.filter(u =>
+                (u.name || '').toLowerCase().includes(query) ||
+                u.email.toLowerCase().includes(query)
+            );
+            renderUsers(filtered);
+        });
+
+        // Delete modal
+        cancelDelete.addEventListener('click', closeModal);
+        deleteModal.addEventListener('click', (e) => { if (e.target === deleteModal) closeModal(); });
+
+        function closeModal() {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('flex');
+            userToDelete = null;
+        }
+
+        confirmDelete.addEventListener('click', async () => {
+            if (userToDelete === null) return;
+            try {
+                await deleteDoc(doc(db, 'users', userToDelete));
+                showToast('Usuário excluído', 'success');
+                loadUsers();
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                showToast('Erro ao excluir', 'error');
+            }
+            closeModal();
+        });
+
+        // Initialize
+        loadUsers();
+    </script>
+</body>
+</html>

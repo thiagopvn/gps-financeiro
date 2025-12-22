@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Recuperar Senha - GPS Financeiro</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Theme Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: 100dvh;
+        }
+    </style>
+</head>
+<body class="font-display antialiased bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen overflow-x-hidden flex flex-col">
+    <div class="flex-1 flex flex-col justify-center w-full max-w-md mx-auto px-6 py-8 relative">
+        <!-- Decoration Gradient -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary/10 blur-[80px] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-primary/5 blur-[80px] pointer-events-none"></div>
+
+        <!-- Header Section -->
+        <div class="w-full flex flex-col items-center mb-8 z-10">
+            <button onclick="window.history.back()" class="absolute left-4 top-4 p-2 rounded-full hover:bg-white/10 transition-colors">
+                <span class="material-symbols-outlined text-slate-400">arrow_back</span>
+            </button>
+            <div class="w-16 h-16 bg-gradient-to-tr from-primary/20 to-surface-dark rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-primary/5 border border-primary/20">
+                <span class="material-symbols-outlined text-primary text-[32px]">lock_reset</span>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight text-center mb-2">Recuperar senha</h1>
+            <p class="text-slate-400 text-sm text-center max-w-xs">Digite seu email para receber um link de recuperação de senha</p>
+        </div>
+
+        <!-- Initial Form -->
+        <div id="formContainer">
+            <!-- Reset Password Form -->
+            <form id="resetForm" class="w-full space-y-4 z-10">
+                <!-- Email Input -->
+                <div class="group relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">mail</span>
+                    </div>
+                    <input
+                        id="email"
+                        type="email"
+                        required
+                        class="block w-full rounded-xl border-0 bg-surface-dark py-4 pl-12 pr-4 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 transition-all"
+                        placeholder="Digite seu email"
+                    />
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    id="submitBtn"
+                    class="flex w-full justify-center items-center rounded-xl bg-primary px-3 py-4 text-sm font-bold leading-6 text-background-dark shadow-sm hover:bg-[#34f574] hover:shadow-primary/25 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all duration-200 mt-6"
+                >
+                    Enviar link de recuperação
+                    <span class="material-symbols-outlined text-[20px] ml-2 font-bold">send</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Success Message (hidden initially) -->
+        <div id="successContainer" class="hidden w-full z-10">
+            <div class="flex flex-col items-center text-center">
+                <div class="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-primary text-[40px]">mark_email_read</span>
+                </div>
+                <h2 class="text-xl font-bold mb-2">Email enviado!</h2>
+                <p class="text-slate-400 text-sm mb-6">
+                    Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.
+                </p>
+                <p class="text-slate-500 text-xs mb-4">
+                    Não recebeu? Verifique sua pasta de spam ou tente novamente.
+                </p>
+                <button
+                    type="button"
+                    id="retryBtn"
+                    class="text-primary font-semibold text-sm hover:underline"
+                >
+                    Enviar novamente
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <p class="mt-10 text-center text-sm text-slate-400 z-10">
+            Lembrou a senha?
+            <a class="font-semibold text-primary hover:text-[#34f574] hover:underline transition-all ml-1" href="login.html">
+                Voltar ao login
+            </a>
+        </p>
+    </div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { resetPassword } from '/js/auth.js';
+        import { requireNoAuth } from '/js/firebase-config.js';
+        import { showToast, isValidEmail } from '/js/utils.js';
+
+        // Check if already logged in
+        requireNoAuth();
+
+        // DOM Elements
+        const form = document.getElementById('resetForm');
+        const formContainer = document.getElementById('formContainer');
+        const successContainer = document.getElementById('successContainer');
+        const emailInput = document.getElementById('email');
+        const retryBtn = document.getElementById('retryBtn');
+
+        let lastEmail = '';
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+
+            // Validation
+            if (!isValidEmail(email)) {
+                showToast('Digite um email válido', 'error');
+                return;
+            }
+
+            lastEmail = email;
+
+            // Send reset email
+            const result = await resetPassword(email);
+
+            if (result.success) {
+                // Show success message
+                formContainer.classList.add('hidden');
+                successContainer.classList.remove('hidden');
+            }
+        });
+
+        // Retry button
+        retryBtn.addEventListener('click', async () => {
+            if (lastEmail) {
+                const result = await resetPassword(lastEmail);
+                if (result.success) {
+                    showToast('Email reenviado!', 'success');
+                }
+            } else {
+                // Show form again
+                successContainer.classList.add('hidden');
+                formContainer.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

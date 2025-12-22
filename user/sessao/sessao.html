@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Registro de Horas - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec80",
+                        "primary-hover": "#0fd671",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#102219",
+                        "surface-dark": "#162e22",
+                        "surface-light": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { min-height: max(884px, 100dvh); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white overflow-hidden h-screen flex flex-col">
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 overflow-y-auto no-scrollbar pb-24">
+        <!-- Header -->
+        <div class="sticky top-0 z-10 flex items-center bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md p-4 pb-2 justify-between border-b border-black/5 dark:border-white/5">
+            <a href="/user/Dashboard/dash.html" class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-start cursor-pointer transition-colors hover:text-primary">
+                <span class="material-symbols-outlined" style="font-size: 24px;">arrow_back_ios</span>
+            </a>
+            <h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Registro de Ponto</h2>
+            <div class="flex w-12 items-center justify-end">
+                <a href="/user/configuracoes/config.html" class="flex items-center justify-center rounded-lg h-12 text-slate-900 dark:text-white hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">settings</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Timer Section -->
+        <div class="flex flex-col items-center justify-center pt-8 pb-6 px-6">
+            <!-- Status Headline -->
+            <div class="mb-8 text-center">
+                <div id="statusBadge" class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-slate-200 dark:bg-surface-dark mb-3">
+                    <div id="statusDot" class="w-2 h-2 rounded-full bg-slate-400 mr-2"></div>
+                    <span id="statusLabel" class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Status Atual</span>
+                </div>
+                <h3 id="statusText" class="text-slate-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">Você está offline</h3>
+                <p id="currentDate" class="text-slate-500 dark:text-slate-400 text-sm mt-1"></p>
+            </div>
+
+            <!-- Timer Display -->
+            <div class="w-full max-w-sm">
+                <div class="flex gap-3 justify-center">
+                    <!-- Hours -->
+                    <div class="flex flex-col items-center gap-2 flex-1">
+                        <div class="w-full aspect-[4/5] flex items-center justify-center rounded-2xl bg-white dark:bg-[#1a382a] shadow-sm ring-1 ring-black/5 dark:ring-white/5 relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 dark:to-black/20"></div>
+                            <p id="hours" class="text-slate-900 dark:text-primary text-5xl sm:text-6xl font-black leading-none tracking-tighter relative z-10 tabular-nums">00</p>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Horas</p>
+                    </div>
+                    <!-- Separator -->
+                    <div class="flex flex-col justify-start pt-6 h-full">
+                        <span id="sep1" class="text-slate-300 dark:text-slate-600 text-4xl font-bold">:</span>
+                    </div>
+                    <!-- Minutes -->
+                    <div class="flex flex-col items-center gap-2 flex-1">
+                        <div class="w-full aspect-[4/5] flex items-center justify-center rounded-2xl bg-white dark:bg-[#1a382a] shadow-sm ring-1 ring-black/5 dark:ring-white/5 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 dark:to-black/20"></div>
+                            <p id="minutes" class="text-slate-900 dark:text-primary text-5xl sm:text-6xl font-black leading-none tracking-tighter relative z-10 tabular-nums">00</p>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Min</p>
+                    </div>
+                    <!-- Separator -->
+                    <div class="flex flex-col justify-start pt-6 h-full">
+                        <span id="sep2" class="text-slate-300 dark:text-slate-600 text-4xl font-bold">:</span>
+                    </div>
+                    <!-- Seconds -->
+                    <div class="flex flex-col items-center gap-2 flex-1">
+                        <div class="w-full aspect-[4/5] flex items-center justify-center rounded-2xl bg-white dark:bg-[#1a382a] shadow-sm ring-1 ring-black/5 dark:ring-white/5 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 dark:to-black/20"></div>
+                            <p id="seconds" class="text-slate-900 dark:text-primary text-5xl sm:text-6xl font-black leading-none tracking-tighter relative z-10 tabular-nums">00</p>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Seg</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Action Button -->
+            <div class="w-full max-w-sm mt-10">
+                <button id="actionBtn" class="relative group w-full cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary-hover active:scale-[0.98] transition-all duration-200 shadow-lg shadow-primary/20">
+                    <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                    <span id="actionIcon" class="material-symbols-outlined text-background-dark mr-2 text-[28px]">play_circle</span>
+                    <span id="actionText" class="text-background-dark text-lg font-bold tracking-wide z-10">INICIAR TURNO</span>
+                </button>
+
+                <div class="flex justify-between items-center mt-6 px-2">
+                    <div class="flex flex-col items-start">
+                        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Previsão de Ganhos</span>
+                        <span id="earnings" class="text-lg font-bold text-slate-900 dark:text-white">R$ 0,00</span>
+                    </div>
+                    <div class="h-8 w-[1px] bg-slate-200 dark:bg-white/10"></div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Meta Diária</span>
+                        <span id="goalProgress" class="text-lg font-bold text-slate-900 dark:text-white">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spacer -->
+        <div class="h-2 w-full bg-slate-100 dark:bg-black/20 border-y border-slate-200 dark:border-white/5"></div>
+
+        <!-- History Section -->
+        <div class="pb-6">
+            <div class="flex items-center justify-between px-4 pt-6 pb-2">
+                <h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Histórico Recente</h3>
+                <button class="text-primary text-sm font-semibold hover:text-primary-hover">Ver tudo</button>
+            </div>
+            <div id="historyContainer" class="px-4 flex flex-col gap-3 mt-2">
+                <!-- History will be loaded dynamically -->
+                <div class="text-center py-8 text-slate-400">
+                    <span class="material-symbols-outlined text-3xl mb-2">hourglass_empty</span>
+                    <p class="text-sm">Carregando histórico...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-surface-light dark:bg-background-dark border-t border-slate-200 dark:border-white/5 pb-safe">
+        <div class="flex justify-around items-center h-16 max-w-lg mx-auto px-4">
+            <a href="/user/Dashboard/dash.html" class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 w-16 transition-colors">
+                <span class="material-symbols-outlined">grid_view</span>
+                <span class="text-[10px] font-medium">Painel</span>
+            </a>
+            <a href="/user/transacao/transacao.html" class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 w-16 transition-colors">
+                <span class="material-symbols-outlined">history</span>
+                <span class="text-[10px] font-medium">Histórico</span>
+            </a>
+            <a href="/user/sessao/sessao.html" class="flex flex-col items-center gap-1 text-primary w-16">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">timer</span>
+                <span class="text-[10px] font-bold">Sessão</span>
+            </a>
+            <a href="/user/configuracoes/config.html" class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 w-16 transition-colors">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="text-[10px] font-medium">Ajustes</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { requireAuth } from '/js/firebase-config.js';
+        import { startSession, endSession, getSessions, getActiveSession, getUserSettings, getGoals } from '/js/db.js';
+        import { formatCurrency, formatDuration, formatDurationHuman, formatRelativeDate, formatDate, showToast, saveLocal, getLocal } from '/js/utils.js';
+
+        // Require authentication
+        const user = await requireAuth();
+        if (!user) throw new Error('Not authenticated');
+
+        // DOM Elements
+        const statusDot = document.getElementById('statusDot');
+        const statusLabel = document.getElementById('statusLabel');
+        const statusText = document.getElementById('statusText');
+        const currentDateEl = document.getElementById('currentDate');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        const sep1 = document.getElementById('sep1');
+        const sep2 = document.getElementById('sep2');
+        const actionBtn = document.getElementById('actionBtn');
+        const actionIcon = document.getElementById('actionIcon');
+        const actionText = document.getElementById('actionText');
+        const earningsEl = document.getElementById('earnings');
+        const goalProgressEl = document.getElementById('goalProgress');
+        const historyContainer = document.getElementById('historyContainer');
+
+        // State
+        let isRunning = false;
+        let currentSessionId = null;
+        let startTime = null;
+        let elapsedSeconds = 0;
+        let timerInterval = null;
+        let hourlyRate = 30; // Default R$30/hour
+        let dailyGoal = 300; // Default R$300
+
+        // Format current date
+        const today = new Date();
+        const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+        currentDateEl.textContent = today.toLocaleDateString('pt-BR', dateOptions);
+
+        // Load settings
+        const loadSettings = async () => {
+            const settings = await getUserSettings();
+            if (settings) {
+                hourlyRate = settings.hourlyRate || 30;
+            }
+
+            // Get daily goal
+            const goals = await getGoals();
+            const dailyGoalObj = goals.find(g => g.type === 'daily');
+            if (dailyGoalObj) {
+                dailyGoal = dailyGoalObj.target;
+            }
+        };
+
+        // Update timer display
+        const updateTimerDisplay = () => {
+            const hours = Math.floor(elapsedSeconds / 3600);
+            const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+            const seconds = elapsedSeconds % 60;
+
+            hoursEl.textContent = String(hours).padStart(2, '0');
+            minutesEl.textContent = String(minutes).padStart(2, '0');
+            secondsEl.textContent = String(seconds).padStart(2, '0');
+
+            // Calculate earnings
+            const hoursWorked = elapsedSeconds / 3600;
+            const currentEarnings = hoursWorked * hourlyRate;
+            earningsEl.textContent = formatCurrency(currentEarnings);
+
+            // Calculate goal progress
+            const progress = Math.min(100, Math.round((currentEarnings / dailyGoal) * 100));
+            goalProgressEl.textContent = `${progress}%`;
+        };
+
+        // Start timer
+        const startTimer = () => {
+            timerInterval = setInterval(() => {
+                elapsedSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+
+            // Animate separators
+            sep1.classList.add('animate-pulse');
+            sep2.classList.add('animate-pulse');
+        };
+
+        // Stop timer
+        const stopTimer = () => {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            sep1.classList.remove('animate-pulse');
+            sep2.classList.remove('animate-pulse');
+        };
+
+        // Update UI for running state
+        const setRunningState = (running) => {
+            isRunning = running;
+
+            if (running) {
+                statusDot.classList.remove('bg-slate-400');
+                statusDot.classList.add('bg-primary', 'animate-pulse');
+                statusLabel.textContent = 'Em andamento';
+                statusText.textContent = 'Turno em andamento';
+                actionIcon.textContent = 'stop_circle';
+                actionText.textContent = 'FINALIZAR TURNO';
+                actionBtn.classList.remove('bg-primary', 'hover:bg-primary-hover', 'shadow-primary/20');
+                actionBtn.classList.add('bg-red-500', 'hover:bg-red-600', 'shadow-red-500/20');
+            } else {
+                statusDot.classList.remove('bg-primary', 'animate-pulse');
+                statusDot.classList.add('bg-slate-400');
+                statusLabel.textContent = 'Status Atual';
+                statusText.textContent = 'Você está offline';
+                actionIcon.textContent = 'play_circle';
+                actionText.textContent = 'INICIAR TURNO';
+                actionBtn.classList.remove('bg-red-500', 'hover:bg-red-600', 'shadow-red-500/20');
+                actionBtn.classList.add('bg-primary', 'hover:bg-primary-hover', 'shadow-primary/20');
+            }
+        };
+
+        // Handle action button click
+        actionBtn.addEventListener('click', async () => {
+            if (isRunning) {
+                // Stop session
+                stopTimer();
+
+                const hoursWorked = elapsedSeconds / 3600;
+                const sessionEarnings = hoursWorked * hourlyRate;
+
+                await endSession(currentSessionId, elapsedSeconds, sessionEarnings);
+
+                showToast(`Turno finalizado! Ganhos: ${formatCurrency(sessionEarnings)}`, 'success');
+
+                // Reset
+                currentSessionId = null;
+                startTime = null;
+                elapsedSeconds = 0;
+                updateTimerDisplay();
+                setRunningState(false);
+
+                // Clear local storage
+                saveLocal('activeSession', null);
+
+                // Reload history
+                await loadHistory();
+            } else {
+                // Start session
+                currentSessionId = await startSession();
+                startTime = Date.now();
+                elapsedSeconds = 0;
+
+                // Save to local storage for recovery
+                saveLocal('activeSession', {
+                    sessionId: currentSessionId,
+                    startTime: startTime
+                });
+
+                setRunningState(true);
+                startTimer();
+                showToast('Turno iniciado! Bom trabalho!', 'success');
+            }
+        });
+
+        // Load history
+        const loadHistory = async () => {
+            const sessions = await getSessions({ limit: 5 });
+
+            if (sessions.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="text-center py-8 text-slate-400">
+                        <span class="material-symbols-outlined text-3xl mb-2">work_history</span>
+                        <p class="text-sm">Nenhum turno registrado ainda</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            sessions.forEach(session => {
+                if (session.status === 'completed') {
+                    const dateStr = formatRelativeDate(session.startTime);
+                    const shortDate = session.startTime.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
+
+                    html += `
+                        <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-surface-dark border border-slate-200 dark:border-white/5 shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="size-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                                    <span class="material-symbols-outlined text-xl">calendar_today</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-slate-900 dark:text-white font-bold text-sm">${dateStr}</span>
+                                    <span class="text-slate-500 dark:text-slate-400 text-xs">${shortDate}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end gap-0.5">
+                                <span class="text-primary font-bold text-sm">+ ${formatCurrency(session.earnings)}</span>
+                                <div class="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-xs">
+                                    <span class="material-symbols-outlined text-[14px]">schedule</span>
+                                    <span>${formatDurationHuman(session.duration)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            historyContainer.innerHTML = html || `
+                <div class="text-center py-8 text-slate-400">
+                    <span class="material-symbols-outlined text-3xl mb-2">work_history</span>
+                    <p class="text-sm">Nenhum turno finalizado ainda</p>
+                </div>
+            `;
+        };
+
+        // Check for active session (recovery)
+        const checkActiveSession = async () => {
+            // First check Firebase
+            const activeSession = await getActiveSession();
+
+            if (activeSession) {
+                currentSessionId = activeSession.id;
+                startTime = activeSession.startTime.getTime();
+                elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+
+                setRunningState(true);
+                updateTimerDisplay();
+                startTimer();
+            } else {
+                // Check local storage for recovery
+                const savedSession = getLocal('activeSession');
+                if (savedSession && savedSession.sessionId) {
+                    // Session might have been lost, clear it
+                    saveLocal('activeSession', null);
+                }
+            }
+        };
+
+        // Initialize
+        const init = async () => {
+            await loadSettings();
+            await checkActiveSession();
+            await loadHistory();
+        };
+
+        init();
+    </script>
+</body>
+</html>

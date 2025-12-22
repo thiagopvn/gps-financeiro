@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Configurações - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #13ec5b;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #13ec5b;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display antialiased overflow-x-hidden">
+    <div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto shadow-2xl overflow-hidden bg-background-light dark:bg-background-dark">
+        <!-- Top App Bar -->
+        <header class="sticky top-0 z-50 flex items-center justify-between px-4 pt-12 pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-white/5">
+            <button id="backBtn" class="flex size-10 items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined" style="font-size: 24px;">arrow_back</span>
+            </button>
+            <h1 class="text-lg font-bold leading-tight tracking-tight flex-1 text-center">Configurações</h1>
+            <div class="w-10"></div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-28">
+            <!-- Profile Header -->
+            <div class="px-4 pt-6 pb-2">
+                <div class="flex flex-col items-center gap-4 p-6 bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-slate-200 dark:border-white/5">
+                    <div class="relative group cursor-pointer" id="photoContainer">
+                        <div id="profilePhoto" class="size-24 rounded-full bg-slate-200 dark:bg-slate-700 bg-cover bg-center border-4 border-background-light dark:border-background-dark shadow-md flex items-center justify-center">
+                            <span class="material-symbols-outlined text-4xl text-slate-400">person</span>
+                        </div>
+                        <label for="photoInput" class="absolute bottom-0 right-0 bg-primary text-background-dark rounded-full p-1.5 border-2 border-background-light dark:border-background-dark cursor-pointer">
+                            <span class="material-symbols-outlined flex items-center justify-center" style="font-size: 14px;">edit</span>
+                        </label>
+                        <input type="file" id="photoInput" accept="image/*" class="hidden"/>
+                    </div>
+                    <div class="text-center">
+                        <h2 id="userName" class="text-xl font-bold">Carregando...</h2>
+                        <p id="userVehicle" class="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium"></p>
+                    </div>
+                    <button id="editProfileBtn" class="w-full py-2.5 px-4 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-sm font-semibold rounded-xl transition-colors text-slate-900 dark:text-white border border-transparent dark:border-white/5">
+                        Editar Perfil
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section: Financeiro -->
+            <div class="mt-6">
+                <h3 class="px-6 pb-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Financeiro</h3>
+                <div class="mx-4 flex flex-col bg-white dark:bg-surface-dark rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-white/5 divide-y divide-slate-100 dark:divide-white/5">
+                    <!-- Item: Metas -->
+                    <a href="/user/metas/meta.html" class="flex items-center justify-between w-full p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center size-10 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 shrink-0">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">flag</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-base font-medium">Metas Financeiras</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Diária, Semanal, Mensal</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors" style="font-size: 20px;">chevron_right</span>
+                    </a>
+                    <!-- Item: Taxa por hora -->
+                    <div class="flex items-center justify-between w-full p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center size-10 rounded-full bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400 shrink-0">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">payments</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-base font-medium">Taxa por hora</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Para cálculo de sessões</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-slate-400">R$</span>
+                            <input type="number" id="hourlyRateInput" class="w-16 text-right bg-transparent border-none focus:ring-0 text-base font-semibold p-0" value="25" min="0" step="0.50"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Dados -->
+            <div class="mt-6">
+                <h3 class="px-6 pb-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Dados & Histórico</h3>
+                <div class="mx-4 flex flex-col bg-white dark:bg-surface-dark rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-white/5 divide-y divide-slate-100 dark:divide-white/5">
+                    <!-- Item: Histórico -->
+                    <a href="/user/sessao/sessao.html" class="flex items-center justify-between w-full p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center size-10 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 shrink-0">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">history</span>
+                            </div>
+                            <p class="text-base font-medium flex-1 text-left">Histórico de Sessões</p>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors" style="font-size: 20px;">chevron_right</span>
+                    </a>
+                    <!-- Item: Backup -->
+                    <button id="exportDataBtn" class="flex items-center justify-between w-full p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center size-10 rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 shrink-0">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">download</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-base font-medium">Exportar Dados</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Formato JSON</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors" style="font-size: 20px;">chevron_right</span>
+                    </button>
+                    <!-- Item: Restore -->
+                    <button id="importDataBtn" class="flex items-center justify-between w-full p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center size-10 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-500/20 dark:text-slate-400 shrink-0">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">upload</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-base font-medium">Importar Backup</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Restaurar de arquivo</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors" style="font-size: 20px;">chevron_right</span>
+                    </button>
+                    <input type="file" id="importFileInput" accept=".json" class="hidden"/>
+                </div>
+            </div>
+
+            <!-- Section: Preferências -->
+            <div class="mt-6">
+                <h3 class="px-6 pb-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Aplicativo</h3>
+                <div class="mx-4 flex flex-col bg-white dark:bg-surface-dark rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-white/5 divide-y divide-slate-100 dark:divide-white/5">
+                    <!-- Item: Dark Mode Toggle -->
+                    <div class="flex items-center justify-between w-full p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center size-10 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 shrink-0">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">dark_mode</span>
+                            </div>
+                            <p class="text-base font-medium">Tema Escuro</p>
+                        </div>
+                        <div class="relative inline-block w-12 align-middle select-none">
+                            <input class="toggle-checkbox absolute block size-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-300 dark:border-slate-600 transition-all duration-300 left-0 checked:left-6 checked:bg-white checked:border-primary" id="themeToggle" type="checkbox" checked/>
+                            <label class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 dark:bg-slate-700 cursor-pointer transition-colors duration-300" for="themeToggle"></label>
+                        </div>
+                    </div>
+                    <!-- Item: Notifications Toggle -->
+                    <div class="flex items-center justify-between w-full p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center size-10 rounded-full bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 shrink-0">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">notifications</span>
+                            </div>
+                            <p class="text-base font-medium">Notificações</p>
+                        </div>
+                        <div class="relative inline-block w-12 align-middle select-none">
+                            <input class="toggle-checkbox absolute block size-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-300 dark:border-slate-600 transition-all duration-300 left-0 checked:left-6 checked:bg-white checked:border-primary" id="notifToggle" type="checkbox"/>
+                            <label class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 dark:bg-slate-700 cursor-pointer transition-colors duration-300" for="notifToggle"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone / Logout -->
+            <div class="mt-8 mx-4">
+                <button id="logoutBtn" class="flex items-center justify-center w-full p-4 gap-3 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl transition-colors font-semibold border border-red-100 dark:border-red-500/20">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">logout</span>
+                    Sair da Conta
+                </button>
+            </div>
+
+            <div class="mt-8 mb-6 text-center">
+                <p class="text-xs text-slate-400 dark:text-slate-600">GPS Financeiro v1.0.0</p>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white dark:bg-background-dark border-t border-gray-200 dark:border-white/5 px-6 pt-3 pb-6">
+            <div class="flex justify-between items-end">
+                <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/Dashboard/dash.html">
+                    <span class="material-symbols-outlined text-[26px]">home</span>
+                    <span class="text-[10px] font-medium">Início</span>
+                </a>
+                <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/transacao/transacao.html">
+                    <span class="material-symbols-outlined text-[26px]">receipt_long</span>
+                    <span class="text-[10px] font-medium">Extrato</span>
+                </a>
+                <!-- Central FAB -->
+                <div class="relative -top-3">
+                    <a href="/user/Lancamento/lancamento.html" class="flex items-center justify-center w-14 h-14 rounded-full bg-primary shadow-lg shadow-primary/30 text-background-dark hover:scale-105 active:scale-95 transition-all">
+                        <span class="material-symbols-outlined text-[32px]">add</span>
+                    </a>
+                </div>
+                <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/metas/meta.html">
+                    <span class="material-symbols-outlined text-[26px]">flag</span>
+                    <span class="text-[10px] font-medium">Metas</span>
+                </a>
+                <a class="flex flex-col items-center gap-1 w-12 text-slate-900 dark:text-primary transition-colors" href="/user/configuracoes/config.html">
+                    <span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">settings</span>
+                    <span class="text-[10px] font-medium">Ajustes</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold mb-4">Editar Perfil</h3>
+            <form id="profileForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-500 mb-1">Nome</label>
+                    <input type="text" id="editName" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-500 mb-1">Email</label>
+                    <input type="email" id="editEmail" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary" disabled/>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-500 mb-1">Telefone</label>
+                    <input type="tel" id="editPhone" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-500 mb-1">Veículo</label>
+                    <input type="text" id="editVehicle" placeholder="Ex: Toyota Corolla" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-500 mb-1">Placa</label>
+                    <input type="text" id="editPlate" placeholder="ABC-1234" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary uppercase"/>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" id="cancelEditBtn" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 py-3 rounded-xl bg-primary text-background-dark font-semibold">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { auth, requireAuth } from '/js/firebase-config.js';
+        import { logout, getCurrentUserData, getUserSettings } from '/js/auth.js';
+        import { getUserProfile, updateUserProfile, uploadProfilePhoto, exportUserData, importUserData } from '/js/db.js';
+        import { showToast, applyPhoneMask } from '/js/utils.js';
+        import { doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { db } from '/js/firebase-config.js';
+
+        // Wait for auth
+        requireAuth();
+
+        // State
+        let userProfile = null;
+        let userSettings = null;
+
+        // DOM Elements
+        const backBtn = document.getElementById('backBtn');
+        const userName = document.getElementById('userName');
+        const userVehicle = document.getElementById('userVehicle');
+        const profilePhoto = document.getElementById('profilePhoto');
+        const photoInput = document.getElementById('photoInput');
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const editProfileModal = document.getElementById('editProfileModal');
+        const profileForm = document.getElementById('profileForm');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const notifToggle = document.getElementById('notifToggle');
+        const hourlyRateInput = document.getElementById('hourlyRateInput');
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        const importDataBtn = document.getElementById('importDataBtn');
+        const importFileInput = document.getElementById('importFileInput');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Form fields
+        const editName = document.getElementById('editName');
+        const editEmail = document.getElementById('editEmail');
+        const editPhone = document.getElementById('editPhone');
+        const editVehicle = document.getElementById('editVehicle');
+        const editPlate = document.getElementById('editPlate');
+
+        // Apply phone mask
+        applyPhoneMask(editPhone);
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                userProfile = await getUserProfile();
+                userSettings = await getUserSettings();
+
+                if (userProfile) {
+                    userName.textContent = userProfile.name || 'Usuário';
+                    if (userProfile.vehicle || userProfile.plate) {
+                        userVehicle.textContent = `${userProfile.vehicle || ''} ${userProfile.plate ? '• ' + userProfile.plate : ''}`.trim();
+                    } else {
+                        userVehicle.textContent = '';
+                    }
+                    if (userProfile.photoURL) {
+                        profilePhoto.style.backgroundImage = `url(${userProfile.photoURL})`;
+                        profilePhoto.innerHTML = '';
+                    }
+
+                    // Fill edit form
+                    editName.value = userProfile.name || '';
+                    editEmail.value = userProfile.email || '';
+                    editPhone.value = userProfile.phone || '';
+                    editVehicle.value = userProfile.vehicle || '';
+                    editPlate.value = userProfile.plate || '';
+                }
+
+                if (userSettings) {
+                    hourlyRateInput.value = userSettings.hourlyRate || 25;
+                    notifToggle.checked = userSettings.notifications !== false;
+
+                    // Apply dark mode from settings
+                    const isDark = userSettings.darkMode !== false;
+                    themeToggle.checked = isDark;
+                    document.documentElement.classList.toggle('dark', isDark);
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Photo upload
+        photoInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Imagem muito grande (máx 5MB)', 'error');
+                return;
+            }
+
+            try {
+                showToast('Enviando foto...', 'info');
+                const photoURL = await uploadProfilePhoto(file);
+                profilePhoto.style.backgroundImage = `url(${photoURL})`;
+                profilePhoto.innerHTML = '';
+                showToast('Foto atualizada!', 'success');
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                showToast('Erro ao enviar foto', 'error');
+            }
+        });
+
+        // Edit profile modal
+        editProfileBtn.addEventListener('click', () => {
+            editProfileModal.classList.remove('hidden');
+            editProfileModal.classList.add('flex');
+        });
+
+        cancelEditBtn.addEventListener('click', closeEditModal);
+        editProfileModal.addEventListener('click', (e) => {
+            if (e.target === editProfileModal) closeEditModal();
+        });
+
+        function closeEditModal() {
+            editProfileModal.classList.add('hidden');
+            editProfileModal.classList.remove('flex');
+        }
+
+        // Save profile
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                await updateUserProfile({
+                    name: editName.value.trim(),
+                    phone: editPhone.value.trim(),
+                    vehicle: editVehicle.value.trim(),
+                    plate: editPlate.value.trim().toUpperCase()
+                });
+
+                showToast('Perfil atualizado!', 'success');
+                closeEditModal();
+                loadUserData();
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showToast('Erro ao atualizar', 'error');
+            }
+        });
+
+        // Theme toggle
+        themeToggle.addEventListener('change', async () => {
+            const isDark = themeToggle.checked;
+            document.documentElement.classList.toggle('dark', isDark);
+
+            try {
+                const user = auth.currentUser;
+                if (user) {
+                    const settingsRef = doc(db, 'users', user.uid, 'settings', 'preferences');
+                    await updateDoc(settingsRef, { darkMode: isDark });
+                }
+            } catch (error) {
+                console.error('Error saving theme preference:', error);
+            }
+        });
+
+        // Notifications toggle
+        notifToggle.addEventListener('change', async () => {
+            const enabled = notifToggle.checked;
+
+            try {
+                const user = auth.currentUser;
+                if (user) {
+                    const settingsRef = doc(db, 'users', user.uid, 'settings', 'preferences');
+                    await updateDoc(settingsRef, { notifications: enabled });
+                }
+
+                if (enabled && 'Notification' in window) {
+                    const permission = await Notification.requestPermission();
+                    if (permission !== 'granted') {
+                        showToast('Permissão de notificação negada', 'error');
+                        notifToggle.checked = false;
+                    }
+                }
+            } catch (error) {
+                console.error('Error saving notification preference:', error);
+            }
+        });
+
+        // Hourly rate
+        let rateDebounce;
+        hourlyRateInput.addEventListener('input', () => {
+            clearTimeout(rateDebounce);
+            rateDebounce = setTimeout(async () => {
+                try {
+                    const user = auth.currentUser;
+                    if (user) {
+                        const settingsRef = doc(db, 'users', user.uid, 'settings', 'preferences');
+                        await updateDoc(settingsRef, { hourlyRate: parseFloat(hourlyRateInput.value) || 25 });
+                    }
+                } catch (error) {
+                    console.error('Error saving hourly rate:', error);
+                }
+            }, 500);
+        });
+
+        // Export data
+        exportDataBtn.addEventListener('click', async () => {
+            try {
+                showToast('Exportando dados...', 'info');
+                const data = await exportUserData();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `gps-financeiro-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('Dados exportados!', 'success');
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                showToast('Erro ao exportar', 'error');
+            }
+        });
+
+        // Import data
+        importDataBtn.addEventListener('click', () => {
+            importFileInput.click();
+        });
+
+        importFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+
+                if (!data.profile && !data.transactions && !data.goals) {
+                    showToast('Arquivo inválido', 'error');
+                    return;
+                }
+
+                showToast('Importando dados...', 'info');
+                await importUserData(data);
+                showToast('Dados importados!', 'success');
+                loadUserData();
+            } catch (error) {
+                console.error('Error importing data:', error);
+                showToast('Erro ao importar', 'error');
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await logout();
+                window.location.href = '/user/login/login.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                showToast('Erro ao sair', 'error');
+            }
+        });
+
+        // Navigation
+        backBtn.addEventListener('click', () => window.history.back());
+
+        // Initialize
+        loadUserData();
+    </script>
+</body>
+</html>

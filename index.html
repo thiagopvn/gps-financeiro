@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta http-equiv="refresh" content="0;url=/user/login/login.html"/>
+    <title>GPS Financeiro</title>
+    <link rel="manifest" href="/manifest.json"/>
+    <meta name="theme-color" content="#13ec5b"/>
+    <meta name="description" content="Controle financeiro para motoristas de aplicativo"/>
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg"/>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #102216;
+            font-family: 'Manrope', sans-serif;
+            color: white;
+        }
+        .loader {
+            text-align: center;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(19, 236, 91, 0.2);
+            border-top-color: #13ec5b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(() => console.log('SW registered'))
+                .catch(err => console.log('SW failed:', err));
+        }
+        // Redirect
+        window.location.href = '/user/login/login.html';
+    </script>
+</body>
+</html>

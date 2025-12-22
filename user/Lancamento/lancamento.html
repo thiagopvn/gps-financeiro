@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Novo Lançamento - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Hide category when not selected */
+        .category-item:not(.selected) .check-icon {
+            display: none;
+        }
+        .category-item.selected {
+            border-color: var(--tw-border-opacity, 1) !important;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased overflow-hidden">
+    <div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto shadow-2xl overflow-hidden">
+        <!-- Header -->
+        <header class="flex items-center justify-between px-4 py-4 pt-12 bg-background-light dark:bg-background-dark z-10">
+            <button id="backBtn" class="flex size-10 items-center justify-center rounded-full text-slate-500 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                <span class="material-symbols-outlined" style="font-size: 24px;">arrow_back</span>
+            </button>
+            <h2 class="text-xl font-bold tracking-tight text-center flex-1">Novo Lançamento</h2>
+            <button id="closeBtn" class="flex size-10 items-center justify-center rounded-full text-slate-500 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                <span class="material-symbols-outlined" style="font-size: 28px;">close</span>
+            </button>
+        </header>
+
+        <!-- Main Content Scrollable Area -->
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-32 px-4">
+            <!-- Type Toggle -->
+            <div class="py-4">
+                <div class="flex h-12 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-[#1c3628] p-1">
+                    <label id="toggleReceita" class="relative flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 transition-all duration-200 bg-primary text-black shadow-sm font-semibold">
+                        <span class="z-10 text-sm">Receita</span>
+                        <input checked class="invisible w-0 absolute" name="transaction-type" type="radio" value="income"/>
+                    </label>
+                    <label id="toggleDespesa" class="relative flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 transition-all duration-200 text-slate-500 dark:text-slate-400 font-semibold">
+                        <span class="z-10 text-sm">Despesa</span>
+                        <input class="invisible w-0 absolute" name="transaction-type" type="radio" value="expense"/>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Amount Input -->
+            <div class="flex flex-col items-center justify-center py-8">
+                <div id="amountLabel" class="text-slate-400 dark:text-slate-500 text-sm font-medium mb-2">Valor da receita</div>
+                <div class="flex items-baseline relative">
+                    <input
+                        type="text"
+                        id="amountInput"
+                        inputmode="numeric"
+                        class="text-4xl font-bold text-slate-900 dark:text-white tracking-tighter bg-transparent border-none text-center focus:ring-0 focus:outline-none w-full max-w-[250px] p-0"
+                        value="R$ 0,00"
+                        readonly
+                    />
+                </div>
+                <!-- Numeric Keypad -->
+                <div class="grid grid-cols-3 gap-3 mt-6 w-full max-w-[280px]">
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="1">1</button>
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="2">2</button>
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="3">3</button>
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="4">4</button>
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="5">5</button>
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="6">6</button>
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="7">7</button>
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="8">8</button>
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="9">9</button>
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="00">00</button>
+                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="0">0</button>
+                    <button id="backspaceKey" class="h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex items-center justify-center">
+                        <span class="material-symbols-outlined">backspace</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Categories for Income -->
+            <div id="incomeCategories" class="mb-6">
+                <h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight mb-4">Categoria</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Uber -->
+                    <label class="category-item income-cat selected group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-primary shadow-sm transition-all" data-category="uber">
+                        <input checked class="peer sr-only" name="income-category" type="radio" value="uber"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-black text-white">
+                            <span class="material-symbols-outlined">directions_car</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Uber</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Aplicativo</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- 99 -->
+                    <label class="category-item income-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="99">
+                        <input class="peer sr-only" name="income-category" type="radio" value="99"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-yellow-400 text-black">
+                            <span class="material-symbols-outlined">local_taxi</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">99</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Aplicativo</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Indrive -->
+                    <label class="category-item income-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="indrive">
+                        <input class="peer sr-only" name="income-category" type="radio" value="indrive"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-500 text-white">
+                            <span class="material-symbols-outlined">two_wheeler</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Indrive</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Negociação</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Particular -->
+                    <label class="category-item income-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="particular">
+                        <input class="peer sr-only" name="income-category" type="radio" value="particular"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500 text-white">
+                            <span class="material-symbols-outlined">person</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Particular</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Corrida extra</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Outros -->
+                    <label class="category-item income-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="outros_receita">
+                        <input class="peer sr-only" name="income-category" type="radio" value="outros_receita"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-500 text-white">
+                            <span class="material-symbols-outlined">more_horiz</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Outros</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Outras receitas</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Categories for Expense (hidden by default) -->
+            <div id="expenseCategories" class="mb-6 hidden">
+                <h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight mb-4">Categoria</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Combustível -->
+                    <label class="category-item expense-cat selected group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-red-500 shadow-sm transition-all" data-category="combustivel">
+                        <input checked class="peer sr-only" name="expense-category" type="radio" value="combustivel"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white">
+                            <span class="material-symbols-outlined">local_gas_station</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Combustível</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Gasolina/Etanol</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Manutenção -->
+                    <label class="category-item expense-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="manutencao">
+                        <input class="peer sr-only" name="expense-category" type="radio" value="manutencao"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-600 text-white">
+                            <span class="material-symbols-outlined">build</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Manutenção</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Reparos/Revisão</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Alimentação -->
+                    <label class="category-item expense-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="alimentacao">
+                        <input class="peer sr-only" name="expense-category" type="radio" value="alimentacao"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
+                            <span class="material-symbols-outlined">restaurant</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Alimentação</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Refeições</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Lavagem -->
+                    <label class="category-item expense-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="lavagem">
+                        <input class="peer sr-only" name="expense-category" type="radio" value="lavagem"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-500 text-white">
+                            <span class="material-symbols-outlined">local_car_wash</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Lavagem</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Limpeza veículo</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Estacionamento -->
+                    <label class="category-item expense-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="estacionamento">
+                        <input class="peer sr-only" name="expense-category" type="radio" value="estacionamento"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-white">
+                            <span class="material-symbols-outlined">local_parking</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Estacionamento</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Pedágios/Parking</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Outros -->
+                    <label class="category-item expense-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="outros_despesa">
+                        <input class="peer sr-only" name="expense-category" type="radio" value="outros_despesa"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white">
+                            <span class="material-symbols-outlined">more_horiz</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Outros</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Outras despesas</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Details Inputs -->
+            <div class="space-y-4 mb-6">
+                <!-- Date Picker -->
+                <div class="flex items-center gap-3 rounded-xl bg-white dark:bg-surface-dark p-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined">calendar_today</span>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Data</label>
+                        <input id="dateInput" class="w-full bg-transparent p-0 text-sm font-semibold text-slate-900 dark:text-white focus:ring-0 border-none h-6" type="date"/>
+                    </div>
+                </div>
+                <!-- Notes Input -->
+                <div class="flex items-center gap-3 rounded-xl bg-white dark:bg-surface-dark p-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined">description</span>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Descrição (Opcional)</label>
+                        <input id="descriptionInput" class="w-full bg-transparent p-0 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-0 border-none h-6" placeholder="Adicionar nota..." type="text"/>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Fixed Bottom Action -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 pb-8 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark dark:to-transparent pt-12">
+            <button id="saveBtn" class="w-full rounded-xl bg-primary py-4 text-center text-base font-bold text-slate-900 shadow-lg shadow-primary/20 hover:bg-[#34f574] transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">check</span>
+                Salvar Lançamento
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { requireAuth } from '/js/firebase-config.js';
+        import { addTransaction, updateGoalsProgress } from '/js/db.js';
+        import { showToast, formatCurrency, parseCurrency } from '/js/utils.js';
+
+        // Wait for auth
+        requireAuth();
+
+        // State
+        let transactionType = 'income';
+        let amountCents = 0;
+
+        // DOM Elements
+        const toggleReceita = document.getElementById('toggleReceita');
+        const toggleDespesa = document.getElementById('toggleDespesa');
+        const amountInput = document.getElementById('amountInput');
+        const amountLabel = document.getElementById('amountLabel');
+        const dateInput = document.getElementById('dateInput');
+        const descriptionInput = document.getElementById('descriptionInput');
+        const saveBtn = document.getElementById('saveBtn');
+        const backBtn = document.getElementById('backBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const incomeCategories = document.getElementById('incomeCategories');
+        const expenseCategories = document.getElementById('expenseCategories');
+        const numKeys = document.querySelectorAll('.num-key');
+        const backspaceKey = document.getElementById('backspaceKey');
+
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+
+        // Update amount display
+        function updateAmountDisplay() {
+            const formatted = formatCurrency(amountCents / 100);
+            amountInput.value = formatted;
+        }
+
+        // Handle numeric keypad
+        numKeys.forEach(key => {
+            key.addEventListener('click', () => {
+                const value = key.dataset.value;
+                const newAmount = amountCents.toString() + value;
+                // Limit to 999999999 (R$ 9.999.999,99)
+                if (parseInt(newAmount) <= 999999999) {
+                    amountCents = parseInt(newAmount);
+                    updateAmountDisplay();
+                }
+            });
+        });
+
+        // Handle backspace
+        backspaceKey.addEventListener('click', () => {
+            amountCents = Math.floor(amountCents / 10);
+            updateAmountDisplay();
+        });
+
+        // Toggle transaction type
+        function setTransactionType(type) {
+            transactionType = type;
+
+            if (type === 'income') {
+                toggleReceita.classList.add('bg-primary', 'text-black', 'shadow-sm');
+                toggleReceita.classList.remove('text-slate-500', 'dark:text-slate-400');
+                toggleDespesa.classList.remove('bg-red-500', 'text-white', 'shadow-sm');
+                toggleDespesa.classList.add('text-slate-500', 'dark:text-slate-400');
+                amountLabel.textContent = 'Valor da receita';
+                incomeCategories.classList.remove('hidden');
+                expenseCategories.classList.add('hidden');
+            } else {
+                toggleDespesa.classList.add('bg-red-500', 'text-white', 'shadow-sm');
+                toggleDespesa.classList.remove('text-slate-500', 'dark:text-slate-400');
+                toggleReceita.classList.remove('bg-primary', 'text-black', 'shadow-sm');
+                toggleReceita.classList.add('text-slate-500', 'dark:text-slate-400');
+                amountLabel.textContent = 'Valor da despesa';
+                incomeCategories.classList.add('hidden');
+                expenseCategories.classList.remove('hidden');
+            }
+        }
+
+        toggleReceita.addEventListener('click', () => setTransactionType('income'));
+        toggleDespesa.addEventListener('click', () => setTransactionType('expense'));
+
+        // Category selection
+        function setupCategorySelection(categories, borderColor) {
+            categories.forEach(cat => {
+                cat.addEventListener('click', () => {
+                    // Remove selection from all in same group
+                    categories.forEach(c => {
+                        c.classList.remove('selected');
+                        c.classList.remove('border-primary', 'border-red-500');
+                        c.classList.add('border-transparent');
+                    });
+                    // Add selection to clicked
+                    cat.classList.add('selected');
+                    cat.classList.remove('border-transparent');
+                    cat.classList.add(borderColor);
+                });
+            });
+        }
+
+        const incomeCats = document.querySelectorAll('.income-cat');
+        const expenseCats = document.querySelectorAll('.expense-cat');
+        setupCategorySelection(incomeCats, 'border-primary');
+        setupCategorySelection(expenseCats, 'border-red-500');
+
+        // Get selected category
+        function getSelectedCategory() {
+            const selector = transactionType === 'income' ? 'income-category' : 'expense-category';
+            const checked = document.querySelector(`input[name="${selector}"]:checked`);
+            return checked ? checked.value : null;
+        }
+
+        // Save transaction
+        saveBtn.addEventListener('click', async () => {
+            // Validate amount
+            if (amountCents === 0) {
+                showToast('Digite um valor', 'error');
+                return;
+            }
+
+            const category = getSelectedCategory();
+            if (!category) {
+                showToast('Selecione uma categoria', 'error');
+                return;
+            }
+
+            // Disable button while saving
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Salvando...';
+
+            try {
+                const amount = amountCents / 100;
+                const date = new Date(dateInput.value + 'T12:00:00');
+                const description = descriptionInput.value.trim();
+
+                // Save transaction
+                await addTransaction({
+                    type: transactionType,
+                    amount: amount,
+                    category: category,
+                    date: date,
+                    description: description || null
+                });
+
+                // Update goals progress if it's income
+                if (transactionType === 'income') {
+                    await updateGoalsProgress(amount);
+                }
+
+                showToast(transactionType === 'income' ? 'Receita salva!' : 'Despesa salva!', 'success');
+
+                // Reset form
+                amountCents = 0;
+                updateAmountDisplay();
+                descriptionInput.value = '';
+                dateInput.value = today;
+
+                // Go back after short delay
+                setTimeout(() => {
+                    window.history.back();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error saving transaction:', error);
+                showToast('Erro ao salvar. Tente novamente.', 'error');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<span class="material-symbols-outlined">check</span> Salvar Lançamento';
+            }
+        });
+
+        // Navigation
+        backBtn.addEventListener('click', () => window.history.back());
+        closeBtn.addEventListener('click', () => window.location.href = '/user/Dashboard/dash.html');
+    </script>
+</body>
+</html>

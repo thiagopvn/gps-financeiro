@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Administradores - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>body { min-height: 100dvh; }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased">
+    <div class="min-h-screen max-w-4xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <a href="/admin/dashadmin/dashadmin.html" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold">Administradores</h1>
+                    <p class="text-slate-400 text-sm">Gerenciar acessos administrativos</p>
+                </div>
+            </div>
+            <a href="/admin/newadmin/newadmin.html" class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-colors">
+                <span class="material-symbols-outlined text-lg">add</span>
+                <span class="text-sm">Novo Admin</span>
+            </a>
+        </header>
+
+        <!-- Admins List -->
+        <div id="adminsList" class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden">
+            <div class="flex items-center justify-center py-12 text-slate-400">
+                <span class="material-symbols-outlined animate-spin text-2xl mr-2">progress_activity</span>
+                Carregando...
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
+            <h3 class="text-lg font-bold mb-2">Remover administrador?</h3>
+            <p class="text-slate-400 text-sm mb-6">O usuário perderá o acesso ao painel administrativo.</p>
+            <div class="flex gap-3">
+                <button id="cancelDelete" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">Cancelar</button>
+                <button id="confirmDelete" class="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { auth } from '/js/firebase-config.js';
+        import { isAdmin } from '/js/auth.js';
+        import { getAllAdmins, deleteAdmin } from '/js/db.js';
+        import { showToast, formatRelativeDate } from '/js/utils.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Check admin auth
+        onAuthStateChanged(auth, async (user) => {
+            if (user === null) {
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+                return;
+            }
+            const adminCheck = await isAdmin();
+            if (adminCheck === false) {
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+            }
+        });
+
+        // State
+        let adminToDelete = null;
+
+        // DOM Elements
+        const adminsList = document.getElementById('adminsList');
+        const deleteModal = document.getElementById('deleteModal');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+
+        // Load admins
+        async function loadAdmins() {
+            try {
+                const admins = await getAllAdmins();
+                renderAdmins(admins);
+            } catch (error) {
+                console.error('Error loading admins:', error);
+                adminsList.innerHTML = '<div class="flex items-center justify-center py-12 text-red-400">Erro ao carregar administradores</div>';
+            }
+        }
+
+        // Render admins
+        function renderAdmins(admins) {
+            if (admins.length === 0) {
+                adminsList.innerHTML = '<div class="flex items-center justify-center py-12 text-slate-400">Nenhum administrador encontrado</div>';
+                return;
+            }
+
+            const currentUser = auth.currentUser;
+            let html = '';
+            admins.forEach(admin => {
+                const isCurrentUser = currentUser && currentUser.uid === admin.id;
+                const dateStr = admin.createdAt ? formatRelativeDate(admin.createdAt.toDate()) : 'Data desconhecida';
+                const statusClass = admin.active !== false ? 'bg-green-500' : 'bg-red-500';
+
+                html += '<div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5 last:border-0">';
+                html += '<div class="flex items-center gap-3">';
+                html += '<div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">';
+                html += '<span class="material-symbols-outlined text-red-400">admin_panel_settings</span>';
+                html += '</div>';
+                html += '<div>';
+                html += '<div class="flex items-center gap-2">';
+                html += '<p class="font-semibold">' + (admin.name || 'Sem nome') + '</p>';
+                if (isCurrentUser) html += '<span class="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">Você</span>';
+                html += '</div>';
+                html += '<p class="text-sm text-slate-400">' + admin.email + '</p>';
+                html += '<p class="text-xs text-slate-500">' + (admin.role || 'admin') + '</p>';
+                html += '</div></div>';
+                html += '<div class="flex items-center gap-3">';
+                html += '<div class="flex items-center gap-2">';
+                html += '<div class="w-2 h-2 rounded-full ' + statusClass + '"></div>';
+                html += '<span class="text-xs text-slate-400">' + (admin.active !== false ? 'Ativo' : 'Inativo') + '</span>';
+                html += '</div>';
+                if (isCurrentUser === false) {
+                    html += '<button class="delete-btn p-2 rounded-full hover:bg-red-500/10 text-red-400 transition-colors" data-id="' + admin.id + '">';
+                    html += '<span class="material-symbols-outlined">delete</span>';
+                    html += '</button>';
+                }
+                html += '</div></div>';
+            });
+            adminsList.innerHTML = html;
+
+            // Add delete handlers
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    adminToDelete = btn.dataset.id;
+                    deleteModal.classList.remove('hidden');
+                    deleteModal.classList.add('flex');
+                });
+            });
+        }
+
+        // Delete modal
+        cancelDelete.addEventListener('click', closeModal);
+        deleteModal.addEventListener('click', (e) => { if (e.target === deleteModal) closeModal(); });
+
+        function closeModal() {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('flex');
+            adminToDelete = null;
+        }
+
+        confirmDelete.addEventListener('click', async () => {
+            if (adminToDelete === null) return;
+            try {
+                await deleteAdmin(adminToDelete);
+                showToast('Administrador removido', 'success');
+                loadAdmins();
+            } catch (error) {
+                console.error('Error deleting admin:', error);
+                showToast('Erro ao remover', 'error');
+            }
+            closeModal();
+        });
+
+        // Initialize
+        loadAdmins();
+    </script>
+</body>
+</html>

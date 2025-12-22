@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Admin Login - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: 100dvh;
+        }
+    </style>
+</head>
+<body class="font-display antialiased bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex flex-col">
+    <div class="flex-1 flex flex-col justify-center w-full max-w-md mx-auto px-6 py-8 relative">
+        <!-- Decoration Gradient -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary/10 blur-[80px] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-primary/5 blur-[80px] pointer-events-none"></div>
+
+        <!-- Header Section -->
+        <div class="w-full flex flex-col items-center mb-10 z-10">
+            <div class="w-20 h-20 bg-gradient-to-tr from-red-500/20 to-surface-dark rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-red-500/5 border border-red-500/20">
+                <span class="material-symbols-outlined text-red-400 text-[40px]">admin_panel_settings</span>
+            </div>
+            <h1 class="text-3xl font-bold tracking-tight text-center mb-2">Painel Admin</h1>
+            <p class="text-slate-400 text-sm text-center">Acesso restrito a administradores</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="w-full space-y-5 z-10">
+            <!-- Email Input -->
+            <div class="group relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">mail</span>
+                </div>
+                <input
+                    id="email"
+                    type="email"
+                    required
+                    class="block w-full rounded-xl border-0 bg-surface-dark py-4 pl-12 pr-4 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 transition-all"
+                    placeholder="Email do administrador"
+                />
+            </div>
+
+            <!-- Password Input -->
+            <div class="group relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">lock</span>
+                </div>
+                <input
+                    id="password"
+                    type="password"
+                    required
+                    class="block w-full rounded-xl border-0 bg-surface-dark py-4 pl-12 pr-12 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 transition-all"
+                    placeholder="Senha"
+                />
+                <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer">
+                    <span class="material-symbols-outlined text-slate-500 hover:text-white transition-colors text-[20px]">visibility_off</span>
+                </button>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+                type="submit"
+                id="submitBtn"
+                class="flex w-full justify-center items-center rounded-xl bg-red-500 px-3 py-4 text-sm font-bold leading-6 text-white shadow-sm hover:bg-red-600 hover:shadow-red-500/25 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 transition-all duration-200 mt-6"
+            >
+                Entrar no Painel
+                <span class="material-symbols-outlined text-[20px] ml-2 font-bold">arrow_forward</span>
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <p class="mt-10 text-center text-sm text-slate-400 z-10">
+            <a class="font-semibold text-slate-300 hover:text-white hover:underline transition-all" href="/user/login/login.html">
+                Voltar ao login de usuário
+            </a>
+        </p>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { loginAsAdmin } from '/js/auth.js';
+        import { showToast, isValidEmail } from '/js/utils.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { auth } from '/js/firebase-config.js';
+        import { isAdmin } from '/js/auth.js';
+
+        // Check if already logged in as admin
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const adminCheck = await isAdmin();
+                if (adminCheck) {
+                    window.location.href = '/admin/dashadmin/dashadmin.html';
+                }
+            }
+        });
+
+        // DOM Elements
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+
+        // Password visibility toggle
+        togglePassword.addEventListener('click', () => {
+            const icon = togglePassword.querySelector('.material-symbols-outlined');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                passwordInput.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            // Validation
+            if (!isValidEmail(email)) {
+                showToast('Digite um email válido', 'error');
+                return;
+            }
+
+            if (!password) {
+                showToast('Digite sua senha', 'error');
+                return;
+            }
+
+            // Login as admin
+            const result = await loginAsAdmin(email, password);
+
+            if (result.success) {
+                window.location.href = '/admin/dashadmin/dashadmin.html';
+            } else {
+                showToast(result.error || 'Acesso negado', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

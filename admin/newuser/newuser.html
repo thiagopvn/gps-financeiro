@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Criar Novo Usuário - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>body { min-height: 100dvh; }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased">
+    <div class="min-h-screen max-w-lg mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex items-center gap-4 mb-8">
+            <a href="/admin/usergerenciamento/usergerenciamento.html" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold">Criar Usuário</h1>
+                <p class="text-slate-400 text-sm">Cadastrar novo motorista</p>
+            </div>
+        </header>
+
+        <!-- Form -->
+        <form id="createUserForm" class="space-y-6">
+            <!-- Photo Upload -->
+            <div class="flex flex-col items-center mb-6">
+                <div class="relative group cursor-pointer" id="photoUploadArea">
+                    <div class="w-24 h-24 rounded-full bg-white dark:bg-surface-dark border-2 border-dashed border-gray-300 dark:border-white/20 flex items-center justify-center overflow-hidden group-hover:border-primary transition-colors">
+                        <span id="photoIcon" class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary transition-colors">add_a_photo</span>
+                        <img id="photoPreview" class="hidden w-full h-full object-cover" alt="Preview"/>
+                    </div>
+                    <div class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-background-dark">
+                        <span class="material-symbols-outlined text-background-dark text-sm">edit</span>
+                    </div>
+                    <input type="file" id="photoInput" accept="image/*" class="hidden"/>
+                </div>
+                <p class="text-sm text-slate-400 mt-2">Foto opcional</p>
+            </div>
+
+            <!-- Name -->
+            <div class="space-y-2">
+                <label class="text-sm font-semibold text-slate-400">Nome Completo *</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">person</span>
+                    <input type="text" id="name" required placeholder="Ex: Carlos Silva" class="w-full bg-white dark:bg-surface-dark rounded-xl pl-12 pr-4 py-4 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="space-y-2">
+                <label class="text-sm font-semibold text-slate-400">Email *</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">mail</span>
+                    <input type="email" id="email" required placeholder="carlos@email.com" class="w-full bg-white dark:bg-surface-dark rounded-xl pl-12 pr-4 py-4 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="space-y-2">
+                <label class="text-sm font-semibold text-slate-400">Celular</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">smartphone</span>
+                    <input type="tel" id="phone" placeholder="(00) 00000-0000" class="w-full bg-white dark:bg-surface-dark rounded-xl pl-12 pr-4 py-4 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="h-px bg-gray-200 dark:bg-white/10"></div>
+
+            <!-- Vehicle Info -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-slate-400">Veículo</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">directions_car</span>
+                        <input type="text" id="vehicle" placeholder="HB20" class="w-full bg-white dark:bg-surface-dark rounded-xl pl-12 pr-4 py-4 border-none focus:ring-2 focus:ring-primary"/>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-slate-400">Placa</label>
+                    <input type="text" id="plate" placeholder="ABC-1234" class="w-full bg-white dark:bg-surface-dark rounded-xl px-4 py-4 border-none focus:ring-2 focus:ring-primary uppercase"/>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="h-px bg-gray-200 dark:bg-white/10"></div>
+
+            <!-- Password -->
+            <div class="space-y-2">
+                <label class="text-sm font-semibold text-slate-400">Senha *</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">lock</span>
+                    <input type="password" id="password" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full bg-white dark:bg-surface-dark rounded-xl pl-12 pr-12 py-4 border-none focus:ring-2 focus:ring-primary"/>
+                    <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                        <span class="material-symbols-outlined">visibility_off</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="space-y-2">
+                <label class="text-sm font-semibold text-slate-400">Confirmar Senha *</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">lock_reset</span>
+                    <input type="password" id="confirmPassword" required placeholder="Repita a senha" class="w-full bg-white dark:bg-surface-dark rounded-xl pl-12 pr-4 py-4 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col gap-3 pt-4">
+                <button type="submit" id="submitBtn" class="w-full py-4 rounded-xl bg-primary text-background-dark font-bold text-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                    <span>Criar Usuário</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+                <a href="/admin/usergerenciamento/usergerenciamento.html" class="w-full py-3 rounded-xl bg-white/5 text-slate-400 font-semibold text-center hover:bg-white/10 transition-colors">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { auth, db, storage } from '/js/firebase-config.js';
+        import { isAdmin } from '/js/auth.js';
+        import { showToast, isValidEmail } from '/js/utils.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+        // Check admin auth
+        onAuthStateChanged(auth, async (user) => {
+            if (user === null) {
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+                return;
+            }
+            const adminCheck = await isAdmin();
+            if (adminCheck === false) {
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+            }
+        });
+
+        // DOM Elements
+        const form = document.getElementById('createUserForm');
+        const photoUploadArea = document.getElementById('photoUploadArea');
+        const photoInput = document.getElementById('photoInput');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoIcon = document.getElementById('photoIcon');
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // State
+        let selectedPhoto = null;
+
+        // Photo upload
+        photoUploadArea.addEventListener('click', () => photoInput.click());
+        photoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('Imagem muito grande (máx 5MB)', 'error');
+                    return;
+                }
+                selectedPhoto = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    photoPreview.src = e.target.result;
+                    photoPreview.classList.remove('hidden');
+                    photoIcon.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Password visibility
+        togglePassword.addEventListener('click', () => {
+            const icon = togglePassword.querySelector('.material-symbols-outlined');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                passwordInput.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        });
+
+        // Phone mask
+        document.getElementById('phone').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+            if (value.length > 6) {
+                value = '(' + value.slice(0,2) + ') ' + value.slice(2,7) + '-' + value.slice(7);
+            } else if (value.length > 2) {
+                value = '(' + value.slice(0,2) + ') ' + value.slice(2);
+            } else if (value.length > 0) {
+                value = '(' + value;
+            }
+            e.target.value = value;
+        });
+
+        // Plate mask
+        document.getElementById('plate').addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const vehicle = document.getElementById('vehicle').value.trim();
+            const plate = document.getElementById('plate').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validation
+            if (!name) {
+                showToast('Digite o nome', 'error');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showToast('Email inválido', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showToast('Senha deve ter no mínimo 6 caracteres', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showToast('Senhas não conferem', 'error');
+                return;
+            }
+
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span>';
+
+            try {
+                // Store current admin user
+                const adminUser = auth.currentUser;
+                const adminEmail = adminUser.email;
+
+                // Create user in Firebase Auth
+                // Note: This will sign out the current admin, so we need to handle this
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const newUser = userCredential.user;
+
+                // Upload photo if selected
+                let photoURL = null;
+                if (selectedPhoto) {
+                    const photoRef = ref(storage, 'profiles/' + newUser.uid);
+                    await uploadBytes(photoRef, selectedPhoto);
+                    photoURL = await getDownloadURL(photoRef);
+                }
+
+                // Create user document
+                await setDoc(doc(db, 'users', newUser.uid), {
+                    name: name,
+                    email: email,
+                    phone: phone || null,
+                    vehicle: vehicle || null,
+                    plate: plate || null,
+                    photoURL: photoURL,
+                    createdAt: serverTimestamp(),
+                    createdBy: 'admin'
+                });
+
+                // Create default settings
+                await setDoc(doc(db, 'users', newUser.uid, 'settings', 'preferences'), {
+                    darkMode: true,
+                    notifications: true,
+                    hourlyRate: 0
+                });
+
+                showToast('Usuário criado com sucesso!', 'success');
+
+                // Sign out the newly created user
+                await auth.signOut();
+
+                // Redirect after short delay
+                setTimeout(() => {
+                    window.location.href = '/admin/loginadmin/loginadmin.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error creating user:', error);
+                let errorMsg = 'Erro ao criar usuário';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg = 'Este email já está em uso';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'Email inválido';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg = 'Senha muito fraca';
+                }
+                showToast(errorMsg, 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Criar Usuário</span><span class="material-symbols-outlined">arrow_forward</span>';
+            }
+        });
+    </script>
+</body>
+</html>

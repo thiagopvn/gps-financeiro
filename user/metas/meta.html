@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Metas - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .filter-chip.active {
+            background-color: #13ec5b;
+            color: #102216;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display flex flex-col h-screen overflow-hidden antialiased">
+    <!-- Header -->
+    <header class="flex-none px-4 pt-12 pb-4 bg-background-light dark:bg-background-dark z-20">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button id="backBtn" class="p-2 -ml-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-slate-500">arrow_back</span>
+                </button>
+                <h1 class="text-xl font-bold tracking-tight">Gerenciar Metas</h1>
+            </div>
+            <a href="/user/newmeta/newmeta.html" class="p-2 rounded-full bg-surface-dark border border-white/10 shadow-sm">
+                <span class="material-symbols-outlined text-primary text-xl">add</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto no-scrollbar pb-24 px-4">
+        <!-- Overall Progress Card -->
+        <section class="bg-surface-dark rounded-2xl p-5 shadow-lg mb-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10">
+                <span class="material-symbols-outlined text-8xl text-primary">flag</span>
+            </div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-sm text-slate-400 font-medium">Progresso Geral</p>
+                        <h2 id="overallProgress" class="text-2xl font-bold mt-1">0% <span class="text-sm font-normal text-slate-400">concluído</span></h2>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-3 mb-2">
+                    <div id="overallProgressBar" class="bg-gradient-to-r from-primary to-green-400 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p id="progressMessage" class="text-xs text-slate-400">Carregando...</p>
+            </div>
+        </section>
+
+        <!-- Filter Chips -->
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-4">
+            <button class="filter-chip active px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all" data-filter="all">Todas</button>
+            <button class="filter-chip px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 rounded-full text-sm whitespace-nowrap transition-all" data-filter="receita">Receita</button>
+            <button class="filter-chip px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 rounded-full text-sm whitespace-nowrap transition-all" data-filter="economia">Economia</button>
+            <button class="filter-chip px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 rounded-full text-sm whitespace-nowrap transition-all" data-filter="corridas">Corridas</button>
+        </div>
+
+        <!-- Goals List -->
+        <div id="goalsList" class="space-y-4">
+            <!-- Loading State -->
+            <div id="loadingState" class="flex flex-col items-center justify-center py-12">
+                <span class="material-symbols-outlined text-4xl text-slate-400 animate-spin">progress_activity</span>
+                <p class="text-slate-400 mt-2">Carregando metas...</p>
+            </div>
+            <!-- Empty State (hidden) -->
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-12">
+                <span class="material-symbols-outlined text-6xl text-slate-600">flag</span>
+                <p class="text-slate-400 mt-4 text-center">Nenhuma meta criada</p>
+                <a href="/user/newmeta/newmeta.html" class="mt-4 text-primary font-semibold text-sm hover:underline">
+                    Criar primeira meta
+                </a>
+            </div>
+            <!-- Goals will be inserted here -->
+        </div>
+
+        <!-- Create New Goal Button -->
+        <a href="/user/newmeta/newmeta.html" class="block mt-6 w-full py-4 border-2 border-dashed border-gray-600 rounded-xl text-slate-400 font-medium hover:border-primary hover:text-primary transition-colors text-center">
+            <span class="material-symbols-outlined align-middle mr-1">add_circle</span>
+            Criar Nova Meta
+        </a>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="flex-none bg-white dark:bg-background-dark border-t border-gray-200 dark:border-white/5 px-6 pt-3 pb-6">
+        <div class="flex justify-between items-end">
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/Dashboard/dash.html">
+                <span class="material-symbols-outlined text-[26px]">home</span>
+                <span class="text-[10px] font-medium">Início</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/transacao/transacao.html">
+                <span class="material-symbols-outlined text-[26px]">receipt_long</span>
+                <span class="text-[10px] font-medium">Extrato</span>
+            </a>
+            <!-- Central FAB -->
+            <div class="relative -top-3">
+                <a href="/user/Lancamento/lancamento.html" class="flex items-center justify-center w-14 h-14 rounded-full bg-primary shadow-lg shadow-primary/30 text-background-dark hover:scale-105 active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[32px]">add</span>
+                </a>
+            </div>
+            <a class="flex flex-col items-center gap-1 w-12 text-slate-900 dark:text-primary transition-colors" href="/user/metas/meta.html">
+                <span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">flag</span>
+                <span class="text-[10px] font-medium">Metas</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/configuracoes/config.html">
+                <span class="material-symbols-outlined text-[26px]">settings</span>
+                <span class="text-[10px] font-medium">Ajustes</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Edit/Delete Modal -->
+    <div id="goalModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
+            <h3 id="modalTitle" class="text-lg font-bold mb-4">Opções da Meta</h3>
+            <div class="space-y-3">
+                <button id="resetGoalBtn" class="w-full py-3 rounded-xl bg-blue-500/10 text-blue-500 font-semibold flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">refresh</span>
+                    Resetar Progresso
+                </button>
+                <button id="deleteGoalBtn" class="w-full py-3 rounded-xl bg-red-500/10 text-red-500 font-semibold flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">delete</span>
+                    Excluir Meta
+                </button>
+                <button id="cancelModalBtn" class="w-full py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { requireAuth } from '/js/firebase-config.js';
+        import { getGoals, deleteGoal, resetGoal, checkAndResetGoals } from '/js/db.js';
+        import { showToast, formatCurrency } from '/js/utils.js';
+
+        // Wait for auth
+        requireAuth();
+
+        // State
+        let allGoals = [];
+        let filteredGoals = [];
+        let currentFilter = 'all';
+        let selectedGoalId = null;
+
+        // Category config
+        const categoryConfig = {
+            receita: { icon: 'trending_up', label: 'Receita' },
+            economia: { icon: 'savings', label: 'Economia' },
+            corridas: { icon: 'directions_car', label: 'Corridas' },
+            km: { icon: 'speed', label: 'Quilometragem' }
+        };
+
+        const colorClasses = {
+            green: { bg: 'bg-green-500', bgLight: 'bg-green-500/20', text: 'text-green-500' },
+            blue: { bg: 'bg-blue-500', bgLight: 'bg-blue-500/20', text: 'text-blue-500' },
+            yellow: { bg: 'bg-yellow-500', bgLight: 'bg-yellow-500/20', text: 'text-yellow-500' },
+            purple: { bg: 'bg-purple-500', bgLight: 'bg-purple-500/20', text: 'text-purple-500' },
+            red: { bg: 'bg-red-500', bgLight: 'bg-red-500/20', text: 'text-red-500' },
+            orange: { bg: 'bg-orange-500', bgLight: 'bg-orange-500/20', text: 'text-orange-500' }
+        };
+
+        const typeLabels = {
+            daily: 'Meta diária',
+            weekly: 'Meta semanal',
+            monthly: 'Meta mensal'
+        };
+
+        // DOM Elements
+        const goalsList = document.getElementById('goalsList');
+        const loadingState = document.getElementById('loadingState');
+        const emptyState = document.getElementById('emptyState');
+        const overallProgress = document.getElementById('overallProgress');
+        const overallProgressBar = document.getElementById('overallProgressBar');
+        const progressMessage = document.getElementById('progressMessage');
+        const filterChips = document.querySelectorAll('.filter-chip');
+        const backBtn = document.getElementById('backBtn');
+        const goalModal = document.getElementById('goalModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const resetGoalBtn = document.getElementById('resetGoalBtn');
+        const deleteGoalBtn = document.getElementById('deleteGoalBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+
+        // Load goals
+        async function loadGoals() {
+            try {
+                // Check and reset goals if needed
+                await checkAndResetGoals();
+
+                allGoals = await getGoals();
+                applyFilters();
+                updateOverallProgress();
+            } catch (error) {
+                console.error('Error loading goals:', error);
+                showToast('Erro ao carregar metas', 'error');
+            } finally {
+                loadingState.classList.add('hidden');
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            filteredGoals = allGoals.filter(g => {
+                if (currentFilter === 'all') return true;
+                return g.category === currentFilter;
+            });
+            renderGoals();
+        }
+
+        // Update overall progress
+        function updateOverallProgress() {
+            if (allGoals.length === 0) {
+                overallProgress.innerHTML = '0% <span class="text-sm font-normal text-slate-400">concluído</span>';
+                overallProgressBar.style.width = '0%';
+                progressMessage.textContent = 'Crie suas primeiras metas para começar!';
+                return;
+            }
+
+            let totalProgress = 0;
+            allGoals.forEach(g => {
+                const progress = Math.min((g.current / g.target) * 100, 100);
+                totalProgress += progress;
+            });
+
+            const avgProgress = Math.round(totalProgress / allGoals.length);
+            overallProgress.innerHTML = `${avgProgress}% <span class="text-sm font-normal text-slate-400">concluído</span>`;
+            overallProgressBar.style.width = `${avgProgress}%`;
+
+            if (avgProgress >= 100) {
+                progressMessage.textContent = 'Parabéns! Todas as metas foram atingidas!';
+            } else if (avgProgress >= 75) {
+                progressMessage.textContent = 'Excelente! Você está quase lá!';
+            } else if (avgProgress >= 50) {
+                progressMessage.textContent = 'Você está indo bem! Continue assim.';
+            } else if (avgProgress >= 25) {
+                progressMessage.textContent = 'Bom progresso! Mantenha o foco.';
+            } else {
+                progressMessage.textContent = 'Vamos lá! Cada conquista conta.';
+            }
+        }
+
+        // Render goals
+        function renderGoals() {
+            // Clear previous content
+            const children = Array.from(goalsList.children);
+            children.forEach(child => {
+                if (child.id !== 'loadingState' && child.id !== 'emptyState') {
+                    child.remove();
+                }
+            });
+
+            if (filteredGoals.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+
+            filteredGoals.forEach(goal => {
+                const cat = categoryConfig[goal.category] || { icon: 'flag', label: 'Meta' };
+                const color = colorClasses[goal.color] || colorClasses.green;
+                const progress = Math.min(Math.round((goal.current / goal.target) * 100), 100);
+
+                const isCurrency = goal.category === 'receita' || goal.category === 'economia';
+                const currentDisplay = isCurrency ? formatCurrency(goal.current) : `${goal.current} ${goal.category === 'km' ? 'km' : ''}`;
+                const targetDisplay = isCurrency ? formatCurrency(goal.target) : `${goal.target} ${goal.category === 'km' ? 'km' : ''}`;
+
+                const card = document.createElement('div');
+                card.className = 'group bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-white/5 shadow-sm transition-all';
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full ${color.bgLight} flex items-center justify-center">
+                                <span class="material-symbols-outlined ${color.text} text-xl">${cat.icon}</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold">${goal.name}</h3>
+                                <p class="text-xs text-slate-400">${typeLabels[goal.type] || 'Meta'}</p>
+                            </div>
+                        </div>
+                        <button class="options-btn text-slate-400 hover:text-white transition-colors p-1" data-id="${goal.id}" data-name="${goal.name}">
+                            <span class="material-symbols-outlined">more_vert</span>
+                        </button>
+                    </div>
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-2xl font-bold">${targetDisplay}</span>
+                        <span class="text-sm font-medium ${color.text}">${progress}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                        <div class="${color.bg} h-2.5 rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-slate-400 font-medium">
+                        <span>Atual: ${currentDisplay}</span>
+                        <span>Alvo: ${targetDisplay}</span>
+                    </div>
+                    ${progress >= 100 ? `
+                        <div class="mt-3 flex items-center gap-2 text-sm ${color.text} font-semibold">
+                            <span class="material-symbols-outlined text-lg">check_circle</span>
+                            Meta atingida!
+                        </div>
+                    ` : ''}
+                `;
+                goalsList.appendChild(card);
+
+                // Options button handler
+                const optionsBtn = card.querySelector('.options-btn');
+                optionsBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedGoalId = goal.id;
+                    modalTitle.textContent = goal.name;
+                    goalModal.classList.remove('hidden');
+                    goalModal.classList.add('flex');
+                });
+            });
+        }
+
+        // Filter chips
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                filterChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                currentFilter = chip.dataset.filter;
+                applyFilters();
+            });
+        });
+
+        // Modal handlers
+        cancelModalBtn.addEventListener('click', closeModal);
+        goalModal.addEventListener('click', (e) => {
+            if (e.target === goalModal) closeModal();
+        });
+
+        function closeModal() {
+            goalModal.classList.add('hidden');
+            goalModal.classList.remove('flex');
+            selectedGoalId = null;
+        }
+
+        resetGoalBtn.addEventListener('click', async () => {
+            if (!selectedGoalId) return;
+            try {
+                await resetGoal(selectedGoalId);
+                showToast('Progresso resetado', 'success');
+                await loadGoals();
+            } catch (error) {
+                console.error('Error resetting goal:', error);
+                showToast('Erro ao resetar', 'error');
+            }
+            closeModal();
+        });
+
+        deleteGoalBtn.addEventListener('click', async () => {
+            if (!selectedGoalId) return;
+            try {
+                await deleteGoal(selectedGoalId);
+                showToast('Meta excluída', 'success');
+                await loadGoals();
+            } catch (error) {
+                console.error('Error deleting goal:', error);
+                showToast('Erro ao excluir', 'error');
+            }
+            closeModal();
+        });
+
+        // Navigation
+        backBtn.addEventListener('click', () => window.history.back());
+
+        // Initialize
+        loadGoals();
+    </script>
+</body>
+</html>

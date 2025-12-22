@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Criar Nova Meta</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        background: "#000000",
+                        surface: "#1C1C1E",
+                        "surface-light": "#2C2C2E",
+                        primary: "#00E080", // User's requested vibrant green
+                        "primary-dark": "#00B366",
+                        danger: "#FF453A",
+                        warning: "#FFD60A", // iOS Yellow
+                        info: "#0A84FF", // iOS Blue
+                        purple: "#BF5AF2", // iOS Purple
+                        "text-main": "#FFFFFF",
+                        "text-muted": "#8E8E93",
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl': '12px',
+                        '2xl': '16px',
+                        '3xl': '24px',
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px rgba(0, 224, 128, 0.15)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }.no-scrollbar {
+            -ms-overflow-style: none;scrollbar-width: none;}
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.5;
+            cursor: pointer;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-text-main min-h-screen pb-32 selection:bg-primary/30">
+<header class="fixed top-0 w-full z-40 bg-background/80 backdrop-blur-xl border-b border-white/10">
+<div class="px-4 h-14 flex items-center justify-between">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 active:bg-white/20 transition-colors -ml-2">
+<span class="material-symbols-outlined text-white text-[24px]">arrow_back</span>
+</button>
+<h1 class="text-[17px] font-semibold tracking-tight">Criar Nova Meta</h1>
+<div class="w-10"></div> 
+</div>
+</header>
+<main class="px-4 pt-20 space-y-8 max-w-lg mx-auto">
+<div class="space-y-4">
+<div class="bg-surface rounded-2xl overflow-hidden border border-white/5">
+<div class="relative group px-4 py-1">
+<input class="block w-full pt-6 pb-2 bg-transparent border-0 text-white placeholder-transparent focus:ring-0 peer text-lg font-medium" id="title" placeholder=" " type="text"/>
+<label class="absolute text-sm text-text-muted duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-primary" for="title">
+                        Título da Meta
+                    </label>
+</div>
+<div class="h-px bg-white/10 mx-4"></div>
+<div class="relative group px-4 py-1">
+<input class="block w-full pt-6 pb-2 bg-transparent border-0 text-white placeholder-transparent focus:ring-0 peer text-base" id="description" placeholder=" " type="text"/>
+<label class="absolute text-sm text-text-muted duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-primary" for="description">
+                        Descrição <span class="text-xs opacity-50">(Opcional)</span>
+</label>
+</div>
+</div>
+</div>
+<div class="space-y-3">
+<h2 class="text-xs uppercase tracking-wider text-text-muted font-semibold ml-1">Tipo de Meta</h2>
+<div class="grid grid-cols-2 gap-3">
+<label class="relative cursor-pointer group">
+<input checked="" class="peer sr-only" name="goal_type" type="radio" value="faturamento"/>
+<div class="h-full p-4 rounded-2xl bg-surface border border-white/5 peer-checked:border-primary peer-checked:bg-primary/10 transition-all duration-200 flex flex-col items-start gap-3 hover:bg-surface-light">
+<div class="w-10 h-10 flex items-center justify-center rounded-xl bg-primary/20 text-primary">
+<span class="material-symbols-outlined filled">attach_money</span>
+</div>
+<div>
+<span class="block font-medium text-sm text-white">Faturamento</span>
+<span class="text-[10px] text-text-muted">Receita bruta</span>
+</div>
+</div>
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity scale-0 peer-checked:scale-100 duration-200">
+<span class="material-symbols-outlined text-primary text-[20px] filled">check_circle</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="goal_type" type="radio" value="economia"/>
+<div class="h-full p-4 rounded-2xl bg-surface border border-white/5 peer-checked:border-warning peer-checked:bg-warning/10 transition-all duration-200 flex flex-col items-start gap-3 hover:bg-surface-light">
+<div class="w-10 h-10 flex items-center justify-center rounded-xl bg-warning/20 text-warning">
+<span class="material-symbols-outlined filled">savings</span>
+</div>
+<div>
+<span class="block font-medium text-sm text-white">Economia</span>
+<span class="text-[10px] text-text-muted">Guardar valor</span>
+</div>
+</div>
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity scale-0 peer-checked:scale-100 duration-200">
+<span class="material-symbols-outlined text-warning text-[20px] filled">check_circle</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="goal_type" type="radio" value="lucro"/>
+<div class="h-full p-4 rounded-2xl bg-surface border border-white/5 peer-checked:border-info peer-checked:bg-info/10 transition-all duration-200 flex flex-col items-start gap-3 hover:bg-surface-light">
+<div class="w-10 h-10 flex items-center justify-center rounded-xl bg-info/20 text-info">
+<span class="material-symbols-outlined filled">trending_up</span>
+</div>
+<div>
+<span class="block font-medium text-sm text-white">Lucro</span>
+<span class="text-[10px] text-text-muted">Líquido estimado</span>
+</div>
+</div>
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity scale-0 peer-checked:scale-100 duration-200">
+<span class="material-symbols-outlined text-info text-[20px] filled">check_circle</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="goal_type" type="radio" value="quilometragem"/>
+<div class="h-full p-4 rounded-2xl bg-surface border border-white/5 peer-checked:border-purple peer-checked:bg-purple/10 transition-all duration-200 flex flex-col items-start gap-3 hover:bg-surface-light">
+<div class="w-10 h-10 flex items-center justify-center rounded-xl bg-purple/20 text-purple">
+<span class="material-symbols-outlined filled">speed</span>
+</div>
+<div>
+<span class="block font-medium text-sm text-white">Quilometragem</span>
+<span class="text-[10px] text-text-muted">Distância</span>
+</div>
+</div>
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity scale-0 peer-checked:scale-100 duration-200">
+<span class="material-symbols-outlined text-purple text-[20px] filled">check_circle</span>
+</div>
+</label>
+</div>
+</div>
+<div class="space-y-3">
+<h2 class="text-xs uppercase tracking-wider text-text-muted font-semibold ml-1">Definição do Alvo</h2>
+<div class="bg-surface rounded-2xl p-6 border border-white/5 space-y-6 shadow-glow">
+<div class="flex flex-col items-center justify-center space-y-1">
+<label class="text-[11px] text-text-muted uppercase tracking-wide font-medium">Valor Alvo</label>
+<div class="relative w-full">
+<input class="w-full bg-transparent border-0 text-center text-5xl font-bold text-white placeholder-gray-700 focus:ring-0 p-0 tracking-tight" inputmode="decimal" placeholder="0" type="number"/>
+</div>
+</div>
+<div class="grid grid-cols-5 gap-3 pt-2">
+<div class="col-span-2 space-y-1">
+<label class="text-[10px] text-text-muted ml-1 uppercase font-bold">Unidade</label>
+<div class="relative">
+<input class="w-full bg-surface-light rounded-xl border-none focus:ring-1 focus:ring-primary text-sm h-12 px-4 text-white placeholder-gray-500 transition-colors" placeholder="Ex: R$" type="text"/>
+</div>
+</div>
+<div class="col-span-3 space-y-1">
+<label class="text-[10px] text-text-muted ml-1 uppercase font-bold">Categoria</label>
+<div class="relative">
+<select class="w-full bg-surface-light rounded-xl border-none focus:ring-1 focus:ring-primary text-sm h-12 px-4 text-white appearance-none transition-colors pr-10">
+<option disabled="" selected="" value="">Selecionar</option>
+<option value="daily">Diária</option>
+<option value="weekly">Semanal</option>
+<option value="monthly">Mensal</option>
+<option value="custom">Personalizada</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-lg">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-3">
+<h2 class="text-xs uppercase tracking-wider text-text-muted font-semibold ml-1">Período</h2>
+<div class="bg-surface rounded-2xl overflow-hidden border border-white/5">
+<div class="flex items-center justify-between p-4 border-b border-white/10 active:bg-surface-light transition-colors group">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-surface-light flex items-center justify-center text-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">calendar_today</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white">Data de Início</span>
+</div>
+</div>
+<input class="bg-transparent border-none text-right text-gray-300 focus:ring-0 text-sm p-0 w-36 h-full font-medium" type="date"/>
+</div>
+<div class="flex items-center justify-between p-4 active:bg-surface-light transition-colors group">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-surface-light flex items-center justify-center text-text-muted group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">event_repeat</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white">Data de Término</span>
+<span class="text-[10px] text-text-muted">Opcional</span>
+</div>
+</div>
+<input class="bg-transparent border-none text-right text-gray-300 focus:ring-0 text-sm p-0 w-36 h-full font-medium" type="date"/>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-0 inset-x-0 p-5 bg-background/80 backdrop-blur-xl border-t border-white/10 z-50">
+<button class="w-full bg-primary hover:bg-primary-dark active:scale-[0.98] transition-all duration-200 text-black font-bold text-[17px] py-4 rounded-2xl shadow-[0_0_20px_rgba(0,224,128,0.3)] flex items-center justify-center gap-2">
+<span class="material-symbols-outlined filled">save</span>
+            Salvar Meta
+        </button>
+</div>
+
+</body></html>

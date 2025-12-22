@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Transações - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .filter-chip.active {
+            background-color: #13ec5b;
+            color: #102216;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display flex flex-col h-screen overflow-hidden">
+    <!-- Top App Bar -->
+    <header class="flex-none px-4 pt-12 pb-2 bg-background-light dark:bg-background-dark z-20">
+        <div class="flex items-center justify-between mb-2">
+            <h2 class="text-xl font-bold leading-tight tracking-tight">Transações</h2>
+            <div class="flex items-center gap-2">
+                <button id="searchBtn" class="flex items-center justify-center w-10 h-10 rounded-full text-slate-600 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">search</span>
+                </button>
+                <button id="calendarBtn" class="flex items-center justify-center w-10 h-10 rounded-full text-slate-600 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">calendar_month</span>
+                </button>
+            </div>
+        </div>
+        <!-- Search Bar (hidden by default) -->
+        <div id="searchBar" class="hidden mt-2">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="Buscar transações..."
+                    class="w-full bg-white dark:bg-surface-dark rounded-xl pl-10 pr-4 py-3 text-sm border-none focus:ring-2 focus:ring-primary"
+                />
+            </div>
+        </div>
+        <!-- Date Range Picker (hidden by default) -->
+        <div id="dateRangePicker" class="hidden mt-2 flex gap-2">
+            <div class="flex-1">
+                <label class="text-xs text-slate-500">De</label>
+                <input id="startDate" type="date" class="w-full bg-white dark:bg-surface-dark rounded-lg px-3 py-2 text-sm border-none"/>
+            </div>
+            <div class="flex-1">
+                <label class="text-xs text-slate-500">Até</label>
+                <input id="endDate" type="date" class="w-full bg-white dark:bg-surface-dark rounded-lg px-3 py-2 text-sm border-none"/>
+            </div>
+            <button id="applyDateFilter" class="bg-primary text-background-dark rounded-lg px-4 py-2 font-bold text-sm self-end">
+                Filtrar
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Scrollable Area -->
+    <main class="flex-1 overflow-y-auto no-scrollbar pb-24 relative">
+        <!-- Summary Stats Card -->
+        <div class="px-4 py-2">
+            <div class="relative overflow-hidden rounded-xl bg-surface-dark p-5 shadow-lg">
+                <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/20 blur-3xl"></div>
+                <div class="relative z-10 flex flex-col gap-2">
+                    <div class="flex justify-between items-start">
+                        <p id="periodLabel" class="text-white/80 text-sm font-medium">Saldo do período</p>
+                        <div id="trendBadge" class="hidden items-center gap-1 bg-primary/10 px-2 py-1 rounded-full">
+                            <span id="trendValue" class="text-primary text-xs font-bold"></span>
+                            <span class="material-symbols-outlined text-primary text-[14px]">trending_up</span>
+                        </div>
+                    </div>
+                    <p id="balanceValue" class="text-white tracking-tight text-3xl font-bold">R$ 0,00</p>
+                    <div class="flex gap-4 mt-2">
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-primary text-[16px]">arrow_downward</span>
+                            <span id="incomeValue" class="text-white/60 text-xs">R$ 0,00 Rec.</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-red-400 text-[16px]">arrow_upward</span>
+                            <span id="expenseValue" class="text-white/60 text-xs">R$ 0,00 Desp.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Filter Chips -->
+        <div class="sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md pt-4 pb-2 border-b border-gray-200 dark:border-white/5">
+            <div class="flex gap-2 px-4 overflow-x-auto no-scrollbar pb-2">
+                <button class="filter-chip active flex h-8 shrink-0 items-center justify-center px-4 rounded-full transition-all" data-filter="all">
+                    <span class="text-sm">Todos</span>
+                </button>
+                <button class="filter-chip flex h-8 shrink-0 items-center justify-center px-4 rounded-full bg-white dark:bg-surface-dark border border-gray-200 dark:border-transparent transition-all" data-filter="income">
+                    <span class="text-sm text-slate-600 dark:text-white">Receitas</span>
+                </button>
+                <button class="filter-chip flex h-8 shrink-0 items-center justify-center px-4 rounded-full bg-white dark:bg-surface-dark border border-gray-200 dark:border-transparent transition-all" data-filter="expense">
+                    <span class="text-sm text-slate-600 dark:text-white">Despesas</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Transaction List -->
+        <div id="transactionList" class="flex flex-col mt-2 px-2">
+            <!-- Loading State -->
+            <div id="loadingState" class="flex flex-col items-center justify-center py-12">
+                <span class="material-symbols-outlined text-4xl text-slate-400 animate-spin">progress_activity</span>
+                <p class="text-slate-400 mt-2">Carregando transações...</p>
+            </div>
+            <!-- Empty State (hidden by default) -->
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-12">
+                <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">receipt_long</span>
+                <p class="text-slate-400 mt-4 text-center">Nenhuma transação encontrada</p>
+                <a href="/user/Lancamento/lancamento.html" class="mt-4 text-primary font-semibold text-sm hover:underline">
+                    Adicionar primeira transação
+                </a>
+            </div>
+            <!-- Transactions will be inserted here -->
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="flex-none bg-white dark:bg-background-dark border-t border-gray-200 dark:border-white/5 px-6 pt-3 pb-6">
+        <div class="flex justify-between items-end">
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/Dashboard/dash.html">
+                <span class="material-symbols-outlined text-[26px]">home</span>
+                <span class="text-[10px] font-medium">Início</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 w-12 text-slate-900 dark:text-primary transition-colors" href="/user/transacao/transacao.html">
+                <span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+                <span class="text-[10px] font-medium">Extrato</span>
+            </a>
+            <!-- Central FAB -->
+            <div class="relative -top-3">
+                <a href="/user/Lancamento/lancamento.html" class="flex items-center justify-center w-14 h-14 rounded-full bg-primary shadow-lg shadow-primary/30 text-background-dark hover:scale-105 active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[32px]">add</span>
+                </a>
+            </div>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/metas/meta.html">
+                <span class="material-symbols-outlined text-[26px]">flag</span>
+                <span class="text-[10px] font-medium">Metas</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/configuracoes/config.html">
+                <span class="material-symbols-outlined text-[26px]">settings</span>
+                <span class="text-[10px] font-medium">Ajustes</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
+            <h3 class="text-lg font-bold mb-2">Excluir transação?</h3>
+            <p class="text-slate-500 text-sm mb-6">Esta ação não pode ser desfeita.</p>
+            <div class="flex gap-3">
+                <button id="cancelDelete" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">
+                    Cancelar
+                </button>
+                <button id="confirmDelete" class="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold">
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { requireAuth } from '/js/firebase-config.js';
+        import { getTransactions, deleteTransaction, getTransactionsSummary } from '/js/db.js';
+        import { showToast, formatCurrency, formatDate, formatRelativeDate } from '/js/utils.js';
+
+        // Wait for auth
+        requireAuth();
+
+        // State
+        let allTransactions = [];
+        let filteredTransactions = [];
+        let currentFilter = 'all';
+        let searchQuery = '';
+        let startDate = null;
+        let endDate = null;
+        let transactionToDelete = null;
+
+        // Category configs
+        const categoryConfig = {
+            // Income categories
+            uber: { icon: 'directions_car', label: 'Uber', bgClass: 'bg-black text-white' },
+            '99': { icon: 'local_taxi', label: '99', bgClass: 'bg-yellow-400 text-black' },
+            indrive: { icon: 'two_wheeler', label: 'Indrive', bgClass: 'bg-green-500 text-white' },
+            particular: { icon: 'person', label: 'Particular', bgClass: 'bg-blue-500 text-white' },
+            outros_receita: { icon: 'more_horiz', label: 'Outros', bgClass: 'bg-purple-500 text-white' },
+            // Expense categories
+            combustivel: { icon: 'local_gas_station', label: 'Combustível', bgClass: 'bg-orange-500 text-white' },
+            manutencao: { icon: 'build', label: 'Manutenção', bgClass: 'bg-slate-600 text-white' },
+            alimentacao: { icon: 'restaurant', label: 'Alimentação', bgClass: 'bg-amber-500 text-white' },
+            lavagem: { icon: 'local_car_wash', label: 'Lavagem', bgClass: 'bg-cyan-500 text-white' },
+            estacionamento: { icon: 'local_parking', label: 'Estacionamento', bgClass: 'bg-indigo-500 text-white' },
+            outros_despesa: { icon: 'more_horiz', label: 'Outros', bgClass: 'bg-rose-500 text-white' },
+        };
+
+        // DOM Elements
+        const transactionList = document.getElementById('transactionList');
+        const loadingState = document.getElementById('loadingState');
+        const emptyState = document.getElementById('emptyState');
+        const balanceValue = document.getElementById('balanceValue');
+        const incomeValue = document.getElementById('incomeValue');
+        const expenseValue = document.getElementById('expenseValue');
+        const periodLabel = document.getElementById('periodLabel');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchBar = document.getElementById('searchBar');
+        const searchInput = document.getElementById('searchInput');
+        const calendarBtn = document.getElementById('calendarBtn');
+        const dateRangePicker = document.getElementById('dateRangePicker');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const applyDateFilter = document.getElementById('applyDateFilter');
+        const filterChips = document.querySelectorAll('.filter-chip');
+        const deleteModal = document.getElementById('deleteModal');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+
+        // Load transactions
+        async function loadTransactions() {
+            try {
+                const filters = {};
+                if (startDate) filters.startDate = new Date(startDate);
+                if (endDate) filters.endDate = new Date(endDate + 'T23:59:59');
+
+                allTransactions = await getTransactions(filters);
+                applyFilters();
+                updateSummary();
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                showToast('Erro ao carregar transações', 'error');
+            } finally {
+                loadingState.classList.add('hidden');
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            filteredTransactions = allTransactions.filter(t => {
+                // Type filter
+                if (currentFilter !== 'all' && t.type !== currentFilter) return false;
+                // Search filter
+                if (searchQuery) {
+                    const query = searchQuery.toLowerCase();
+                    const cat = categoryConfig[t.category];
+                    const catLabel = cat ? cat.label.toLowerCase() : '';
+                    const desc = (t.description || '').toLowerCase();
+                    if (!catLabel.includes(query) && !desc.includes(query)) return false;
+                }
+                return true;
+            });
+            renderTransactions();
+        }
+
+        // Update summary
+        function updateSummary() {
+            let income = 0;
+            let expense = 0;
+
+            filteredTransactions.forEach(t => {
+                if (t.type === 'income') income += t.amount;
+                else expense += t.amount;
+            });
+
+            const balance = income - expense;
+            balanceValue.textContent = formatCurrency(balance);
+            incomeValue.textContent = formatCurrency(income) + ' Rec.';
+            expenseValue.textContent = formatCurrency(expense) + ' Desp.';
+
+            // Update period label
+            if (startDate || endDate) {
+                periodLabel.textContent = 'Saldo filtrado';
+            } else {
+                const now = new Date();
+                const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                periodLabel.textContent = `Saldo de ${monthNames[now.getMonth()]}`;
+            }
+        }
+
+        // Render transactions
+        function renderTransactions() {
+            // Clear previous content except loading/empty states
+            const children = Array.from(transactionList.children);
+            children.forEach(child => {
+                if (child.id !== 'loadingState' && child.id !== 'emptyState') {
+                    child.remove();
+                }
+            });
+
+            if (filteredTransactions.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+
+            // Group by date
+            const grouped = {};
+            filteredTransactions.forEach(t => {
+                const dateKey = t.date.toDate ? t.date.toDate().toDateString() : new Date(t.date).toDateString();
+                if (!grouped[dateKey]) grouped[dateKey] = [];
+                grouped[dateKey].push(t);
+            });
+
+            // Sort dates descending
+            const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
+
+            // Render each group
+            sortedDates.forEach(dateKey => {
+                const date = new Date(dateKey);
+                const dateLabel = formatRelativeDate(date);
+
+                // Section header
+                const header = document.createElement('div');
+                header.className = 'flex items-center gap-4 px-4 py-3';
+                header.innerHTML = `
+                    <h4 class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">${dateLabel}</h4>
+                    <div class="h-[1px] flex-1 bg-gray-200 dark:bg-surface-dark"></div>
+                `;
+                transactionList.appendChild(header);
+
+                // Transactions for this date
+                grouped[dateKey].forEach(t => {
+                    const cat = categoryConfig[t.category] || { icon: 'receipt', label: t.category, bgClass: 'bg-slate-500 text-white' };
+                    const isIncome = t.type === 'income';
+                    const amountClass = isIncome ? 'text-primary' : 'text-red-500';
+                    const amountPrefix = isIncome ? '+' : '-';
+                    const iconBgClass = isIncome ? `${cat.bgClass}` : 'bg-red-50 dark:bg-red-500/10 text-red-500';
+                    const time = t.date.toDate ? t.date.toDate() : new Date(t.date);
+                    const timeStr = time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                    const item = document.createElement('div');
+                    item.className = 'group flex items-center justify-between gap-4 px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors rounded-lg';
+                    item.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center rounded-xl shrink-0 size-12 ${iconBgClass}">
+                                <span class="material-symbols-outlined">${cat.icon}</span>
+                            </div>
+                            <div class="flex flex-col justify-center">
+                                <p class="text-slate-900 dark:text-white text-base font-semibold line-clamp-1">${cat.label}</p>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm line-clamp-1">${timeStr}${t.description ? ' • ' + t.description : ''}</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0 text-right flex items-center gap-2">
+                            <p class="${amountClass} text-base font-bold">${amountPrefix} ${formatCurrency(t.amount)}</p>
+                            <button class="delete-btn opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-500/20 transition-all" data-id="${t.id}">
+                                <span class="material-symbols-outlined text-red-500 text-[20px]">delete</span>
+                            </button>
+                        </div>
+                    `;
+                    transactionList.appendChild(item);
+
+                    // Delete button handler
+                    const deleteBtn = item.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        transactionToDelete = t.id;
+                        deleteModal.classList.remove('hidden');
+                        deleteModal.classList.add('flex');
+                    });
+                });
+            });
+
+            updateSummary();
+        }
+
+        // Search functionality
+        searchBtn.addEventListener('click', () => {
+            searchBar.classList.toggle('hidden');
+            dateRangePicker.classList.add('hidden');
+            if (!searchBar.classList.contains('hidden')) {
+                searchInput.focus();
+            }
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            applyFilters();
+        });
+
+        // Date range filter
+        calendarBtn.addEventListener('click', () => {
+            dateRangePicker.classList.toggle('hidden');
+            searchBar.classList.add('hidden');
+        });
+
+        applyDateFilter.addEventListener('click', () => {
+            startDate = startDateInput.value || null;
+            endDate = endDateInput.value || null;
+            loadTransactions();
+            dateRangePicker.classList.add('hidden');
+        });
+
+        // Filter chips
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                filterChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                currentFilter = chip.dataset.filter;
+                applyFilters();
+            });
+        });
+
+        // Delete modal handlers
+        cancelDelete.addEventListener('click', () => {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('flex');
+            transactionToDelete = null;
+        });
+
+        confirmDelete.addEventListener('click', async () => {
+            if (!transactionToDelete) return;
+            try {
+                await deleteTransaction(transactionToDelete);
+                showToast('Transação excluída', 'success');
+                await loadTransactions();
+            } catch (error) {
+                console.error('Error deleting transaction:', error);
+                showToast('Erro ao excluir', 'error');
+            } finally {
+                deleteModal.classList.add('hidden');
+                deleteModal.classList.remove('flex');
+                transactionToDelete = null;
+            }
+        });
+
+        // Close modal on backdrop click
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                deleteModal.classList.add('hidden');
+                deleteModal.classList.remove('flex');
+                transactionToDelete = null;
+            }
+        });
+
+        // Initialize
+        loadTransactions();
+    </script>
+</body>
+</html>

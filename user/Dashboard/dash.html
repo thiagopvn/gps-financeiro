@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Painel Financeiro - GPS Financeiro</title>
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json"/>
+    <meta name="theme-color" content="#13ec5b"/>
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg"/>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec80",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#102219",
+                        "surface-dark": "#1c2721",
+                        "surface-light": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #1c2721 25%, #2a3830 50%, #1c2721 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-background-dark pb-24">
+    <!-- Header Section -->
+    <header class="sticky top-0 z-30 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 pt-safe">
+        <div class="flex items-center p-4 justify-between">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div id="userAvatar" class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-primary/20 bg-surface-dark flex items-center justify-center">
+                        <span class="material-symbols-outlined text-gray-400">person</span>
+                    </div>
+                    <div class="absolute bottom-0 right-0 size-3 bg-primary rounded-full border-2 border-background-light dark:border-background-dark"></div>
+                </div>
+                <div>
+                    <h2 id="userName" class="text-gray-900 dark:text-white text-base font-bold leading-tight">Olá!</h2>
+                    <p id="currentDate" class="text-gray-500 dark:text-gray-400 text-xs font-medium"></p>
+                </div>
+            </div>
+            <button id="toggleVisibility" class="flex items-center justify-center rounded-full size-10 bg-transparent text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                <span class="material-symbols-outlined">visibility</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex flex-col gap-6 p-4 pt-6 max-w-lg mx-auto w-full">
+        <!-- Main Balance Card -->
+        <div class="@container">
+            <div class="flex flex-col items-stretch justify-start rounded-xl shadow-lg shadow-primary/5 bg-surface-light dark:bg-surface-dark overflow-hidden border border-gray-100 dark:border-white/5">
+                <!-- Abstract Map/Header Image for Card -->
+                <div class="w-full h-24 bg-cover bg-center relative bg-gradient-to-br from-primary/20 to-surface-dark">
+                    <div class="absolute inset-0 bg-gradient-to-t from-surface-light dark:from-surface-dark to-transparent"></div>
+                </div>
+                <div class="flex flex-col px-5 pb-5 -mt-8 relative z-10">
+                    <div class="flex justify-between items-end mb-2">
+                        <div>
+                            <p class="text-gray-500 dark:text-[#9db9ab] text-sm font-medium mb-1">Saldo em conta</p>
+                            <h3 id="balance" class="text-gray-900 dark:text-white text-3xl font-bold tracking-tight balance-value">R$ 0,00</h3>
+                        </div>
+                        <div class="bg-primary/10 rounded-lg p-2">
+                            <span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+                        </div>
+                    </div>
+                    <div class="h-px w-full bg-gray-200 dark:bg-white/10 my-4"></div>
+                    <div class="flex items-center justify-between">
+                        <p class="text-gray-500 dark:text-[#9db9ab] text-sm">Disponível para saque</p>
+                        <a href="/user/transacao/transacao.html" class="group flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+                            Ver extrato
+                            <span class="material-symbols-outlined text-[18px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="grid grid-cols-2 gap-3">
+            <!-- Revenue -->
+            <div class="flex flex-col gap-3 rounded-xl p-4 bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5 shadow-sm">
+                <div class="flex items-center gap-2">
+                    <div class="size-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-green-500 text-[20px]">trending_up</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm font-medium">Receita</p>
+                </div>
+                <div>
+                    <p id="income" class="text-gray-900 dark:text-white text-xl font-bold tracking-tight balance-value">R$ 0</p>
+                    <p id="incomeChange" class="text-green-500 text-xs font-semibold mt-1">Este mês</p>
+                </div>
+            </div>
+            <!-- Expenses -->
+            <div class="flex flex-col gap-3 rounded-xl p-4 bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5 shadow-sm">
+                <div class="flex items-center gap-2">
+                    <div class="size-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-red-500 text-[20px]">trending_down</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm font-medium">Despesas</p>
+                </div>
+                <div>
+                    <p id="expenses" class="text-gray-900 dark:text-white text-xl font-bold tracking-tight balance-value">R$ 0</p>
+                    <p id="expensesChange" class="text-red-500 text-xs font-semibold mt-1">Este mês</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goals Section -->
+        <div class="flex flex-col">
+            <div class="flex items-center justify-between mb-4 px-1">
+                <h2 class="text-gray-900 dark:text-white text-lg font-bold">Metas</h2>
+                <a href="/user/metas/meta.html" class="text-primary text-sm font-medium hover:text-primary/80">Editar metas</a>
+            </div>
+            <div id="goalsContainer" class="flex flex-col gap-4 rounded-xl bg-surface-light dark:bg-surface-dark p-5 border border-gray-100 dark:border-white/5 shadow-sm">
+                <!-- Goals will be loaded dynamically -->
+                <div class="text-center py-4 text-gray-400">
+                    <span class="material-symbols-outlined text-4xl mb-2">flag</span>
+                    <p class="text-sm">Carregando metas...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <a href="/user/Lancamento/lancamento.html" class="fixed right-4 bottom-24 z-40 flex items-center justify-center size-14 bg-primary text-background-dark rounded-full shadow-lg shadow-primary/25 active:scale-95 transition-all hover:bg-primary/90">
+        <span class="material-symbols-outlined text-[28px] font-bold">add</span>
+    </a>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-surface-light dark:bg-surface-dark border-t border-gray-200 dark:border-white/5 pb-safe">
+        <div class="flex justify-around items-center h-16 max-w-lg mx-auto">
+            <a href="/user/Dashboard/dash.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+                <span class="text-[10px] font-medium">Painel</span>
+            </a>
+            <a href="/user/transacao/transacao.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
+                <span class="material-symbols-outlined">history</span>
+                <span class="text-[10px] font-medium">Histórico</span>
+            </a>
+            <a href="/user/sessao/sessao.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
+                <span class="material-symbols-outlined">timer</span>
+                <span class="text-[10px] font-medium">Sessão</span>
+            </a>
+            <a href="/user/configuracoes/config.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="text-[10px] font-medium">Ajustes</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { requireAuth } from '/js/firebase-config.js';
+        import { getUserProfile, getTransactionsSummary, getGoals, checkAndResetGoals } from '/js/db.js';
+        import { formatCurrency, formatDate, getStartOfMonth, getLocal, saveLocal } from '/js/utils.js';
+
+        // Require authentication
+        const user = await requireAuth();
+        if (!user) throw new Error('Not authenticated');
+
+        // DOM Elements
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const currentDate = document.getElementById('currentDate');
+        const balance = document.getElementById('balance');
+        const income = document.getElementById('income');
+        const expenses = document.getElementById('expenses');
+        const goalsContainer = document.getElementById('goalsContainer');
+        const toggleVisibility = document.getElementById('toggleVisibility');
+
+        // State
+        let isHidden = getLocal('balanceHidden', false);
+
+        // Format current date
+        const today = new Date();
+        const dateOptions = { weekday: 'long', day: 'numeric', month: 'short' };
+        currentDate.textContent = today.toLocaleDateString('pt-BR', dateOptions);
+
+        // Load user profile
+        const loadProfile = async () => {
+            const profile = await getUserProfile();
+            if (profile) {
+                const firstName = (profile.name || 'Usuário').split(' ')[0];
+                userName.textContent = `Olá, ${firstName}`;
+
+                if (profile.photoURL) {
+                    userAvatar.innerHTML = '';
+                    userAvatar.style.backgroundImage = `url("${profile.photoURL}")`;
+                }
+            }
+        };
+
+        // Load financial summary
+        const loadSummary = async () => {
+            const startOfMonth = getStartOfMonth();
+            const summary = await getTransactionsSummary(startOfMonth, new Date());
+
+            updateBalanceDisplay(summary);
+        };
+
+        // Update balance display
+        const updateBalanceDisplay = (summary) => {
+            const balanceValue = summary.balance;
+            const incomeValue = summary.income;
+            const expensesValue = summary.expenses;
+
+            if (isHidden) {
+                balance.textContent = '••••••';
+                income.textContent = '••••';
+                expenses.textContent = '••••';
+            } else {
+                balance.textContent = formatCurrency(balanceValue);
+                income.textContent = formatCurrency(incomeValue);
+                expenses.textContent = formatCurrency(expensesValue);
+            }
+
+            // Store for toggle
+            balance.dataset.value = balanceValue;
+            income.dataset.value = incomeValue;
+            expenses.dataset.value = expensesValue;
+        };
+
+        // Toggle visibility
+        toggleVisibility.addEventListener('click', () => {
+            isHidden = !isHidden;
+            saveLocal('balanceHidden', isHidden);
+
+            const icon = toggleVisibility.querySelector('.material-symbols-outlined');
+            icon.textContent = isHidden ? 'visibility_off' : 'visibility';
+
+            // Update display
+            const balanceElements = document.querySelectorAll('.balance-value');
+            balanceElements.forEach(el => {
+                if (isHidden) {
+                    el.dataset.originalText = el.textContent;
+                    el.textContent = '••••••';
+                } else if (el.dataset.value) {
+                    el.textContent = formatCurrency(parseFloat(el.dataset.value));
+                }
+            });
+        });
+
+        // Load goals
+        const loadGoals = async () => {
+            // First check and reset goals if needed
+            await checkAndResetGoals();
+
+            const goals = await getGoals();
+
+            if (goals.length === 0) {
+                goalsContainer.innerHTML = `
+                    <div class="text-center py-4">
+                        <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">flag</span>
+                        <p class="text-gray-400 text-sm mb-3">Você ainda não tem metas</p>
+                        <a href="/user/newmeta/newmeta.html" class="text-primary text-sm font-semibold hover:underline">
+                            + Criar primeira meta
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort goals by type (daily, weekly, monthly)
+            const typeOrder = { daily: 1, weekly: 2, monthly: 3 };
+            goals.sort((a, b) => (typeOrder[a.type] || 4) - (typeOrder[b.type] || 4));
+
+            // Render goals (max 3)
+            const displayGoals = goals.slice(0, 3);
+            let html = '';
+
+            displayGoals.forEach((goal, index) => {
+                const progress = Math.min(100, Math.round((goal.current / goal.target) * 100));
+                const typeConfig = {
+                    daily: { icon: 'today', color: 'text-primary', bgColor: 'bg-primary', label: 'Diária' },
+                    weekly: { icon: 'calendar_view_week', color: 'text-yellow-400', bgColor: 'bg-yellow-400', label: 'Semanal' },
+                    monthly: { icon: 'calendar_month', color: 'text-purple-400', bgColor: 'bg-purple-400', label: 'Mensal' }
+                };
+                const config = typeConfig[goal.type] || typeConfig.daily;
+
+                if (index > 0) {
+                    html += '<div class="h-px bg-gray-200 dark:bg-white/5 w-full"></div>';
+                }
+
+                html += `
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 dark:text-gray-200 text-sm font-medium flex items-center gap-2">
+                                <span class="material-symbols-outlined ${config.color} text-[18px]">${config.icon}</span>
+                                ${goal.name || config.label}
+                            </span>
+                            <span class="text-gray-900 dark:text-white text-sm font-bold">${progress}%</span>
+                        </div>
+                        <div class="h-2.5 w-full bg-gray-200 dark:bg-black/40 rounded-full overflow-hidden">
+                            <div class="h-full ${config.bgColor} rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-xs text-right balance-value" data-value="${goal.current}">
+                            ${isHidden ? '••••' : formatCurrency(goal.current)} / ${formatCurrency(goal.target)}
+                        </p>
+                    </div>
+                `;
+            });
+
+            goalsContainer.innerHTML = html;
+        };
+
+        // Listen for goal achieved events
+        window.addEventListener('goalAchieved', (e) => {
+            const { goal } = e.detail;
+            // Show notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Meta alcançada! 🎉', {
+                    body: `Parabéns! Você atingiu sua meta: ${goal.name}`,
+                    icon: '/icons/icon-192.png'
+                });
+            }
+        });
+
+        // Initialize
+        const init = async () => {
+            await Promise.all([
+                loadProfile(),
+                loadSummary(),
+                loadGoals()
+            ]);
+
+            // Update visibility icon if hidden
+            if (isHidden) {
+                toggleVisibility.querySelector('.material-symbols-outlined').textContent = 'visibility_off';
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>

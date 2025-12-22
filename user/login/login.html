@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Login - GPS Financeiro</title>
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json"/>
+    <meta name="theme-color" content="#13ec5b"/>
+    <meta name="description" content="Controle financeiro para motoristas de aplicativo"/>
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg"/>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Theme Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="font-display antialiased bg-background-light dark:bg-background-dark text-slate-900 dark:text-white h-screen overflow-hidden flex flex-col">
+    <div class="flex-1 flex flex-col justify-center w-full max-w-md mx-auto px-6 py-8 relative">
+        <!-- Decoration Gradient -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary/10 blur-[80px] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-primary/5 blur-[80px] pointer-events-none"></div>
+
+        <!-- Header Section -->
+        <div class="w-full flex flex-col items-center mb-10 z-10">
+            <div class="w-20 h-20 bg-gradient-to-tr from-primary/20 to-surface-dark rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/5 border border-primary/20">
+                <span class="material-symbols-outlined text-primary text-[40px]">local_taxi</span>
+            </div>
+            <h1 class="text-3xl font-bold tracking-tight text-center mb-2">Bem-vindo de volta</h1>
+            <p class="text-slate-400 text-sm text-center">Gerencie seus ganhos com inteligência</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="w-full space-y-5 z-10">
+            <!-- Email Input -->
+            <div class="group relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">mail</span>
+                </div>
+                <input
+                    id="email"
+                    type="email"
+                    required
+                    class="block w-full rounded-xl border-0 bg-surface-dark py-4 pl-12 pr-4 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 transition-all"
+                    placeholder="Email"
+                />
+            </div>
+
+            <!-- Password Input -->
+            <div class="group relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">lock</span>
+                </div>
+                <input
+                    id="password"
+                    type="password"
+                    required
+                    class="block w-full rounded-xl border-0 bg-surface-dark py-4 pl-12 pr-12 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 transition-all"
+                    placeholder="Senha"
+                />
+                <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer">
+                    <span class="material-symbols-outlined text-slate-500 hover:text-white transition-colors text-[20px]">visibility_off</span>
+                </button>
+            </div>
+
+            <!-- Forgot Password -->
+            <div class="flex justify-end">
+                <a class="text-sm font-medium text-slate-400 hover:text-primary transition-colors" href="newsenha.html">
+                    Esqueci minha senha
+                </a>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+                type="submit"
+                id="submitBtn"
+                class="flex w-full justify-center items-center rounded-xl bg-primary px-3 py-4 text-sm font-bold leading-6 text-background-dark shadow-sm hover:bg-[#34f574] hover:shadow-primary/25 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all duration-200 mt-4"
+            >
+                Entrar
+                <span class="material-symbols-outlined text-[20px] ml-2 font-bold">arrow_forward</span>
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="relative mt-8 mb-6">
+            <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-white/10"></div>
+            </div>
+            <div class="relative flex justify-center text-sm font-medium leading-6">
+                <span class="bg-background-dark px-6 text-slate-500">ou continue com</span>
+            </div>
+        </div>
+
+        <!-- Social Login -->
+        <div class="flex justify-center z-10">
+            <button
+                type="button"
+                id="googleBtn"
+                class="flex w-full items-center justify-center gap-3 rounded-xl bg-surface-dark px-3 py-3 text-white ring-1 ring-inset ring-white/10 hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors"
+            >
+                <!-- Google Logo SVG -->
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M23.766 12.276c0-.88-.076-1.738-.225-2.556H12v4.836h6.598c-.286 1.545-1.153 2.853-2.457 3.732v3.102h3.982c2.329-2.145 3.643-5.304 3.643-8.996z" fill="#4285F4"/>
+                    <path d="M12 24c3.24 0 5.957-1.074 7.942-2.91l-3.983-3.102c-1.074.72-2.449 1.146-3.959 1.146-3.126 0-5.772-2.112-6.723-4.95H1.176v3.114C3.132 21.186 7.278 24 12 24z" fill="#34A853"/>
+                    <path d="M5.277 14.184c-.238-.72-.375-1.491-.375-2.292 0-.801.137-1.572.375-2.292V6.486H1.176C.426 7.98 0 9.684 0 12c0 2.316.426 4.02 1.176 5.514l4.101-3.33z" fill="#FBBC05"/>
+                    <path d="M12 4.752c1.764 0 3.348.606 4.593 1.794l3.435-3.435C17.952 1.188 15.234 0 12 0 7.278 0 3.132 2.814 1.176 6.486l4.101 3.33c.951-2.838 3.597-4.95 6.723-4.95z" fill="#EA4335"/>
+                </svg>
+                <span class="text-sm font-semibold">Continuar com Google</span>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <p class="mt-10 text-center text-sm text-slate-400 z-10">
+            Ainda não tem conta?
+            <a class="font-semibold text-primary hover:text-[#34f574] hover:underline transition-all ml-1" href="newlogin.html">
+                Cadastre-se
+            </a>
+        </p>
+    </div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { loginWithEmail, loginWithGoogle } from '/js/auth.js';
+        import { requireNoAuth } from '/js/firebase-config.js';
+        import { showToast, isValidEmail } from '/js/utils.js';
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker failed:', err));
+        }
+
+        // Check if already logged in
+        requireNoAuth();
+
+        // DOM Elements
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const googleBtn = document.getElementById('googleBtn');
+
+        // Password visibility toggle
+        togglePassword.addEventListener('click', () => {
+            const icon = togglePassword.querySelector('.material-symbols-outlined');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                passwordInput.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            // Validation
+            if (!isValidEmail(email)) {
+                showToast('Digite um email válido', 'error');
+                return;
+            }
+
+            if (!password) {
+                showToast('Digite sua senha', 'error');
+                return;
+            }
+
+            // Login
+            const result = await loginWithEmail(email, password);
+
+            if (result.success) {
+                window.location.href = '/user/Dashboard/dash.html';
+            }
+        });
+
+        // Google login
+        googleBtn.addEventListener('click', async () => {
+            const result = await loginWithGoogle();
+            if (result.success) {
+                window.location.href = '/user/Dashboard/dash.html';
+            }
+        });
+    </script>
+</body>
+</html>
