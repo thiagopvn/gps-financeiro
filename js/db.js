@@ -451,72 +451,62 @@ export const deleteGoal = async (goalId) => {
  * @param {string} category - Category to filter goals (receita, economia, corridas, km)
  */
 export const updateGoalsProgress = async (amount, category) => {
-    // Validate inputs
+    console.log('=== updateGoalsProgress v2 ===');
+    console.log('Parametros recebidos:', { amount, category });
+
+    // Validate category
     if (!category || typeof category !== 'string') {
-        console.error('updateGoalsProgress: categoria invalida:', category);
+        console.error('ERRO: categoria invalida:', category);
         return;
     }
 
+    // Validate amount
     if (typeof amount !== 'number' || amount <= 0 || isNaN(amount)) {
-        console.error('updateGoalsProgress: valor invalido:', amount);
+        console.error('ERRO: valor invalido:', amount);
         return;
     }
 
-    // Normalize category to lowercase and trim
-    const normalizedCategory = category.toLowerCase().trim();
-    console.log(`updateGoalsProgress: Categoria normalizada: "${normalizedCategory}", valor: ${amount}`);
+    // Normalize category
+    const targetCategory = String(category).toLowerCase().trim();
+    console.log('Categoria alvo (normalizada):', targetCategory);
 
+    // Get all goals
     const goals = await getGoals();
-    console.log(`updateGoalsProgress: ${goals.length} metas encontradas`);
+    console.log('Total de metas:', goals.length);
+    console.log('Metas:', goals.map(g => ({ name: g.name, category: g.category })));
 
-    if (goals.length === 0) {
-        console.log('updateGoalsProgress: Nenhuma meta encontrada');
-        return;
-    }
-
-    let updatedCount = 0;
-
+    // Filter and update only matching goals
     for (const goal of goals) {
-        // Normalize goal category for comparison
-        const goalCategory = (goal.category || '').toLowerCase().trim();
+        const goalCat = String(goal.category || '').toLowerCase().trim();
 
-        console.log(`updateGoalsProgress: Meta "${goal.name}" - categoria da meta: "${goalCategory}", categoria buscada: "${normalizedCategory}"`);
+        console.log(`Comparando: meta "${goal.name}" categoria="${goalCat}" vs alvo="${targetCategory}"`);
 
-        // Only update goals that match the specified category (case-insensitive)
-        if (goalCategory !== normalizedCategory) {
-            console.log(`updateGoalsProgress: PULANDO meta "${goal.name}" (${goalCategory} != ${normalizedCategory})`);
+        // STRICT comparison - must match exactly
+        if (goalCat !== targetCategory) {
+            console.log(`>>> IGNORANDO "${goal.name}" - categorias diferentes`);
             continue;
         }
 
-        console.log(`updateGoalsProgress: ATUALIZANDO meta "${goal.name}"`);
+        console.log(`>>> ATUALIZANDO "${goal.name}"`);
 
-        // Check if goal needs reset first
+        // Check reset
         const shouldReset = checkGoalNeedsReset(goal);
-
         if (shouldReset) {
-            console.log(`updateGoalsProgress: Resetando meta "${goal.name}"`);
             await resetGoal(goal.id);
         }
 
-        // Update current value
-        const oldCurrent = shouldReset ? 0 : (goal.current || 0);
-        const newCurrent = oldCurrent + amount;
+        // Calculate new value
+        const oldValue = shouldReset ? 0 : (goal.current || 0);
+        const newValue = oldValue + amount;
 
-        console.log(`updateGoalsProgress: Meta "${goal.name}": ${oldCurrent} + ${amount} = ${newCurrent}`);
+        console.log(`Calculo: ${oldValue} + ${amount} = ${newValue}`);
 
-        await updateGoal(goal.id, { current: newCurrent });
-        updatedCount++;
-
-        // Check if goal was achieved
-        if (newCurrent >= goal.target && (goal.current || 0) < goal.target) {
-            console.log(`updateGoalsProgress: Meta "${goal.name}" ATINGIDA!`);
-            window.dispatchEvent(new CustomEvent('goalAchieved', {
-                detail: { goal: { ...goal, current: newCurrent } }
-            }));
-        }
+        // Update in database
+        await updateGoal(goal.id, { current: newValue });
+        console.log(`Meta "${goal.name}" atualizada para ${newValue}`);
     }
 
-    console.log(`updateGoalsProgress: TOTAL ${updatedCount} meta(s) atualizada(s) de ${goals.length}`);
+    console.log('=== FIM updateGoalsProgress ===');
 };
 
 /**
