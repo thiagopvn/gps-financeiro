@@ -448,41 +448,65 @@ export const deleteGoal = async (goalId) => {
 /**
  * Update goals progress with new amount
  * @param {number} amount - Amount to add to goals
- * @param {string} category - Category to filter goals (receita, economia, corridas, km) - optional
+ * @param {string} category - Category to filter goals (receita, economia, corridas, km)
  */
-export const updateGoalsProgress = async (amount, category = null) => {
+export const updateGoalsProgress = async (amount, category) => {
+    // Validate inputs
+    if (!category) {
+        console.error('updateGoalsProgress: categoria nao especificada');
+        return;
+    }
+
+    if (typeof amount !== 'number' || amount <= 0) {
+        console.error('updateGoalsProgress: valor invalido:', amount);
+        return;
+    }
+
+    console.log(`updateGoalsProgress: Atualizando metas de "${category}" com valor ${amount}`);
+
     const goals = await getGoals();
+    console.log(`updateGoalsProgress: Encontradas ${goals.length} metas`);
+
+    let updatedCount = 0;
 
     for (const goal of goals) {
-        // If category is specified, only update goals of that category
-        if (category && goal.category !== category) {
+        console.log(`updateGoalsProgress: Verificando meta "${goal.name}" (categoria: "${goal.category}")`);
+
+        // Only update goals that match the specified category
+        if (goal.category !== category) {
+            console.log(`updateGoalsProgress: Pulando meta "${goal.name}" - categoria diferente`);
             continue;
         }
 
-        // If no category specified, only update receita goals (backward compatibility)
-        if (!category && goal.category !== 'receita') {
-            continue;
-        }
+        console.log(`updateGoalsProgress: Atualizando meta "${goal.name}"`);
 
         // Check if goal needs reset first
         const shouldReset = checkGoalNeedsReset(goal);
 
         if (shouldReset) {
+            console.log(`updateGoalsProgress: Resetando meta "${goal.name}"`);
             await resetGoal(goal.id);
         }
 
         // Update current value
-        const newCurrent = (shouldReset ? 0 : goal.current) + amount;
+        const oldCurrent = shouldReset ? 0 : (goal.current || 0);
+        const newCurrent = oldCurrent + amount;
+
+        console.log(`updateGoalsProgress: Meta "${goal.name}": ${oldCurrent} + ${amount} = ${newCurrent}`);
+
         await updateGoal(goal.id, { current: newCurrent });
+        updatedCount++;
 
         // Check if goal was achieved
-        if (newCurrent >= goal.target && goal.current < goal.target) {
-            // Goal just achieved - trigger notification
+        if (newCurrent >= goal.target && (goal.current || 0) < goal.target) {
+            console.log(`updateGoalsProgress: Meta "${goal.name}" atingida!`);
             window.dispatchEvent(new CustomEvent('goalAchieved', {
                 detail: { goal: { ...goal, current: newCurrent } }
             }));
         }
     }
+
+    console.log(`updateGoalsProgress: ${updatedCount} meta(s) atualizada(s)`);
 };
 
 /**

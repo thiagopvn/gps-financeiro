@@ -540,9 +540,20 @@
             return parseInt(rawValue) || 0;
         }
 
+        // Flag to prevent double submission
+        let isSaving = false;
+
         // Save handler
         saveBtn.addEventListener('click', async (e) => {
             e.preventDefault();
+            e.stopPropagation();
+
+            // Prevent double click
+            if (isSaving) {
+                console.log('Salvamento ja em andamento, ignorando clique');
+                return;
+            }
+
             console.log('Botao salvar clicado');
 
             const value = getNumericValue();
@@ -562,7 +573,8 @@
                 return;
             }
 
-            // Disable button
+            // Set saving flag and disable button
+            isSaving = true;
             saveBtn.disabled = true;
             const originalText = saveBtnText.textContent;
             saveBtnText.textContent = 'Salvando...';
@@ -644,6 +656,7 @@
                 showToast('Erro ao salvar. Verifique sua conexao e tente novamente.', 'error');
                 saveBtn.disabled = false;
                 saveBtnText.textContent = originalText;
+                isSaving = false;
             }
         });
 
