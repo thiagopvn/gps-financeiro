@@ -306,9 +306,9 @@ export const endSession = async (sessionId, duration, earnings) => {
         status: 'completed'
     });
 
-    // Update goals with session earnings
+    // Update goals with session earnings (receita category)
     if (earnings > 0) {
-        await updateGoalsProgress(earnings);
+        await updateGoalsProgress(earnings, 'receita');
     }
 
     return true;
@@ -452,33 +452,43 @@ export const deleteGoal = async (goalId) => {
  */
 export const updateGoalsProgress = async (amount, category) => {
     // Validate inputs
-    if (!category) {
-        console.error('updateGoalsProgress: categoria nao especificada');
+    if (!category || typeof category !== 'string') {
+        console.error('updateGoalsProgress: categoria invalida:', category);
         return;
     }
 
-    if (typeof amount !== 'number' || amount <= 0) {
+    if (typeof amount !== 'number' || amount <= 0 || isNaN(amount)) {
         console.error('updateGoalsProgress: valor invalido:', amount);
         return;
     }
 
-    console.log(`updateGoalsProgress: Atualizando metas de "${category}" com valor ${amount}`);
+    // Normalize category to lowercase and trim
+    const normalizedCategory = category.toLowerCase().trim();
+    console.log(`updateGoalsProgress: Categoria normalizada: "${normalizedCategory}", valor: ${amount}`);
 
     const goals = await getGoals();
-    console.log(`updateGoalsProgress: Encontradas ${goals.length} metas`);
+    console.log(`updateGoalsProgress: ${goals.length} metas encontradas`);
+
+    if (goals.length === 0) {
+        console.log('updateGoalsProgress: Nenhuma meta encontrada');
+        return;
+    }
 
     let updatedCount = 0;
 
     for (const goal of goals) {
-        console.log(`updateGoalsProgress: Verificando meta "${goal.name}" (categoria: "${goal.category}")`);
+        // Normalize goal category for comparison
+        const goalCategory = (goal.category || '').toLowerCase().trim();
 
-        // Only update goals that match the specified category
-        if (goal.category !== category) {
-            console.log(`updateGoalsProgress: Pulando meta "${goal.name}" - categoria diferente`);
+        console.log(`updateGoalsProgress: Meta "${goal.name}" - categoria da meta: "${goalCategory}", categoria buscada: "${normalizedCategory}"`);
+
+        // Only update goals that match the specified category (case-insensitive)
+        if (goalCategory !== normalizedCategory) {
+            console.log(`updateGoalsProgress: PULANDO meta "${goal.name}" (${goalCategory} != ${normalizedCategory})`);
             continue;
         }
 
-        console.log(`updateGoalsProgress: Atualizando meta "${goal.name}"`);
+        console.log(`updateGoalsProgress: ATUALIZANDO meta "${goal.name}"`);
 
         // Check if goal needs reset first
         const shouldReset = checkGoalNeedsReset(goal);
@@ -499,14 +509,14 @@ export const updateGoalsProgress = async (amount, category) => {
 
         // Check if goal was achieved
         if (newCurrent >= goal.target && (goal.current || 0) < goal.target) {
-            console.log(`updateGoalsProgress: Meta "${goal.name}" atingida!`);
+            console.log(`updateGoalsProgress: Meta "${goal.name}" ATINGIDA!`);
             window.dispatchEvent(new CustomEvent('goalAchieved', {
                 detail: { goal: { ...goal, current: newCurrent } }
             }));
         }
     }
 
-    console.log(`updateGoalsProgress: ${updatedCount} meta(s) atualizada(s)`);
+    console.log(`updateGoalsProgress: TOTAL ${updatedCount} meta(s) atualizada(s) de ${goals.length}`);
 };
 
 /**
