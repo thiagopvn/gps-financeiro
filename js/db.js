@@ -16,7 +16,8 @@ import {
     limit,
     startAfter,
     serverTimestamp,
-    Timestamp
+    Timestamp,
+    onSnapshot
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import {
     ref,
@@ -257,6 +258,53 @@ export const getTransactionsSummary = async (startDate, endDate) => {
     summary.balance = summary.income - summary.expenses;
 
     return summary;
+};
+
+/**
+ * Subscribe to transactions summary in real-time
+ * @param {Date} startDate - Start date filter
+ * @param {function} callback - Callback with summary data
+ * @returns {function} Unsubscribe function
+ */
+export const subscribeToTransactionsSummary = (startDate, callback) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+        callback({ income: 0, expenses: 0, balance: 0, count: 0 });
+        return () => {};
+    }
+
+    const transactionsRef = collection(db, 'users', uid, 'transactions');
+    const q = query(
+        transactionsRef,
+        where('date', '>=', Timestamp.fromDate(startDate)),
+        orderBy('date', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const summary = {
+            income: 0,
+            expenses: 0,
+            balance: 0,
+            count: snapshot.docs.length
+        };
+
+        snapshot.docs.forEach(doc => {
+            const t = doc.data();
+            if (t.type === 'income') {
+                summary.income += t.amount || 0;
+            } else if (t.type === 'expense') {
+                summary.expenses += t.amount || 0;
+            }
+        });
+
+        summary.balance = summary.income - summary.expenses;
+        callback(summary);
+    }, (error) => {
+        console.error('Erro ao ouvir transações:', error);
+        callback({ income: 0, expenses: 0, balance: 0, count: 0 });
+    });
+
+    return unsubscribe;
 };
 
 // ============================================

@@ -189,7 +189,7 @@
     <!-- JavaScript -->
     <script type="module">
         import { requireAuth } from '/js/firebase-config.js';
-        import { getUserProfile, getTransactionsSummary, getGoals, checkAndResetGoals } from '/js/db.js';
+        import { getUserProfile, subscribeToTransactionsSummary, getGoals, checkAndResetGoals } from '/js/db.js';
         import { formatCurrency, formatDate, getStartOfMonth, getLocal, saveLocal } from '/js/utils.js';
 
         // Require authentication
@@ -228,12 +228,20 @@
             }
         };
 
-        // Load financial summary
-        const loadSummary = async () => {
+        // Subscribe to financial summary (real-time updates)
+        let unsubscribeSummary = null;
+        const loadSummary = () => {
             const startOfMonth = getStartOfMonth();
-            const summary = await getTransactionsSummary(startOfMonth, new Date());
 
-            updateBalanceDisplay(summary);
+            // Unsubscribe from previous listener if exists
+            if (unsubscribeSummary) {
+                unsubscribeSummary();
+            }
+
+            // Subscribe to real-time updates
+            unsubscribeSummary = subscribeToTransactionsSummary(startOfMonth, (summary) => {
+                updateBalanceDisplay(summary);
+            });
         };
 
         // Update balance display
@@ -407,9 +415,12 @@
         // Initialize
         const init = async () => {
             try {
+                // Start real-time summary listener (sync function)
+                loadSummary();
+
+                // Load profile and goals
                 await Promise.all([
                     loadProfile().catch(e => console.error('Erro ao carregar perfil:', e)),
-                    loadSummary().catch(e => console.error('Erro ao carregar resumo:', e)),
                     loadGoals().catch(e => console.error('Erro ao carregar metas:', e))
                 ]);
 
@@ -421,6 +432,13 @@
                 console.error('Erro na inicialização:', error);
             }
         };
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribeSummary) {
+                unsubscribeSummary();
+            }
+        });
 
         init().catch(error => {
             console.error('Erro fatal na inicialização:', error);
