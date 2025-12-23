@@ -239,12 +239,15 @@
             particular: { icon: 'person', label: 'Particular', bgClass: 'bg-blue-500 text-white' },
             outros_receita: { icon: 'more_horiz', label: 'Outros', bgClass: 'bg-purple-500 text-white' },
             // Expense categories
-            combustivel: { icon: 'local_gas_station', label: 'Combustível', bgClass: 'bg-orange-500 text-white' },
-            manutencao: { icon: 'build', label: 'Manutenção', bgClass: 'bg-slate-600 text-white' },
-            alimentacao: { icon: 'restaurant', label: 'Alimentação', bgClass: 'bg-amber-500 text-white' },
+            combustivel: { icon: 'local_gas_station', label: 'Combustivel', bgClass: 'bg-orange-500 text-white' },
+            manutencao: { icon: 'build', label: 'Manutencao', bgClass: 'bg-slate-600 text-white' },
+            alimentacao: { icon: 'restaurant', label: 'Alimentacao', bgClass: 'bg-amber-500 text-white' },
             lavagem: { icon: 'local_car_wash', label: 'Lavagem', bgClass: 'bg-cyan-500 text-white' },
             estacionamento: { icon: 'local_parking', label: 'Estacionamento', bgClass: 'bg-indigo-500 text-white' },
             outros_despesa: { icon: 'more_horiz', label: 'Outros', bgClass: 'bg-rose-500 text-white' },
+            // Activity categories
+            corridas: { icon: 'directions_car', label: 'Corridas', bgClass: 'bg-blue-500 text-white' },
+            km: { icon: 'speed', label: 'Quilometragem', bgClass: 'bg-purple-500 text-white' },
         };
 
         // DOM Elements
@@ -390,9 +393,34 @@
                 grouped[dateKey].forEach(t => {
                     const cat = categoryConfig[t.category] || { icon: 'receipt', label: t.category, bgClass: 'bg-slate-500 text-white' };
                     const isIncome = t.type === 'income';
-                    const amountClass = isIncome ? 'text-primary' : 'text-red-500';
-                    const amountPrefix = isIncome ? '+' : '-';
-                    const iconBgClass = isIncome ? `${cat.bgClass}` : 'bg-red-50 dark:bg-red-500/10 text-red-500';
+                    const isCorridas = t.type === 'corridas';
+                    const isKm = t.type === 'km';
+                    const isActivity = isCorridas || isKm;
+
+                    // Determine styling based on type
+                    let amountClass, amountPrefix, iconBgClass, displayValue;
+                    if (isIncome) {
+                        amountClass = 'text-primary';
+                        amountPrefix = '+';
+                        iconBgClass = cat.bgClass;
+                        displayValue = formatCurrency(t.amount);
+                    } else if (isCorridas) {
+                        amountClass = 'text-blue-500';
+                        amountPrefix = '';
+                        iconBgClass = 'bg-blue-50 dark:bg-blue-500/10 text-blue-500';
+                        displayValue = `${t.amount} corrida${t.amount !== 1 ? 's' : ''}`;
+                    } else if (isKm) {
+                        amountClass = 'text-purple-500';
+                        amountPrefix = '';
+                        iconBgClass = 'bg-purple-50 dark:bg-purple-500/10 text-purple-500';
+                        displayValue = `${t.amount} km`;
+                    } else {
+                        amountClass = 'text-red-500';
+                        amountPrefix = '-';
+                        iconBgClass = 'bg-red-50 dark:bg-red-500/10 text-red-500';
+                        displayValue = formatCurrency(t.amount);
+                    }
+
                     const time = t.date.toDate ? t.date.toDate() : new Date(t.date);
                     const timeStr = time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
@@ -409,7 +437,7 @@
                             </div>
                         </div>
                         <div class="shrink-0 text-right flex items-center gap-2">
-                            <p class="${amountClass} text-base font-bold">${amountPrefix} ${formatCurrency(t.amount)}</p>
+                            <p class="${amountClass} text-base font-bold">${amountPrefix}${amountPrefix ? ' ' : ''}${displayValue}</p>
                             <button class="delete-btn opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-500/20 transition-all" data-id="${t.id}">
                                 <span class="material-symbols-outlined text-red-500 text-[20px]">delete</span>
                             </button>

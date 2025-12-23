@@ -128,10 +128,8 @@ export const addTransaction = async (transaction) => {
         transactionData
     );
 
-    // Update goals if it's income
-    if (transaction.type === 'income') {
-        await updateGoalsProgress(transaction.amount);
-    }
+    // Goals are updated separately by the calling page
+    // to support different goal categories (receita, corridas, km)
 
     return docRef.id;
 };
@@ -450,12 +448,22 @@ export const deleteGoal = async (goalId) => {
 /**
  * Update goals progress with new amount
  * @param {number} amount - Amount to add to goals
+ * @param {string} category - Category to filter goals (receita, economia, corridas, km) - optional
  */
-export const updateGoalsProgress = async (amount) => {
+export const updateGoalsProgress = async (amount, category = null) => {
     const goals = await getGoals();
-    const now = new Date();
 
     for (const goal of goals) {
+        // If category is specified, only update goals of that category
+        if (category && goal.category !== category) {
+            continue;
+        }
+
+        // If no category specified, only update receita goals (backward compatibility)
+        if (!category && goal.category !== 'receita') {
+            continue;
+        }
+
         // Check if goal needs reset first
         const shouldReset = checkGoalNeedsReset(goal);
 

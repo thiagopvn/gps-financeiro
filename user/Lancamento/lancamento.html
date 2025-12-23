@@ -42,12 +42,16 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        /* Hide category when not selected */
         .category-item:not(.selected) .check-icon {
             display: none;
         }
         .category-item.selected {
             border-color: var(--tw-border-opacity, 1) !important;
+        }
+        .type-tab.active {
+            background-color: var(--active-bg, #13ec5b);
+            color: var(--active-text, #102216);
+            font-weight: 700;
         }
     </style>
 </head>
@@ -66,30 +70,39 @@
 
         <!-- Main Content Scrollable Area -->
         <main class="flex-1 overflow-y-auto no-scrollbar pb-40 px-4">
-            <!-- Type Toggle -->
+            <!-- Type Toggle - 4 Options -->
             <div class="py-4">
-                <div class="flex h-12 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-[#1c3628] p-1">
-                    <label id="toggleReceita" class="relative flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 transition-all duration-200 bg-primary text-black shadow-sm font-semibold">
-                        <span class="z-10 text-sm">Receita</span>
-                        <input checked class="invisible w-0 absolute" name="transaction-type" type="radio" value="income"/>
-                    </label>
-                    <label id="toggleDespesa" class="relative flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 transition-all duration-200 text-slate-500 dark:text-slate-400 font-semibold">
-                        <span class="z-10 text-sm">Despesa</span>
-                        <input class="invisible w-0 absolute" name="transaction-type" type="radio" value="expense"/>
-                    </label>
+                <div class="grid grid-cols-4 gap-1 h-12 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-[#1c3628] p-1">
+                    <button id="tabReceita" class="type-tab active h-full flex items-center justify-center rounded-lg text-xs font-semibold transition-all" style="--active-bg: #13ec5b; --active-text: #102216;">
+                        <span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
+                        Receita
+                    </button>
+                    <button id="tabDespesa" class="type-tab h-full flex items-center justify-center rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 transition-all" style="--active-bg: #ef4444; --active-text: white;">
+                        <span class="material-symbols-outlined text-[16px] mr-1">trending_down</span>
+                        Despesa
+                    </button>
+                    <button id="tabCorridas" class="type-tab h-full flex items-center justify-center rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 transition-all" style="--active-bg: #3b82f6; --active-text: white;">
+                        <span class="material-symbols-outlined text-[16px] mr-1">directions_car</span>
+                        Corridas
+                    </button>
+                    <button id="tabKm" class="type-tab h-full flex items-center justify-center rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 transition-all" style="--active-bg: #a855f7; --active-text: white;">
+                        <span class="material-symbols-outlined text-[16px] mr-1">speed</span>
+                        KM
+                    </button>
                 </div>
             </div>
 
-            <!-- Amount Input -->
-            <div class="flex flex-col items-center justify-center py-8">
+            <!-- Amount/Value Input -->
+            <div class="flex flex-col items-center justify-center py-6">
                 <div id="amountLabel" class="text-slate-400 dark:text-slate-500 text-sm font-medium mb-2">Valor da receita</div>
+                <div id="amountPrefix" class="text-slate-400 text-lg font-medium">R$</div>
                 <div class="flex items-baseline relative">
                     <input
                         type="text"
                         id="amountInput"
                         inputmode="numeric"
                         class="text-4xl font-bold text-slate-900 dark:text-white tracking-tighter bg-transparent border-none text-center focus:ring-0 focus:outline-none w-full max-w-[250px] p-0"
-                        value="R$ 0,00"
+                        value="0,00"
                         readonly
                     />
                 </div>
@@ -104,7 +117,7 @@
                     <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="7">7</button>
                     <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="8">8</button>
                     <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="9">9</button>
-                    <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="00">00</button>
+                    <button id="decimalKey" class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value=",">.</button>
                     <button class="num-key h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" data-value="0">0</button>
                     <button id="backspaceKey" class="h-14 rounded-xl bg-white dark:bg-surface-dark text-xl font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex items-center justify-center">
                         <span class="material-symbols-outlined">backspace</span>
@@ -148,7 +161,7 @@
                         </div>
                         <div class="flex flex-col">
                             <span class="text-sm font-bold text-slate-900 dark:text-white">Indrive</span>
-                            <span class="text-xs text-slate-500 dark:text-slate-400">Negociação</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Negociacao</span>
                         </div>
                         <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
                     </label>
@@ -183,39 +196,39 @@
             <div id="expenseCategories" class="mb-6 hidden">
                 <h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight mb-4">Categoria</h3>
                 <div class="grid grid-cols-2 gap-3">
-                    <!-- Combustível -->
+                    <!-- Combustivel -->
                     <label class="category-item expense-cat selected group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-red-500 shadow-sm transition-all" data-category="combustivel">
                         <input checked class="peer sr-only" name="expense-category" type="radio" value="combustivel"/>
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white">
                             <span class="material-symbols-outlined">local_gas_station</span>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-sm font-bold text-slate-900 dark:text-white">Combustível</span>
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Combustivel</span>
                             <span class="text-xs text-slate-500 dark:text-slate-400">Gasolina/Etanol</span>
                         </div>
                         <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
                     </label>
-                    <!-- Manutenção -->
+                    <!-- Manutencao -->
                     <label class="category-item expense-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="manutencao">
                         <input class="peer sr-only" name="expense-category" type="radio" value="manutencao"/>
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-600 text-white">
                             <span class="material-symbols-outlined">build</span>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-sm font-bold text-slate-900 dark:text-white">Manutenção</span>
-                            <span class="text-xs text-slate-500 dark:text-slate-400">Reparos/Revisão</span>
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Manutencao</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Reparos/Revisao</span>
                         </div>
                         <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
                     </label>
-                    <!-- Alimentação -->
+                    <!-- Alimentacao -->
                     <label class="category-item expense-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="alimentacao">
                         <input class="peer sr-only" name="expense-category" type="radio" value="alimentacao"/>
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
                             <span class="material-symbols-outlined">restaurant</span>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-sm font-bold text-slate-900 dark:text-white">Alimentação</span>
-                            <span class="text-xs text-slate-500 dark:text-slate-400">Refeições</span>
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Alimentacao</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Refeicoes</span>
                         </div>
                         <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
                     </label>
@@ -227,7 +240,7 @@
                         </div>
                         <div class="flex flex-col">
                             <span class="text-sm font-bold text-slate-900 dark:text-white">Lavagem</span>
-                            <span class="text-xs text-slate-500 dark:text-slate-400">Limpeza veículo</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Limpeza veiculo</span>
                         </div>
                         <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
                     </label>
@@ -239,7 +252,7 @@
                         </div>
                         <div class="flex flex-col">
                             <span class="text-sm font-bold text-slate-900 dark:text-white">Estacionamento</span>
-                            <span class="text-xs text-slate-500 dark:text-slate-400">Pedágios/Parking</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Pedagios/Parking</span>
                         </div>
                         <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
                     </label>
@@ -255,6 +268,19 @@
                         </div>
                         <span class="check-icon material-symbols-outlined absolute right-3 text-red-500" style="font-size: 20px;">check_circle</span>
                     </label>
+                </div>
+            </div>
+
+            <!-- Info Card for Corridas/KM -->
+            <div id="infoCard" class="mb-6 hidden">
+                <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-blue-500 text-xl">info</span>
+                        <div>
+                            <p id="infoTitle" class="text-sm font-bold text-slate-900 dark:text-white mb-1">Registrar Corridas</p>
+                            <p id="infoText" class="text-xs text-slate-500 dark:text-slate-400">Este lancamento sera contabilizado nas suas metas de corridas.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -276,7 +302,7 @@
                         <span class="material-symbols-outlined">description</span>
                     </div>
                     <div class="flex-1">
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Descrição (Opcional)</label>
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Descricao (Opcional)</label>
                         <input id="descriptionInput" class="w-full bg-transparent p-0 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-0 border-none h-6" placeholder="Adicionar nota..." type="text"/>
                     </div>
                 </div>
@@ -284,10 +310,10 @@
         </main>
 
         <!-- Fixed Bottom Action -->
-        <div class="absolute bottom-0 left-0 right-0 p-4 pb-8 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark dark:to-transparent pt-12">
+        <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-8 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark dark:to-transparent pt-12 z-20">
             <button id="saveBtn" class="w-full rounded-xl bg-primary py-4 text-center text-base font-bold text-slate-900 shadow-lg shadow-primary/20 hover:bg-[#34f574] transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined">check</span>
-                Salvar Lançamento
+                <span id="saveBtnText">Salvar Lancamento</span>
             </button>
         </div>
     </div>
@@ -304,95 +330,192 @@
         // Wait for auth - must complete before proceeding
         const user = await requireAuth();
         if (!user) {
-            console.error('Usuário não autenticado');
+            console.error('Usuario nao autenticado');
             throw new Error('Not authenticated');
         }
 
+        console.log('Usuario autenticado:', user.uid);
+
         // State
-        let transactionType = 'income';
-        let amountCents = 0;
+        let currentType = 'income'; // income, expense, corridas, km
+        let rawValue = '0';
+        let isCurrency = true;
 
         // DOM Elements
-        const toggleReceita = document.getElementById('toggleReceita');
-        const toggleDespesa = document.getElementById('toggleDespesa');
+        const tabReceita = document.getElementById('tabReceita');
+        const tabDespesa = document.getElementById('tabDespesa');
+        const tabCorridas = document.getElementById('tabCorridas');
+        const tabKm = document.getElementById('tabKm');
         const amountInput = document.getElementById('amountInput');
         const amountLabel = document.getElementById('amountLabel');
+        const amountPrefix = document.getElementById('amountPrefix');
         const dateInput = document.getElementById('dateInput');
         const descriptionInput = document.getElementById('descriptionInput');
         const saveBtn = document.getElementById('saveBtn');
+        const saveBtnText = document.getElementById('saveBtnText');
         const backBtn = document.getElementById('backBtn');
         const closeBtn = document.getElementById('closeBtn');
         const incomeCategories = document.getElementById('incomeCategories');
         const expenseCategories = document.getElementById('expenseCategories');
+        const infoCard = document.getElementById('infoCard');
+        const infoTitle = document.getElementById('infoTitle');
+        const infoText = document.getElementById('infoText');
         const numKeys = document.querySelectorAll('.num-key');
         const backspaceKey = document.getElementById('backspaceKey');
+        const decimalKey = document.getElementById('decimalKey');
+        const allTabs = [tabReceita, tabDespesa, tabCorridas, tabKm];
 
         // Set today's date as default
         const today = new Date().toISOString().split('T')[0];
         dateInput.value = today;
 
+        // Format display based on type
+        function formatDisplayValue() {
+            if (isCurrency) {
+                const numValue = parseFloat(rawValue) / 100;
+                return numValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else {
+                return parseInt(rawValue).toLocaleString('pt-BR');
+            }
+        }
+
         // Update amount display
         function updateAmountDisplay() {
-            const formatted = formatCurrency(amountCents / 100);
-            amountInput.value = formatted;
+            amountInput.value = formatDisplayValue();
+        }
+
+        // Reset value
+        function resetValue() {
+            rawValue = '0';
+            updateAmountDisplay();
         }
 
         // Handle numeric keypad
         numKeys.forEach(key => {
             key.addEventListener('click', () => {
                 const value = key.dataset.value;
-                const newAmount = amountCents.toString() + value;
-                // Limit to 999999999 (R$ 9.999.999,99)
-                if (parseInt(newAmount) <= 999999999) {
-                    amountCents = parseInt(newAmount);
-                    updateAmountDisplay();
+
+                // Skip decimal for non-currency
+                if (value === ',' && !isCurrency) return;
+
+                // For currency, treat as cents
+                if (isCurrency) {
+                    if (rawValue === '0') {
+                        rawValue = value;
+                    } else if (rawValue.length < 12) {
+                        rawValue = rawValue + value;
+                    }
+                } else {
+                    // For integer values (corridas, km)
+                    if (rawValue === '0') {
+                        rawValue = value;
+                    } else if (rawValue.length < 6) {
+                        rawValue = rawValue + value;
+                    }
                 }
+                updateAmountDisplay();
             });
         });
 
         // Handle backspace
         backspaceKey.addEventListener('click', () => {
-            amountCents = Math.floor(amountCents / 10);
+            if (rawValue.length > 1) {
+                rawValue = rawValue.slice(0, -1);
+            } else {
+                rawValue = '0';
+            }
             updateAmountDisplay();
         });
 
-        // Toggle transaction type
-        function setTransactionType(type) {
-            transactionType = type;
+        // Switch tab
+        function switchTab(type) {
+            currentType = type;
+            resetValue();
 
-            if (type === 'income') {
-                toggleReceita.classList.add('bg-primary', 'text-black', 'shadow-sm');
-                toggleReceita.classList.remove('text-slate-500', 'dark:text-slate-400');
-                toggleDespesa.classList.remove('bg-red-500', 'text-white', 'shadow-sm');
-                toggleDespesa.classList.add('text-slate-500', 'dark:text-slate-400');
-                amountLabel.textContent = 'Valor da receita';
-                incomeCategories.classList.remove('hidden');
-                expenseCategories.classList.add('hidden');
-            } else {
-                toggleDespesa.classList.add('bg-red-500', 'text-white', 'shadow-sm');
-                toggleDespesa.classList.remove('text-slate-500', 'dark:text-slate-400');
-                toggleReceita.classList.remove('bg-primary', 'text-black', 'shadow-sm');
-                toggleReceita.classList.add('text-slate-500', 'dark:text-slate-400');
-                amountLabel.textContent = 'Valor da despesa';
-                incomeCategories.classList.add('hidden');
-                expenseCategories.classList.remove('hidden');
+            // Update tab styles
+            allTabs.forEach(tab => {
+                tab.classList.remove('active');
+                tab.classList.add('text-slate-500', 'dark:text-slate-400');
+            });
+
+            // Hide all sections
+            incomeCategories.classList.add('hidden');
+            expenseCategories.classList.add('hidden');
+            infoCard.classList.add('hidden');
+            decimalKey.classList.remove('hidden');
+
+            // Configure based on type
+            switch (type) {
+                case 'income':
+                    tabReceita.classList.add('active');
+                    tabReceita.classList.remove('text-slate-500', 'dark:text-slate-400');
+                    amountLabel.textContent = 'Valor da receita';
+                    amountPrefix.textContent = 'R$';
+                    amountPrefix.classList.remove('hidden');
+                    incomeCategories.classList.remove('hidden');
+                    saveBtnText.textContent = 'Salvar Receita';
+                    saveBtn.className = 'w-full rounded-xl bg-primary py-4 text-center text-base font-bold text-slate-900 shadow-lg shadow-primary/20 hover:bg-[#34f574] transition-colors active:scale-[0.98] flex items-center justify-center gap-2';
+                    isCurrency = true;
+                    break;
+                case 'expense':
+                    tabDespesa.classList.add('active');
+                    tabDespesa.classList.remove('text-slate-500', 'dark:text-slate-400');
+                    amountLabel.textContent = 'Valor da despesa';
+                    amountPrefix.textContent = 'R$';
+                    amountPrefix.classList.remove('hidden');
+                    expenseCategories.classList.remove('hidden');
+                    saveBtnText.textContent = 'Salvar Despesa';
+                    saveBtn.className = 'w-full rounded-xl bg-red-500 py-4 text-center text-base font-bold text-white shadow-lg shadow-red-500/20 hover:bg-red-600 transition-colors active:scale-[0.98] flex items-center justify-center gap-2';
+                    isCurrency = true;
+                    break;
+                case 'corridas':
+                    tabCorridas.classList.add('active');
+                    tabCorridas.classList.remove('text-slate-500', 'dark:text-slate-400');
+                    amountLabel.textContent = 'Quantidade de corridas';
+                    amountPrefix.textContent = 'Corridas';
+                    amountPrefix.classList.remove('hidden');
+                    infoCard.classList.remove('hidden');
+                    infoTitle.textContent = 'Registrar Corridas';
+                    infoText.textContent = 'Este lancamento sera contabilizado nas suas metas de corridas.';
+                    saveBtnText.textContent = 'Salvar Corridas';
+                    saveBtn.className = 'w-full rounded-xl bg-blue-500 py-4 text-center text-base font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-colors active:scale-[0.98] flex items-center justify-center gap-2';
+                    isCurrency = false;
+                    decimalKey.classList.add('hidden');
+                    break;
+                case 'km':
+                    tabKm.classList.add('active');
+                    tabKm.classList.remove('text-slate-500', 'dark:text-slate-400');
+                    amountLabel.textContent = 'Quilometros rodados';
+                    amountPrefix.textContent = 'KM';
+                    amountPrefix.classList.remove('hidden');
+                    infoCard.classList.remove('hidden');
+                    infoTitle.textContent = 'Registrar Quilometragem';
+                    infoText.textContent = 'Este lancamento sera contabilizado nas suas metas de quilometragem.';
+                    saveBtnText.textContent = 'Salvar Quilometragem';
+                    saveBtn.className = 'w-full rounded-xl bg-purple-500 py-4 text-center text-base font-bold text-white shadow-lg shadow-purple-500/20 hover:bg-purple-600 transition-colors active:scale-[0.98] flex items-center justify-center gap-2';
+                    isCurrency = false;
+                    decimalKey.classList.add('hidden');
+                    break;
             }
+
+            updateAmountDisplay();
         }
 
-        toggleReceita.addEventListener('click', () => setTransactionType('income'));
-        toggleDespesa.addEventListener('click', () => setTransactionType('expense'));
+        // Tab click events
+        tabReceita.addEventListener('click', () => switchTab('income'));
+        tabDespesa.addEventListener('click', () => switchTab('expense'));
+        tabCorridas.addEventListener('click', () => switchTab('corridas'));
+        tabKm.addEventListener('click', () => switchTab('km'));
 
         // Category selection
         function setupCategorySelection(categories, borderColor) {
             categories.forEach(cat => {
                 cat.addEventListener('click', () => {
-                    // Remove selection from all in same group
                     categories.forEach(c => {
                         c.classList.remove('selected');
                         c.classList.remove('border-primary', 'border-red-500');
                         c.classList.add('border-transparent');
                     });
-                    // Add selection to clicked
                     cat.classList.add('selected');
                     cat.classList.remove('border-transparent');
                     cat.classList.add(borderColor);
@@ -407,72 +530,136 @@
 
         // Get selected category
         function getSelectedCategory() {
-            const selector = transactionType === 'income' ? 'income-category' : 'expense-category';
+            if (currentType === 'corridas') return 'corridas';
+            if (currentType === 'km') return 'km';
+
+            const selector = currentType === 'income' ? 'income-category' : 'expense-category';
             const checked = document.querySelector(`input[name="${selector}"]:checked`);
             return checked ? checked.value : null;
         }
 
-        // Save transaction
-        saveBtn.addEventListener('click', async () => {
-            // Validate amount
-            if (amountCents === 0) {
-                showToast('Digite um valor', 'error');
+        // Get numeric value
+        function getNumericValue() {
+            if (isCurrency) {
+                return parseFloat(rawValue) / 100;
+            }
+            return parseInt(rawValue) || 0;
+        }
+
+        // Save handler
+        saveBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            console.log('Botao salvar clicado');
+
+            const value = getNumericValue();
+            console.log('Valor:', value, 'Tipo:', currentType);
+
+            // Validate
+            if (value <= 0) {
+                showToast('Digite um valor valido', 'error');
                 return;
             }
 
             const category = getSelectedCategory();
+            console.log('Categoria:', category);
+
             if (!category) {
                 showToast('Selecione uma categoria', 'error');
                 return;
             }
 
-            // Disable button while saving
+            // Disable button
             saveBtn.disabled = true;
-            saveBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Salvando...';
+            const originalText = saveBtnText.textContent;
+            saveBtnText.textContent = 'Salvando...';
 
             try {
-                const amount = amountCents / 100;
                 const date = new Date(dateInput.value + 'T12:00:00');
                 const description = descriptionInput.value.trim();
 
-                // Save transaction
-                await addTransaction({
+                // Map type to transaction type
+                let transactionType;
+                let goalCategory = null;
+
+                switch (currentType) {
+                    case 'income':
+                        transactionType = 'income';
+                        goalCategory = 'receita';
+                        break;
+                    case 'expense':
+                        transactionType = 'expense';
+                        break;
+                    case 'corridas':
+                        transactionType = 'corridas';
+                        goalCategory = 'corridas';
+                        break;
+                    case 'km':
+                        transactionType = 'km';
+                        goalCategory = 'km';
+                        break;
+                }
+
+                console.log('Salvando transacao:', {
                     type: transactionType,
-                    amount: amount,
+                    amount: value,
+                    category: category,
+                    date: date,
+                    description: description
+                });
+
+                // Save transaction to Firebase
+                const transactionId = await addTransaction({
+                    type: transactionType,
+                    amount: value,
                     category: category,
                     date: date,
                     description: description || null
                 });
 
-                // Update goals progress if it's income
-                if (transactionType === 'income') {
-                    await updateGoalsProgress(amount);
+                console.log('Transacao salva com ID:', transactionId);
+
+                // Update goals progress for applicable types
+                if (goalCategory) {
+                    console.log('Atualizando metas da categoria:', goalCategory);
+                    await updateGoalsProgress(value, goalCategory);
                 }
 
-                showToast(transactionType === 'income' ? 'Receita salva!' : 'Despesa salva!', 'success');
+                // Success message based on type
+                let successMessage;
+                switch (currentType) {
+                    case 'income': successMessage = 'Receita salva com sucesso!'; break;
+                    case 'expense': successMessage = 'Despesa salva com sucesso!'; break;
+                    case 'corridas': successMessage = `${value} corrida(s) registrada(s)!`; break;
+                    case 'km': successMessage = `${value} km registrado(s)!`; break;
+                }
+
+                showToast(successMessage, 'success');
 
                 // Reset form
-                amountCents = 0;
-                updateAmountDisplay();
+                resetValue();
                 descriptionInput.value = '';
                 dateInput.value = today;
 
-                // Go back after short delay
+                // Go back after delay
                 setTimeout(() => {
                     window.history.back();
-                }, 1000);
+                }, 1500);
 
             } catch (error) {
-                console.error('Error saving transaction:', error);
-                showToast('Erro ao salvar. Tente novamente.', 'error');
+                console.error('Erro ao salvar:', error);
+                showToast('Erro ao salvar. Verifique sua conexao e tente novamente.', 'error');
                 saveBtn.disabled = false;
-                saveBtn.innerHTML = '<span class="material-symbols-outlined">check</span> Salvar Lançamento';
+                saveBtnText.textContent = originalText;
             }
         });
 
         // Navigation
         backBtn.addEventListener('click', () => window.history.back());
         closeBtn.addEventListener('click', () => window.location.href = '/user/Dashboard/dash.html');
+
+        // Initialize
+        updateAmountDisplay();
+        console.log('Pagina de lancamento inicializada');
     </script>
 </body>
 </html>
