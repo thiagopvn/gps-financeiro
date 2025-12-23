@@ -65,7 +65,7 @@
         </header>
 
         <!-- Main Content Scrollable Area -->
-        <main class="flex-1 overflow-y-auto no-scrollbar pb-32 px-4">
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-40 px-4">
             <!-- Type Toggle -->
             <div class="py-4">
                 <div class="flex h-12 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-[#1c3628] p-1">
@@ -301,8 +301,12 @@
         import { addTransaction, updateGoalsProgress } from '/js/db.js';
         import { showToast, formatCurrency, parseCurrency } from '/js/utils.js';
 
-        // Wait for auth
-        requireAuth();
+        // Wait for auth - must complete before proceeding
+        const user = await requireAuth();
+        if (!user) {
+            console.error('Usuário não autenticado');
+            throw new Error('Not authenticated');
+        }
 
         // State
         let transactionType = 'income';

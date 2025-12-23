@@ -99,7 +99,7 @@
     </header>
 
     <!-- Main Scrollable Area -->
-    <main class="flex-1 overflow-y-auto no-scrollbar pb-24 relative">
+    <main class="flex-1 overflow-y-auto no-scrollbar pb-32 relative">
         <!-- Summary Stats Card -->
         <div class="px-4 py-2">
             <div class="relative overflow-hidden rounded-xl bg-surface-dark p-5 shadow-lg">
@@ -214,8 +214,12 @@
         import { getTransactions, deleteTransaction, getTransactionsSummary } from '/js/db.js';
         import { showToast, formatCurrency, formatDate, formatRelativeDate } from '/js/utils.js';
 
-        // Wait for auth
-        requireAuth();
+        // Wait for auth - must complete before proceeding
+        const user = await requireAuth();
+        if (!user) {
+            console.error('Usuário não autenticado');
+            throw new Error('Not authenticated');
+        }
 
         // State
         let allTransactions = [];
@@ -267,16 +271,21 @@
         // Load transactions
         async function loadTransactions() {
             try {
+                loadingState.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+
                 const filters = {};
                 if (startDate) filters.startDate = new Date(startDate);
                 if (endDate) filters.endDate = new Date(endDate + 'T23:59:59');
 
                 allTransactions = await getTransactions(filters);
+                console.log('Loaded transactions:', allTransactions.length);
                 applyFilters();
-                updateSummary();
             } catch (error) {
                 console.error('Error loading transactions:', error);
                 showToast('Erro ao carregar transações', 'error');
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
             } finally {
                 loadingState.classList.add('hidden');
             }
@@ -284,11 +293,15 @@
 
         // Apply filters
         function applyFilters() {
+            console.log('Applying filter:', currentFilter, 'Search:', searchQuery);
+
             filteredTransactions = allTransactions.filter(t => {
                 // Type filter
-                if (currentFilter !== 'all' && t.type !== currentFilter) return false;
+                if (currentFilter !== 'all') {
+                    if (t.type !== currentFilter) return false;
+                }
                 // Search filter
-                if (searchQuery) {
+                if (searchQuery && searchQuery.length > 0) {
                     const query = searchQuery.toLowerCase();
                     const cat = categoryConfig[t.category];
                     const catLabel = cat ? cat.label.toLowerCase() : '';
@@ -297,7 +310,10 @@
                 }
                 return true;
             });
+
+            console.log('Filtered transactions:', filteredTransactions.length);
             renderTransactions();
+            updateSummary();
         }
 
         // Update summary

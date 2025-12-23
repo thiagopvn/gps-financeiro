@@ -45,7 +45,7 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white overflow-hidden h-screen flex flex-col">
     <!-- Main Content Wrapper -->
-    <div class="flex-1 overflow-y-auto no-scrollbar pb-24">
+    <div class="flex-1 overflow-y-auto no-scrollbar pb-32">
         <!-- Header -->
         <div class="sticky top-0 z-10 flex items-center bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md p-4 pb-2 justify-between border-b border-black/5 dark:border-white/5">
             <a href="/user/Dashboard/dash.html" class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-start cursor-pointer transition-colors hover:text-primary">
@@ -151,22 +151,28 @@
     </div>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-surface-light dark:bg-background-dark border-t border-slate-200 dark:border-white/5 pb-safe">
-        <div class="flex justify-around items-center h-16 max-w-lg mx-auto px-4">
-            <a href="/user/Dashboard/dash.html" class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 w-16 transition-colors">
-                <span class="material-symbols-outlined">grid_view</span>
-                <span class="text-[10px] font-medium">Painel</span>
+    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-surface-light dark:bg-background-dark border-t border-slate-200 dark:border-white/5 px-6 pt-3 pb-6">
+        <div class="flex justify-between items-end max-w-lg mx-auto">
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/Dashboard/dash.html">
+                <span class="material-symbols-outlined text-[26px]">home</span>
+                <span class="text-[10px] font-medium">Início</span>
             </a>
-            <a href="/user/transacao/transacao.html" class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 w-16 transition-colors">
-                <span class="material-symbols-outlined">history</span>
-                <span class="text-[10px] font-medium">Histórico</span>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/transacao/transacao.html">
+                <span class="material-symbols-outlined text-[26px]">receipt_long</span>
+                <span class="text-[10px] font-medium">Extrato</span>
             </a>
-            <a href="/user/sessao/sessao.html" class="flex flex-col items-center gap-1 text-primary w-16">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">timer</span>
-                <span class="text-[10px] font-bold">Sessão</span>
+            <!-- Central FAB -->
+            <div class="relative -top-3">
+                <a href="/user/Lancamento/lancamento.html" class="flex items-center justify-center w-14 h-14 rounded-full bg-primary shadow-lg shadow-primary/30 text-background-dark hover:scale-105 active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[32px]">add</span>
+                </a>
+            </div>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/metas/meta.html">
+                <span class="material-symbols-outlined text-[26px]">flag</span>
+                <span class="text-[10px] font-medium">Metas</span>
             </a>
-            <a href="/user/configuracoes/config.html" class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 w-16 transition-colors">
-                <span class="material-symbols-outlined">settings</span>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors" href="/user/configuracoes/config.html">
+                <span class="material-symbols-outlined text-[26px]">settings</span>
                 <span class="text-[10px] font-medium">Ajustes</span>
             </a>
         </div>
@@ -340,86 +346,114 @@
 
         // Load history
         const loadHistory = async () => {
-            const sessions = await getSessions({ limit: 5 });
+            try {
+                const sessions = await getSessions({ limit: 5 });
 
-            if (sessions.length === 0) {
-                historyContainer.innerHTML = `
-                    <div class="text-center py-8 text-slate-400">
-                        <span class="material-symbols-outlined text-3xl mb-2">work_history</span>
-                        <p class="text-sm">Nenhum turno registrado ainda</p>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            sessions.forEach(session => {
-                if (session.status === 'completed') {
-                    const dateStr = formatRelativeDate(session.startTime);
-                    const shortDate = session.startTime.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
-
-                    html += `
-                        <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-surface-dark border border-slate-200 dark:border-white/5 shadow-sm">
-                            <div class="flex items-center gap-3">
-                                <div class="size-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400">
-                                    <span class="material-symbols-outlined text-xl">calendar_today</span>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="text-slate-900 dark:text-white font-bold text-sm">${dateStr}</span>
-                                    <span class="text-slate-500 dark:text-slate-400 text-xs">${shortDate}</span>
-                                </div>
-                            </div>
-                            <div class="flex flex-col items-end gap-0.5">
-                                <span class="text-primary font-bold text-sm">+ ${formatCurrency(session.earnings)}</span>
-                                <div class="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-xs">
-                                    <span class="material-symbols-outlined text-[14px]">schedule</span>
-                                    <span>${formatDurationHuman(session.duration)}</span>
-                                </div>
-                            </div>
+                if (!sessions || sessions.length === 0) {
+                    historyContainer.innerHTML = `
+                        <div class="text-center py-8 text-slate-400">
+                            <span class="material-symbols-outlined text-3xl mb-2">work_history</span>
+                            <p class="text-sm">Nenhum turno registrado ainda</p>
                         </div>
                     `;
+                    return;
                 }
-            });
 
-            historyContainer.innerHTML = html || `
-                <div class="text-center py-8 text-slate-400">
-                    <span class="material-symbols-outlined text-3xl mb-2">work_history</span>
-                    <p class="text-sm">Nenhum turno finalizado ainda</p>
-                </div>
-            `;
+                let html = '';
+                sessions.forEach(session => {
+                    if (session.status === 'completed') {
+                        const dateStr = formatRelativeDate(session.startTime);
+                        const shortDate = session.startTime.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
+
+                        html += `
+                            <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-surface-dark border border-slate-200 dark:border-white/5 shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                                        <span class="material-symbols-outlined text-xl">calendar_today</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-900 dark:text-white font-bold text-sm">${dateStr}</span>
+                                        <span class="text-slate-500 dark:text-slate-400 text-xs">${shortDate}</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end gap-0.5">
+                                    <span class="text-primary font-bold text-sm">+ ${formatCurrency(session.earnings || 0)}</span>
+                                    <div class="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-xs">
+                                        <span class="material-symbols-outlined text-[14px]">schedule</span>
+                                        <span>${formatDurationHuman(session.duration || 0)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                historyContainer.innerHTML = html || `
+                    <div class="text-center py-8 text-slate-400">
+                        <span class="material-symbols-outlined text-3xl mb-2">work_history</span>
+                        <p class="text-sm">Nenhum turno finalizado ainda</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Erro ao carregar histórico:', error);
+                historyContainer.innerHTML = `
+                    <div class="text-center py-8 text-slate-400">
+                        <span class="material-symbols-outlined text-3xl mb-2">error_outline</span>
+                        <p class="text-sm">Erro ao carregar histórico</p>
+                        <button onclick="location.reload()" class="mt-2 text-primary text-sm font-semibold">Tentar novamente</button>
+                    </div>
+                `;
+            }
         };
 
         // Check for active session (recovery)
         const checkActiveSession = async () => {
-            // First check Firebase
-            const activeSession = await getActiveSession();
+            try {
+                // First check Firebase
+                const activeSession = await getActiveSession();
 
-            if (activeSession) {
-                currentSessionId = activeSession.id;
-                startTime = activeSession.startTime.getTime();
-                elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+                if (activeSession) {
+                    currentSessionId = activeSession.id;
+                    startTime = activeSession.startTime.getTime();
+                    elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
 
-                setRunningState(true);
-                updateTimerDisplay();
-                startTimer();
-            } else {
-                // Check local storage for recovery
-                const savedSession = getLocal('activeSession');
-                if (savedSession && savedSession.sessionId) {
-                    // Session might have been lost, clear it
-                    saveLocal('activeSession', null);
+                    setRunningState(true);
+                    updateTimerDisplay();
+                    startTimer();
+                } else {
+                    // Check local storage for recovery
+                    const savedSession = getLocal('activeSession');
+                    if (savedSession && savedSession.sessionId) {
+                        // Session might have been lost, clear it
+                        saveLocal('activeSession', null);
+                    }
                 }
+            } catch (error) {
+                console.error('Erro ao verificar sessão ativa:', error);
+                // Continue anyway, user can start new session
             }
         };
 
         // Initialize
         const init = async () => {
-            await loadSettings();
-            await checkActiveSession();
+            try {
+                await loadSettings();
+            } catch (error) {
+                console.error('Erro ao carregar configurações:', error);
+            }
+
+            try {
+                await checkActiveSession();
+            } catch (error) {
+                console.error('Erro ao verificar sessão:', error);
+            }
+
             await loadHistory();
         };
 
-        init();
+        init().catch(error => {
+            console.error('Erro na inicialização:', error);
+        });
     </script>
 </body>
 </html>

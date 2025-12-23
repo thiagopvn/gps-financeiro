@@ -1,223 +1,435 @@
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Criar Nova Meta</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Nova Meta - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        background: "#000000",
-                        surface: "#1C1C1E",
-                        "surface-light": "#2C2C2E",
-                        primary: "#00E080", // User's requested vibrant green
-                        "primary-dark": "#00B366",
-                        danger: "#FF453A",
-                        warning: "#FFD60A", // iOS Yellow
-                        info: "#0A84FF", // iOS Blue
-                        purple: "#BF5AF2", // iOS Purple
-                        "text-main": "#FFFFFF",
-                        "text-muted": "#8E8E93",
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        "display": ["Manrope", "sans-serif"]
                     },
                     borderRadius: {
-                        'xl': '12px',
-                        '2xl': '16px',
-                        '3xl': '24px',
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
                     },
-                    boxShadow: {
-                        'glow': '0 0 20px rgba(0, 224, 128, 0.15)',
-                    }
                 },
             },
-        };
+        }
     </script>
-<style>
+    <style>
         body {
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }.no-scrollbar::-webkit-scrollbar {
+            min-height: max(884px, 100dvh);
+        }
+        .no-scrollbar::-webkit-scrollbar {
             display: none;
-        }.no-scrollbar {
-            -ms-overflow-style: none;scrollbar-width: none;}
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            opacity: 0.5;
-            cursor: pointer;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .type-card.selected {
+            border-color: var(--selected-color, #13ec5b);
+            background-color: var(--selected-bg, rgba(19, 236, 91, 0.1));
+        }
+        .type-card.selected .check-icon {
+            display: flex;
+        }
+        .type-card .check-icon {
+            display: none;
+        }
+        .period-chip.selected {
+            background-color: #13ec5b;
+            color: #102216;
+            font-weight: 700;
         }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body class="bg-background text-text-main min-h-screen pb-32 selection:bg-primary/30">
-<header class="fixed top-0 w-full z-40 bg-background/80 backdrop-blur-xl border-b border-white/10">
-<div class="px-4 h-14 flex items-center justify-between">
-<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 active:bg-white/20 transition-colors -ml-2">
-<span class="material-symbols-outlined text-white text-[24px]">arrow_back</span>
-</button>
-<h1 class="text-[17px] font-semibold tracking-tight">Criar Nova Meta</h1>
-<div class="w-10"></div> 
-</div>
-</header>
-<main class="px-4 pt-20 space-y-8 max-w-lg mx-auto">
-<div class="space-y-4">
-<div class="bg-surface rounded-2xl overflow-hidden border border-white/5">
-<div class="relative group px-4 py-1">
-<input class="block w-full pt-6 pb-2 bg-transparent border-0 text-white placeholder-transparent focus:ring-0 peer text-lg font-medium" id="title" placeholder=" " type="text"/>
-<label class="absolute text-sm text-text-muted duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-primary" for="title">
-                        Título da Meta
-                    </label>
-</div>
-<div class="h-px bg-white/10 mx-4"></div>
-<div class="relative group px-4 py-1">
-<input class="block w-full pt-6 pb-2 bg-transparent border-0 text-white placeholder-transparent focus:ring-0 peer text-base" id="description" placeholder=" " type="text"/>
-<label class="absolute text-sm text-text-muted duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-primary" for="description">
-                        Descrição <span class="text-xs opacity-50">(Opcional)</span>
-</label>
-</div>
-</div>
-</div>
-<div class="space-y-3">
-<h2 class="text-xs uppercase tracking-wider text-text-muted font-semibold ml-1">Tipo de Meta</h2>
-<div class="grid grid-cols-2 gap-3">
-<label class="relative cursor-pointer group">
-<input checked="" class="peer sr-only" name="goal_type" type="radio" value="faturamento"/>
-<div class="h-full p-4 rounded-2xl bg-surface border border-white/5 peer-checked:border-primary peer-checked:bg-primary/10 transition-all duration-200 flex flex-col items-start gap-3 hover:bg-surface-light">
-<div class="w-10 h-10 flex items-center justify-center rounded-xl bg-primary/20 text-primary">
-<span class="material-symbols-outlined filled">attach_money</span>
-</div>
-<div>
-<span class="block font-medium text-sm text-white">Faturamento</span>
-<span class="text-[10px] text-text-muted">Receita bruta</span>
-</div>
-</div>
-<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity scale-0 peer-checked:scale-100 duration-200">
-<span class="material-symbols-outlined text-primary text-[20px] filled">check_circle</span>
-</div>
-</label>
-<label class="relative cursor-pointer group">
-<input class="peer sr-only" name="goal_type" type="radio" value="economia"/>
-<div class="h-full p-4 rounded-2xl bg-surface border border-white/5 peer-checked:border-warning peer-checked:bg-warning/10 transition-all duration-200 flex flex-col items-start gap-3 hover:bg-surface-light">
-<div class="w-10 h-10 flex items-center justify-center rounded-xl bg-warning/20 text-warning">
-<span class="material-symbols-outlined filled">savings</span>
-</div>
-<div>
-<span class="block font-medium text-sm text-white">Economia</span>
-<span class="text-[10px] text-text-muted">Guardar valor</span>
-</div>
-</div>
-<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity scale-0 peer-checked:scale-100 duration-200">
-<span class="material-symbols-outlined text-warning text-[20px] filled">check_circle</span>
-</div>
-</label>
-<label class="relative cursor-pointer group">
-<input class="peer sr-only" name="goal_type" type="radio" value="lucro"/>
-<div class="h-full p-4 rounded-2xl bg-surface border border-white/5 peer-checked:border-info peer-checked:bg-info/10 transition-all duration-200 flex flex-col items-start gap-3 hover:bg-surface-light">
-<div class="w-10 h-10 flex items-center justify-center rounded-xl bg-info/20 text-info">
-<span class="material-symbols-outlined filled">trending_up</span>
-</div>
-<div>
-<span class="block font-medium text-sm text-white">Lucro</span>
-<span class="text-[10px] text-text-muted">Líquido estimado</span>
-</div>
-</div>
-<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity scale-0 peer-checked:scale-100 duration-200">
-<span class="material-symbols-outlined text-info text-[20px] filled">check_circle</span>
-</div>
-</label>
-<label class="relative cursor-pointer group">
-<input class="peer sr-only" name="goal_type" type="radio" value="quilometragem"/>
-<div class="h-full p-4 rounded-2xl bg-surface border border-white/5 peer-checked:border-purple peer-checked:bg-purple/10 transition-all duration-200 flex flex-col items-start gap-3 hover:bg-surface-light">
-<div class="w-10 h-10 flex items-center justify-center rounded-xl bg-purple/20 text-purple">
-<span class="material-symbols-outlined filled">speed</span>
-</div>
-<div>
-<span class="block font-medium text-sm text-white">Quilometragem</span>
-<span class="text-[10px] text-text-muted">Distância</span>
-</div>
-</div>
-<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity scale-0 peer-checked:scale-100 duration-200">
-<span class="material-symbols-outlined text-purple text-[20px] filled">check_circle</span>
-</div>
-</label>
-</div>
-</div>
-<div class="space-y-3">
-<h2 class="text-xs uppercase tracking-wider text-text-muted font-semibold ml-1">Definição do Alvo</h2>
-<div class="bg-surface rounded-2xl p-6 border border-white/5 space-y-6 shadow-glow">
-<div class="flex flex-col items-center justify-center space-y-1">
-<label class="text-[11px] text-text-muted uppercase tracking-wide font-medium">Valor Alvo</label>
-<div class="relative w-full">
-<input class="w-full bg-transparent border-0 text-center text-5xl font-bold text-white placeholder-gray-700 focus:ring-0 p-0 tracking-tight" inputmode="decimal" placeholder="0" type="number"/>
-</div>
-</div>
-<div class="grid grid-cols-5 gap-3 pt-2">
-<div class="col-span-2 space-y-1">
-<label class="text-[10px] text-text-muted ml-1 uppercase font-bold">Unidade</label>
-<div class="relative">
-<input class="w-full bg-surface-light rounded-xl border-none focus:ring-1 focus:ring-primary text-sm h-12 px-4 text-white placeholder-gray-500 transition-colors" placeholder="Ex: R$" type="text"/>
-</div>
-</div>
-<div class="col-span-3 space-y-1">
-<label class="text-[10px] text-text-muted ml-1 uppercase font-bold">Categoria</label>
-<div class="relative">
-<select class="w-full bg-surface-light rounded-xl border-none focus:ring-1 focus:ring-primary text-sm h-12 px-4 text-white appearance-none transition-colors pr-10">
-<option disabled="" selected="" value="">Selecionar</option>
-<option value="daily">Diária</option>
-<option value="weekly">Semanal</option>
-<option value="monthly">Mensal</option>
-<option value="custom">Personalizada</option>
-</select>
-<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-lg">expand_more</span>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="space-y-3">
-<h2 class="text-xs uppercase tracking-wider text-text-muted font-semibold ml-1">Período</h2>
-<div class="bg-surface rounded-2xl overflow-hidden border border-white/5">
-<div class="flex items-center justify-between p-4 border-b border-white/10 active:bg-surface-light transition-colors group">
-<div class="flex items-center gap-3">
-<div class="w-9 h-9 rounded-xl bg-surface-light flex items-center justify-center text-primary group-hover:text-white transition-colors">
-<span class="material-symbols-outlined text-[20px]">calendar_today</span>
-</div>
-<div class="flex flex-col">
-<span class="text-sm font-medium text-white">Data de Início</span>
-</div>
-</div>
-<input class="bg-transparent border-none text-right text-gray-300 focus:ring-0 text-sm p-0 w-36 h-full font-medium" type="date"/>
-</div>
-<div class="flex items-center justify-between p-4 active:bg-surface-light transition-colors group">
-<div class="flex items-center gap-3">
-<div class="w-9 h-9 rounded-xl bg-surface-light flex items-center justify-center text-text-muted group-hover:text-white transition-colors">
-<span class="material-symbols-outlined text-[20px]">event_repeat</span>
-</div>
-<div class="flex flex-col">
-<span class="text-sm font-medium text-white">Data de Término</span>
-<span class="text-[10px] text-text-muted">Opcional</span>
-</div>
-</div>
-<input class="bg-transparent border-none text-right text-gray-300 focus:ring-0 text-sm p-0 w-36 h-full font-medium" type="date"/>
-</div>
-</div>
-</div>
-</main>
-<div class="fixed bottom-0 inset-x-0 p-5 bg-background/80 backdrop-blur-xl border-t border-white/10 z-50">
-<button class="w-full bg-primary hover:bg-primary-dark active:scale-[0.98] transition-all duration-200 text-black font-bold text-[17px] py-4 rounded-2xl shadow-[0_0_20px_rgba(0,224,128,0.3)] flex items-center justify-center gap-2">
-<span class="material-symbols-outlined filled">save</span>
-            Salvar Meta
-        </button>
-</div>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display flex flex-col h-screen overflow-hidden antialiased">
+    <!-- Header -->
+    <header class="flex-none px-4 pt-12 pb-4 bg-background-light dark:bg-background-dark z-20">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button id="backBtn" class="p-2 -ml-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-slate-500">arrow_back</span>
+                </button>
+                <h1 class="text-xl font-bold tracking-tight">Nova Meta</h1>
+            </div>
+        </div>
+    </header>
 
-</body></html>
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto no-scrollbar pb-32 px-4">
+        <!-- Title & Description -->
+        <section class="space-y-4 mb-6">
+            <div class="bg-white dark:bg-surface-dark rounded-2xl overflow-hidden border border-gray-200 dark:border-white/5">
+                <div class="relative px-4 py-3">
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1" for="goalName">
+                        Nome da Meta *
+                    </label>
+                    <input
+                        id="goalName"
+                        type="text"
+                        placeholder="Ex: Meta diária de faturamento"
+                        class="w-full bg-transparent border-0 text-slate-900 dark:text-white text-base font-medium placeholder-slate-400 focus:ring-0 p-0"
+                    />
+                </div>
+                <div class="h-px bg-gray-200 dark:bg-white/10 mx-4"></div>
+                <div class="relative px-4 py-3">
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1" for="goalDescription">
+                        Descrição (opcional)
+                    </label>
+                    <input
+                        id="goalDescription"
+                        type="text"
+                        placeholder="Adicione detalhes sobre sua meta"
+                        class="w-full bg-transparent border-0 text-slate-900 dark:text-white text-sm placeholder-slate-400 focus:ring-0 p-0"
+                    />
+                </div>
+            </div>
+        </section>
+
+        <!-- Category Selection -->
+        <section class="mb-6">
+            <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 ml-1">Categoria</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Receita -->
+                <label class="type-card selected cursor-pointer relative flex items-center gap-3 rounded-xl p-4 bg-white dark:bg-surface-dark border-2 border-primary transition-all" style="--selected-color: #13ec5b; --selected-bg: rgba(19, 236, 91, 0.1);">
+                    <input checked class="sr-only" name="goal_category" type="radio" value="receita"/>
+                    <div class="w-10 h-10 flex items-center justify-center rounded-xl bg-primary/20 text-primary">
+                        <span class="material-symbols-outlined">trending_up</span>
+                    </div>
+                    <div class="flex-1">
+                        <span class="block font-semibold text-sm">Receita</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400">Faturamento</span>
+                    </div>
+                    <div class="check-icon absolute top-3 right-3 w-5 h-5 rounded-full bg-primary items-center justify-center">
+                        <span class="material-symbols-outlined text-background-dark text-sm">check</span>
+                    </div>
+                </label>
+                <!-- Economia -->
+                <label class="type-card cursor-pointer relative flex items-center gap-3 rounded-xl p-4 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-yellow-400/50 transition-all" style="--selected-color: #facc15; --selected-bg: rgba(250, 204, 21, 0.1);">
+                    <input class="sr-only" name="goal_category" type="radio" value="economia"/>
+                    <div class="w-10 h-10 flex items-center justify-center rounded-xl bg-yellow-400/20 text-yellow-500">
+                        <span class="material-symbols-outlined">savings</span>
+                    </div>
+                    <div class="flex-1">
+                        <span class="block font-semibold text-sm">Economia</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400">Guardar dinheiro</span>
+                    </div>
+                    <div class="check-icon absolute top-3 right-3 w-5 h-5 rounded-full bg-yellow-400 items-center justify-center">
+                        <span class="material-symbols-outlined text-background-dark text-sm">check</span>
+                    </div>
+                </label>
+                <!-- Corridas -->
+                <label class="type-card cursor-pointer relative flex items-center gap-3 rounded-xl p-4 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-blue-400/50 transition-all" style="--selected-color: #3b82f6; --selected-bg: rgba(59, 130, 246, 0.1);">
+                    <input class="sr-only" name="goal_category" type="radio" value="corridas"/>
+                    <div class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-500/20 text-blue-500">
+                        <span class="material-symbols-outlined">directions_car</span>
+                    </div>
+                    <div class="flex-1">
+                        <span class="block font-semibold text-sm">Corridas</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400">Qtd. de viagens</span>
+                    </div>
+                    <div class="check-icon absolute top-3 right-3 w-5 h-5 rounded-full bg-blue-500 items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-sm">check</span>
+                    </div>
+                </label>
+                <!-- Quilometragem -->
+                <label class="type-card cursor-pointer relative flex items-center gap-3 rounded-xl p-4 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-purple-400/50 transition-all" style="--selected-color: #a855f7; --selected-bg: rgba(168, 85, 247, 0.1);">
+                    <input class="sr-only" name="goal_category" type="radio" value="km"/>
+                    <div class="w-10 h-10 flex items-center justify-center rounded-xl bg-purple-500/20 text-purple-500">
+                        <span class="material-symbols-outlined">speed</span>
+                    </div>
+                    <div class="flex-1">
+                        <span class="block font-semibold text-sm">Quilometragem</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400">Distância rodada</span>
+                    </div>
+                    <div class="check-icon absolute top-3 right-3 w-5 h-5 rounded-full bg-purple-500 items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-sm">check</span>
+                    </div>
+                </label>
+            </div>
+        </section>
+
+        <!-- Target Value -->
+        <section class="mb-6">
+            <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 ml-1">Valor Alvo</h2>
+            <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-white/5">
+                <div class="flex flex-col items-center justify-center">
+                    <div id="targetPrefix" class="text-slate-400 text-sm font-medium mb-1">R$</div>
+                    <input
+                        id="targetValue"
+                        type="text"
+                        inputmode="decimal"
+                        placeholder="0,00"
+                        class="w-full bg-transparent border-0 text-center text-4xl font-bold text-slate-900 dark:text-white placeholder-slate-600 focus:ring-0 p-0 tracking-tight"
+                    />
+                    <p id="targetHelper" class="text-xs text-slate-500 dark:text-slate-400 mt-2">Digite o valor que deseja atingir</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Period Selection -->
+        <section class="mb-6">
+            <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 ml-1">Período de Reset</h2>
+            <div class="flex gap-3">
+                <button type="button" class="period-chip selected flex-1 py-3 rounded-xl bg-primary text-background-dark font-bold text-sm transition-all" data-period="daily">
+                    Diária
+                </button>
+                <button type="button" class="period-chip flex-1 py-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-medium text-sm transition-all hover:border-primary/50" data-period="weekly">
+                    Semanal
+                </button>
+                <button type="button" class="period-chip flex-1 py-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-medium text-sm transition-all hover:border-primary/50" data-period="monthly">
+                    Mensal
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 ml-1">
+                <span class="material-symbols-outlined text-sm align-middle mr-1">info</span>
+                <span id="periodInfo">A meta será resetada todo dia à meia-noite</span>
+            </p>
+        </section>
+
+        <!-- Color Selection -->
+        <section class="mb-6">
+            <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 ml-1">Cor do Card</h2>
+            <div class="flex gap-3 flex-wrap">
+                <label class="cursor-pointer">
+                    <input checked class="sr-only peer" name="goal_color" type="radio" value="green"/>
+                    <div class="w-10 h-10 rounded-full bg-green-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
+                </label>
+                <label class="cursor-pointer">
+                    <input class="sr-only peer" name="goal_color" type="radio" value="blue"/>
+                    <div class="w-10 h-10 rounded-full bg-blue-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
+                </label>
+                <label class="cursor-pointer">
+                    <input class="sr-only peer" name="goal_color" type="radio" value="yellow"/>
+                    <div class="w-10 h-10 rounded-full bg-yellow-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
+                </label>
+                <label class="cursor-pointer">
+                    <input class="sr-only peer" name="goal_color" type="radio" value="purple"/>
+                    <div class="w-10 h-10 rounded-full bg-purple-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
+                </label>
+                <label class="cursor-pointer">
+                    <input class="sr-only peer" name="goal_color" type="radio" value="orange"/>
+                    <div class="w-10 h-10 rounded-full bg-orange-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
+                </label>
+                <label class="cursor-pointer">
+                    <input class="sr-only peer" name="goal_color" type="radio" value="red"/>
+                    <div class="w-10 h-10 rounded-full bg-red-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
+                </label>
+            </div>
+        </section>
+    </main>
+
+    <!-- Fixed Save Button -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 pb-8 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark z-30">
+        <button id="saveBtn" class="w-full rounded-xl bg-primary py-4 text-center text-base font-bold text-background-dark shadow-lg shadow-primary/20 hover:bg-[#34f574] transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined">check</span>
+            Criar Meta
+        </button>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { requireAuth } from '/js/firebase-config.js';
+        import { addGoal } from '/js/db.js';
+        import { showToast, formatCurrency, parseCurrency } from '/js/utils.js';
+
+        // Wait for auth - must complete before proceeding
+        const user = await requireAuth();
+        if (!user) {
+            console.error('Usuário não autenticado');
+            throw new Error('Not authenticated');
+        }
+
+        // State
+        let selectedCategory = 'receita';
+        let selectedPeriod = 'daily';
+        let selectedColor = 'green';
+
+        // DOM Elements
+        const backBtn = document.getElementById('backBtn');
+        const goalName = document.getElementById('goalName');
+        const goalDescription = document.getElementById('goalDescription');
+        const targetValue = document.getElementById('targetValue');
+        const targetPrefix = document.getElementById('targetPrefix');
+        const targetHelper = document.getElementById('targetHelper');
+        const periodInfo = document.getElementById('periodInfo');
+        const saveBtn = document.getElementById('saveBtn');
+        const categoryCards = document.querySelectorAll('.type-card');
+        const periodChips = document.querySelectorAll('.period-chip');
+        const colorInputs = document.querySelectorAll('input[name="goal_color"]');
+
+        // Category selection
+        categoryCards.forEach(card => {
+            const input = card.querySelector('input');
+            input.addEventListener('change', () => {
+                categoryCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedCategory = input.value;
+                updateTargetPrefix();
+            });
+        });
+
+        // Update target prefix based on category
+        function updateTargetPrefix() {
+            if (selectedCategory === 'receita' || selectedCategory === 'economia') {
+                targetPrefix.textContent = 'R$';
+                targetHelper.textContent = 'Digite o valor que deseja atingir';
+            } else if (selectedCategory === 'corridas') {
+                targetPrefix.textContent = 'Corridas';
+                targetHelper.textContent = 'Número de corridas para completar';
+            } else if (selectedCategory === 'km') {
+                targetPrefix.textContent = 'KM';
+                targetHelper.textContent = 'Quilômetros a percorrer';
+            }
+        }
+
+        // Period selection
+        periodChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                periodChips.forEach(c => {
+                    c.classList.remove('selected');
+                    c.classList.add('bg-white', 'dark:bg-surface-dark', 'border', 'border-gray-200', 'dark:border-white/10', 'text-slate-600', 'dark:text-slate-300', 'font-medium');
+                    c.classList.remove('bg-primary', 'text-background-dark', 'font-bold');
+                });
+                chip.classList.add('selected');
+                chip.classList.remove('bg-white', 'dark:bg-surface-dark', 'border', 'border-gray-200', 'dark:border-white/10', 'text-slate-600', 'dark:text-slate-300', 'font-medium');
+                chip.classList.add('bg-primary', 'text-background-dark', 'font-bold');
+                selectedPeriod = chip.dataset.period;
+                updatePeriodInfo();
+            });
+        });
+
+        // Update period info text
+        function updatePeriodInfo() {
+            switch (selectedPeriod) {
+                case 'daily':
+                    periodInfo.textContent = 'A meta será resetada todo dia à meia-noite';
+                    break;
+                case 'weekly':
+                    periodInfo.textContent = 'A meta será resetada toda segunda-feira';
+                    break;
+                case 'monthly':
+                    periodInfo.textContent = 'A meta será resetada no primeiro dia de cada mês';
+                    break;
+            }
+        }
+
+        // Color selection
+        colorInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                selectedColor = input.value;
+            });
+        });
+
+        // Format target value input
+        targetValue.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length === 0) {
+                e.target.value = '';
+                return;
+            }
+
+            // For currency values
+            if (selectedCategory === 'receita' || selectedCategory === 'economia') {
+                const numValue = parseInt(value) / 100;
+                e.target.value = numValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else {
+                // For numeric values (corridas, km)
+                e.target.value = parseInt(value).toLocaleString('pt-BR');
+            }
+        });
+
+        // Parse target value
+        function parseTargetValue() {
+            const value = targetValue.value.replace(/\./g, '').replace(',', '.');
+            return parseFloat(value) || 0;
+        }
+
+        // Save goal
+        saveBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Validate
+            const name = goalName.value.trim();
+            if (!name) {
+                showToast('Digite um nome para a meta', 'error');
+                goalName.focus();
+                return;
+            }
+
+            const target = parseTargetValue();
+            console.log('Target value parsed:', target);
+
+            if (target <= 0 || isNaN(target)) {
+                showToast('Digite um valor alvo válido', 'error');
+                targetValue.focus();
+                return;
+            }
+
+            // Disable button
+            saveBtn.disabled = true;
+            const originalContent = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Salvando...';
+
+            try {
+                const goalData = {
+                    name: name,
+                    description: goalDescription.value.trim() || null,
+                    category: selectedCategory,
+                    type: selectedPeriod,
+                    target: target,
+                    color: selectedColor
+                };
+
+                console.log('Saving goal:', goalData);
+
+                const goalId = await addGoal(goalData);
+                console.log('Goal created with ID:', goalId);
+
+                showToast('Meta criada com sucesso!', 'success');
+
+                // Redirect to goals page
+                setTimeout(() => {
+                    window.location.href = '/user/metas/meta.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error creating goal:', error);
+                showToast('Erro ao criar meta. Tente novamente.', 'error');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalContent;
+            }
+        });
+
+        // Navigation
+        backBtn.addEventListener('click', () => window.history.back());
+
+        // Initialize
+        updateTargetPrefix();
+        updatePeriodInfo();
+    </script>
+</body>
+</html>

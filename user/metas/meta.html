@@ -68,7 +68,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto no-scrollbar pb-24 px-4">
+    <main class="flex-1 overflow-y-auto no-scrollbar pb-32 px-4">
         <!-- Overall Progress Card -->
         <section class="bg-surface-dark rounded-2xl p-5 shadow-lg mb-6 relative overflow-hidden">
             <div class="absolute top-0 right-0 p-4 opacity-10">
@@ -154,6 +154,10 @@
         <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
             <h3 id="modalTitle" class="text-lg font-bold mb-4">Opções da Meta</h3>
             <div class="space-y-3">
+                <button id="editGoalBtn" class="w-full py-3 rounded-xl bg-primary/10 text-primary font-semibold flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">edit</span>
+                    Editar Meta
+                </button>
                 <button id="resetGoalBtn" class="w-full py-3 rounded-xl bg-blue-500/10 text-blue-500 font-semibold flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined">refresh</span>
                     Resetar Progresso
@@ -169,23 +173,57 @@
         </div>
     </div>
 
+    <!-- Edit Goal Modal -->
+    <div id="editGoalModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold mb-4">Editar Meta</h3>
+            <form id="editGoalForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Nome da Meta</label>
+                    <input type="text" id="editGoalName" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Valor Alvo</label>
+                    <input type="text" id="editGoalTarget" inputmode="decimal" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Progresso Atual</label>
+                    <input type="text" id="editGoalCurrent" inputmode="decimal" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" id="cancelEditBtn" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 py-3 rounded-xl bg-primary text-background-dark font-semibold">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
 
     <!-- JavaScript -->
     <script type="module">
         import { requireAuth } from '/js/firebase-config.js';
-        import { getGoals, deleteGoal, resetGoal, checkAndResetGoals } from '/js/db.js';
+        import { getGoals, getGoal, deleteGoal, resetGoal, updateGoal, checkAndResetGoals } from '/js/db.js';
         import { showToast, formatCurrency } from '/js/utils.js';
 
-        // Wait for auth
-        requireAuth();
+        // Wait for auth - must complete before proceeding
+        const user = await requireAuth();
+        if (!user) {
+            console.error('Usuário não autenticado');
+            throw new Error('Not authenticated');
+        }
 
         // State
         let allGoals = [];
         let filteredGoals = [];
         let currentFilter = 'all';
         let selectedGoalId = null;
+        let selectedGoalData = null;
 
         // Category config
         const categoryConfig = {
@@ -224,6 +262,13 @@
         const resetGoalBtn = document.getElementById('resetGoalBtn');
         const deleteGoalBtn = document.getElementById('deleteGoalBtn');
         const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const editGoalBtn = document.getElementById('editGoalBtn');
+        const editGoalModal = document.getElementById('editGoalModal');
+        const editGoalForm = document.getElementById('editGoalForm');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const editGoalName = document.getElementById('editGoalName');
+        const editGoalTarget = document.getElementById('editGoalTarget');
+        const editGoalCurrent = document.getElementById('editGoalCurrent');
 
         // Load goals
         async function loadGoals() {
@@ -406,6 +451,81 @@
                 showToast('Erro ao excluir', 'error');
             }
             closeModal();
+        });
+
+        // Edit goal handlers
+        editGoalBtn.addEventListener('click', async () => {
+            if (!selectedGoalId) return;
+            closeModal();
+
+            // Get current goal data
+            selectedGoalData = allGoals.find(g => g.id === selectedGoalId);
+            if (!selectedGoalData) return;
+
+            // Populate edit form
+            editGoalName.value = selectedGoalData.name || '';
+
+            const isCurrency = selectedGoalData.category === 'receita' || selectedGoalData.category === 'economia';
+            if (isCurrency) {
+                editGoalTarget.value = selectedGoalData.target.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                editGoalCurrent.value = selectedGoalData.current.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else {
+                editGoalTarget.value = selectedGoalData.target.toLocaleString('pt-BR');
+                editGoalCurrent.value = selectedGoalData.current.toLocaleString('pt-BR');
+            }
+
+            // Show edit modal
+            editGoalModal.classList.remove('hidden');
+            editGoalModal.classList.add('flex');
+        });
+
+        cancelEditBtn.addEventListener('click', closeEditModal);
+        editGoalModal.addEventListener('click', (e) => {
+            if (e.target === editGoalModal) closeEditModal();
+        });
+
+        function closeEditModal() {
+            editGoalModal.classList.add('hidden');
+            editGoalModal.classList.remove('flex');
+            selectedGoalData = null;
+        }
+
+        // Parse value from formatted string
+        function parseValue(str) {
+            return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+        }
+
+        editGoalForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!selectedGoalId || !selectedGoalData) return;
+
+            const name = editGoalName.value.trim();
+            if (!name) {
+                showToast('Digite um nome', 'error');
+                return;
+            }
+
+            const target = parseValue(editGoalTarget.value);
+            const current = parseValue(editGoalCurrent.value);
+
+            if (target <= 0) {
+                showToast('Digite um valor alvo válido', 'error');
+                return;
+            }
+
+            try {
+                await updateGoal(selectedGoalId, {
+                    name: name,
+                    target: target,
+                    current: current
+                });
+                showToast('Meta atualizada!', 'success');
+                closeEditModal();
+                await loadGoals();
+            } catch (error) {
+                console.error('Error updating goal:', error);
+                showToast('Erro ao atualizar', 'error');
+            }
         });
 
         // Navigation

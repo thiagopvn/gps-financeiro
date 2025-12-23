@@ -11,6 +11,7 @@ import { getMessaging, isSupported } from 'https://www.gstatic.com/firebasejs/10
 const firebaseConfig = {
     apiKey: "AIzaSyAWhjDiTyUSmAwgA0d2T05Op_dobKXcZlk",
     authDomain: "gps-financeiro-e39fd.firebaseapp.com",
+    databaseURL: "https://gps-financeiro-e39fd-default-rtdb.firebaseio.com",
     projectId: "gps-financeiro-e39fd",
     storageBucket: "gps-financeiro-e39fd.firebasestorage.app",
     messagingSenderId: "705482332766",

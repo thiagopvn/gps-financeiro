@@ -158,28 +158,29 @@
         </div>
     </main>
 
-    <!-- Floating Action Button -->
-    <a href="/user/Lancamento/lancamento.html" class="fixed right-4 bottom-24 z-40 flex items-center justify-center size-14 bg-primary text-background-dark rounded-full shadow-lg shadow-primary/25 active:scale-95 transition-all hover:bg-primary/90">
-        <span class="material-symbols-outlined text-[28px] font-bold">add</span>
-    </a>
-
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-surface-light dark:bg-surface-dark border-t border-gray-200 dark:border-white/5 pb-safe">
-        <div class="flex justify-around items-center h-16 max-w-lg mx-auto">
-            <a href="/user/Dashboard/dash.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
-                <span class="text-[10px] font-medium">Painel</span>
+    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-surface-light dark:bg-surface-dark border-t border-gray-200 dark:border-white/5 px-6 pt-3 pb-6">
+        <div class="flex justify-between items-end max-w-lg mx-auto">
+            <a class="flex flex-col items-center gap-1 w-12 text-primary transition-colors" href="/user/Dashboard/dash.html">
+                <span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">home</span>
+                <span class="text-[10px] font-medium">Início</span>
             </a>
-            <a href="/user/transacao/transacao.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
-                <span class="material-symbols-outlined">history</span>
-                <span class="text-[10px] font-medium">Histórico</span>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors" href="/user/transacao/transacao.html">
+                <span class="material-symbols-outlined text-[26px]">receipt_long</span>
+                <span class="text-[10px] font-medium">Extrato</span>
             </a>
-            <a href="/user/sessao/sessao.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
-                <span class="material-symbols-outlined">timer</span>
-                <span class="text-[10px] font-medium">Sessão</span>
+            <!-- Central FAB -->
+            <div class="relative -top-3">
+                <a href="/user/Lancamento/lancamento.html" class="flex items-center justify-center w-14 h-14 rounded-full bg-primary shadow-lg shadow-primary/30 text-background-dark hover:scale-105 active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[32px]">add</span>
+                </a>
+            </div>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors" href="/user/metas/meta.html">
+                <span class="material-symbols-outlined text-[26px]">flag</span>
+                <span class="text-[10px] font-medium">Metas</span>
             </a>
-            <a href="/user/configuracoes/config.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
-                <span class="material-symbols-outlined">settings</span>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors" href="/user/configuracoes/config.html">
+                <span class="material-symbols-outlined text-[26px]">settings</span>
                 <span class="text-[10px] font-medium">Ajustes</span>
             </a>
         </div>
@@ -277,6 +278,29 @@
             });
         });
 
+        // Category and color configs for goals
+        const categoryConfig = {
+            receita: { icon: 'trending_up', label: 'Receita' },
+            economia: { icon: 'savings', label: 'Economia' },
+            corridas: { icon: 'directions_car', label: 'Corridas' },
+            km: { icon: 'speed', label: 'Quilometragem' }
+        };
+
+        const colorClasses = {
+            green: { bg: 'bg-primary', bgLight: 'bg-primary/20', text: 'text-primary' },
+            blue: { bg: 'bg-blue-500', bgLight: 'bg-blue-500/20', text: 'text-blue-500' },
+            yellow: { bg: 'bg-yellow-400', bgLight: 'bg-yellow-400/20', text: 'text-yellow-400' },
+            purple: { bg: 'bg-purple-500', bgLight: 'bg-purple-500/20', text: 'text-purple-500' },
+            orange: { bg: 'bg-orange-500', bgLight: 'bg-orange-500/20', text: 'text-orange-500' },
+            red: { bg: 'bg-red-500', bgLight: 'bg-red-500/20', text: 'text-red-500' }
+        };
+
+        const typeLabels = {
+            daily: 'Diária',
+            weekly: 'Semanal',
+            monthly: 'Mensal'
+        };
+
         // Load goals
         const loadGoals = async () => {
             // First check and reset goals if needed
@@ -289,8 +313,9 @@
                     <div class="text-center py-4">
                         <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">flag</span>
                         <p class="text-gray-400 text-sm mb-3">Você ainda não tem metas</p>
-                        <a href="/user/newmeta/newmeta.html" class="text-primary text-sm font-semibold hover:underline">
-                            + Criar primeira meta
+                        <a href="/user/newmeta/newmeta.html" class="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:underline">
+                            <span class="material-symbols-outlined text-[18px]">add</span>
+                            Criar primeira meta
                         </a>
                     </div>
                 `;
@@ -307,12 +332,13 @@
 
             displayGoals.forEach((goal, index) => {
                 const progress = Math.min(100, Math.round((goal.current / goal.target) * 100));
-                const typeConfig = {
-                    daily: { icon: 'today', color: 'text-primary', bgColor: 'bg-primary', label: 'Diária' },
-                    weekly: { icon: 'calendar_view_week', color: 'text-yellow-400', bgColor: 'bg-yellow-400', label: 'Semanal' },
-                    monthly: { icon: 'calendar_month', color: 'text-purple-400', bgColor: 'bg-purple-400', label: 'Mensal' }
-                };
-                const config = typeConfig[goal.type] || typeConfig.daily;
+                const cat = categoryConfig[goal.category] || { icon: 'flag', label: 'Meta' };
+                const color = colorClasses[goal.color] || colorClasses.green;
+                const typeLabel = typeLabels[goal.type] || 'Meta';
+
+                const isCurrency = goal.category === 'receita' || goal.category === 'economia';
+                const currentDisplay = isCurrency ? formatCurrency(goal.current) : `${goal.current}`;
+                const targetDisplay = isCurrency ? formatCurrency(goal.target) : `${goal.target}`;
 
                 if (index > 0) {
                     html += '<div class="h-px bg-gray-200 dark:bg-white/5 w-full"></div>';
@@ -321,21 +347,47 @@
                 html += `
                     <div class="flex flex-col gap-2">
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-700 dark:text-gray-200 text-sm font-medium flex items-center gap-2">
-                                <span class="material-symbols-outlined ${config.color} text-[18px]">${config.icon}</span>
-                                ${goal.name || config.label}
-                            </span>
-                            <span class="text-gray-900 dark:text-white text-sm font-bold">${progress}%</span>
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-lg ${color.bgLight} flex items-center justify-center">
+                                    <span class="material-symbols-outlined ${color.text} text-[18px]">${cat.icon}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-gray-900 dark:text-white text-sm font-semibold leading-tight">${goal.name}</span>
+                                    <span class="text-gray-500 dark:text-gray-400 text-[10px]">${typeLabel}</span>
+                                </div>
+                            </div>
+                            <span class="${color.text} text-sm font-bold">${progress}%</span>
                         </div>
-                        <div class="h-2.5 w-full bg-gray-200 dark:bg-black/40 rounded-full overflow-hidden">
-                            <div class="h-full ${config.bgColor} rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                        <div class="h-2 w-full bg-gray-200 dark:bg-black/40 rounded-full overflow-hidden">
+                            <div class="h-full ${color.bg} rounded-full transition-all duration-500 ${progress >= 100 ? 'animate-pulse' : ''}" style="width: ${progress}%"></div>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-xs text-right balance-value" data-value="${goal.current}">
-                            ${isHidden ? '••••' : formatCurrency(goal.current)} / ${formatCurrency(goal.target)}
-                        </p>
+                        <div class="flex justify-between items-center">
+                            <p class="text-gray-500 dark:text-gray-400 text-xs balance-value" data-value="${goal.current}">
+                                ${isHidden ? '••••' : currentDisplay}
+                            </p>
+                            <p class="text-gray-500 dark:text-gray-400 text-xs">
+                                Meta: ${targetDisplay}
+                            </p>
+                        </div>
+                        ${progress >= 100 ? `
+                            <div class="flex items-center gap-1 ${color.text} text-xs font-semibold">
+                                <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                Meta atingida!
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             });
+
+            // Add "Ver todas" link if there are more goals
+            if (goals.length > 3) {
+                html += `
+                    <div class="h-px bg-gray-200 dark:bg-white/5 w-full"></div>
+                    <a href="/user/metas/meta.html" class="text-center text-primary text-sm font-semibold py-1 hover:underline">
+                        Ver todas as ${goals.length} metas
+                    </a>
+                `;
+            }
 
             goalsContainer.innerHTML = html;
         };
@@ -354,19 +406,25 @@
 
         // Initialize
         const init = async () => {
-            await Promise.all([
-                loadProfile(),
-                loadSummary(),
-                loadGoals()
-            ]);
+            try {
+                await Promise.all([
+                    loadProfile().catch(e => console.error('Erro ao carregar perfil:', e)),
+                    loadSummary().catch(e => console.error('Erro ao carregar resumo:', e)),
+                    loadGoals().catch(e => console.error('Erro ao carregar metas:', e))
+                ]);
 
-            // Update visibility icon if hidden
-            if (isHidden) {
-                toggleVisibility.querySelector('.material-symbols-outlined').textContent = 'visibility_off';
+                // Update visibility icon if hidden
+                if (isHidden) {
+                    toggleVisibility.querySelector('.material-symbols-outlined').textContent = 'visibility_off';
+                }
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
             }
         };
 
-        init();
+        init().catch(error => {
+            console.error('Erro fatal na inicialização:', error);
+        });
     </script>
 </body>
 </html>
