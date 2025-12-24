@@ -46,7 +46,7 @@
         </header>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-white/5">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
@@ -80,11 +80,26 @@
                     </div>
                 </div>
             </div>
+            <a href="/admin/pendentes/pendentes.html" id="pendingCard" class="bg-white dark:bg-surface-dark rounded-2xl p-6 border-2 border-amber-500/50 hover:border-amber-500 transition-colors">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-amber-400 text-2xl">hourglass_top</span>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-sm">Pendentes</p>
+                        <p id="pendingUsers" class="text-2xl font-bold text-amber-400">--</p>
+                    </div>
+                </div>
+            </a>
         </div>
 
         <!-- Quick Actions -->
         <h2 class="text-lg font-bold mb-4">Ações Rápidas</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <a href="/admin/pendentes/pendentes.html" class="bg-amber-500/10 dark:bg-amber-500/10 rounded-xl p-4 border-2 border-amber-500/30 hover:border-amber-500 transition-colors flex flex-col items-center gap-3">
+                <span class="material-symbols-outlined text-3xl text-amber-400">pending_actions</span>
+                <span class="text-sm font-semibold text-center text-amber-400">Novos Cadastros</span>
+            </a>
             <a href="/admin/usergerenciamento/usergerenciamento.html" class="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-white/5 hover:border-primary transition-colors flex flex-col items-center gap-3">
                 <span class="material-symbols-outlined text-3xl text-blue-400">people</span>
                 <span class="text-sm font-semibold text-center">Gerenciar Usuários</span>
@@ -120,7 +135,7 @@
     <script type="module">
         import { auth } from '/js/firebase-config.js';
         import { isAdmin, logout } from '/js/auth.js';
-        import { getAdminStats, getAllUsers } from '/js/db.js';
+        import { getAdminStats, getAllUsers, getPendingUsers } from '/js/db.js';
         import { showToast, formatRelativeDate } from '/js/utils.js';
         import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
@@ -141,16 +156,31 @@
         const totalUsersEl = document.getElementById('totalUsers');
         const totalAdminsEl = document.getElementById('totalAdmins');
         const activeUsersEl = document.getElementById('activeUsers');
+        const pendingUsersEl = document.getElementById('pendingUsers');
+        const pendingCard = document.getElementById('pendingCard');
         const recentUsersEl = document.getElementById('recentUsers');
         const logoutBtn = document.getElementById('logoutBtn');
 
         // Load stats
         async function loadStats() {
             try {
-                const stats = await getAdminStats();
+                const [stats, pending] = await Promise.all([
+                    getAdminStats(),
+                    getPendingUsers()
+                ]);
                 totalUsersEl.textContent = stats.totalUsers || 0;
                 totalAdminsEl.textContent = stats.totalAdmins || 0;
                 activeUsersEl.textContent = stats.activeUsers || 0;
+
+                // Atualizar contagem de pendentes
+                const pendingCount = pending.length;
+                pendingUsersEl.textContent = pendingCount;
+
+                // Destacar se houver pendentes
+                if (pendingCount > 0) {
+                    pendingCard.classList.add('animate-pulse');
+                    setTimeout(() => pendingCard.classList.remove('animate-pulse'), 3000);
+                }
             } catch (error) {
                 console.error('Error loading stats:', error);
             }

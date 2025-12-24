@@ -57,6 +57,17 @@
         <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary/10 blur-[80px] pointer-events-none"></div>
         <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-primary/5 blur-[80px] pointer-events-none"></div>
 
+        <!-- Pending Approval Banner -->
+        <div id="pendingBanner" class="hidden w-full mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl z-10">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-amber-400 text-xl">hourglass_top</span>
+                <div>
+                    <p class="text-amber-400 font-semibold text-sm">Cadastro em análise</p>
+                    <p class="text-slate-400 text-xs mt-1">Seu cadastro está aguardando aprovação do administrador. Você receberá acesso em breve.</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Header Section -->
         <div class="w-full flex flex-col items-center mb-10 z-10">
             <div class="w-20 h-20 bg-gradient-to-tr from-primary/20 to-surface-dark rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/5 border border-primary/20">
@@ -169,6 +180,14 @@
 
         // Check if already logged in
         requireNoAuth();
+
+        // Check for pending approval message
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('pending') === '1') {
+            document.getElementById('pendingBanner').classList.remove('hidden');
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
         // DOM Elements
         const form = document.getElementById('loginForm');

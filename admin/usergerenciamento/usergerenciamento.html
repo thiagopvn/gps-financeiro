@@ -82,10 +82,9 @@
     <script type="module">
         import { auth } from '/js/firebase-config.js';
         import { isAdmin } from '/js/auth.js';
-        import { getAllUsers } from '/js/db.js';
+        import { getAllUsers, toggleUserActivation, deleteUser } from '/js/db.js';
         import { showToast, formatRelativeDate } from '/js/utils.js';
         import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { db } from '/js/firebase-config.js';
 
         // Check admin auth
@@ -135,27 +134,54 @@
                 const photoStyle = hasPhoto ? 'background-image: url(' + user.photoURL + ')' : '';
                 const iconHtml = hasPhoto ? '' : '<span class="material-symbols-outlined text-slate-400">person</span>';
                 const dateStr = user.createdAt ? formatRelativeDate(user.createdAt.toDate()) : 'Data desconhecida';
+                const isActive = user.active !== false;
+                const statusClass = isActive ? 'bg-primary/20 text-primary' : 'bg-amber-500/20 text-amber-400';
+                const statusText = isActive ? 'Ativo' : 'Pendente';
+                const statusIcon = isActive ? 'check_circle' : 'hourglass_top';
 
                 html += '<div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5 last:border-0">';
                 html += '<div class="flex items-center gap-3">';
                 html += '<div class="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center bg-cover bg-center" style="' + photoStyle + '">' + iconHtml + '</div>';
                 html += '<div>';
+                html += '<div class="flex items-center gap-2">';
                 html += '<p class="font-semibold">' + (user.name || 'Sem nome') + '</p>';
+                html += '<span class="px-2 py-0.5 text-xs font-medium rounded-full ' + statusClass + '">' + statusText + '</span>';
+                html += '</div>';
                 html += '<p class="text-sm text-slate-400">' + user.email + '</p>';
                 if (user.vehicle) html += '<p class="text-xs text-slate-500">' + user.vehicle + (user.plate ? ' - ' + user.plate : '') + '</p>';
                 html += '</div></div>';
-                html += '<div class="flex items-center gap-2">';
-                html += '<span class="text-xs text-slate-400 hidden md:block">' + dateStr + '</span>';
-                html += '<button class="delete-btn p-2 rounded-full hover:bg-red-500/10 text-red-400 transition-colors" data-id="' + user.id + '" data-name="' + (user.name || user.email) + '">';
+                html += '<div class="flex items-center gap-1">';
+                html += '<span class="text-xs text-slate-400 hidden md:block mr-2">' + dateStr + '</span>';
+                // Toggle status button
+                html += '<button class="toggle-btn p-2 rounded-full hover:bg-white/10 transition-colors" data-uid="' + user.uid + '" data-active="' + isActive + '" title="' + (isActive ? 'Desativar' : 'Ativar') + '">';
+                html += '<span class="material-symbols-outlined ' + (isActive ? 'text-primary' : 'text-amber-400') + '">' + statusIcon + '</span>';
+                html += '</button>';
+                html += '<button class="delete-btn p-2 rounded-full hover:bg-red-500/10 text-red-400 transition-colors" data-uid="' + user.uid + '" data-name="' + (user.name || user.email) + '">';
                 html += '<span class="material-symbols-outlined">delete</span>';
                 html += '</button></div></div>';
             });
             usersList.innerHTML = html;
 
+            // Add toggle status handlers
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const uid = btn.dataset.uid;
+                    const currentActive = btn.dataset.active === 'true';
+                    try {
+                        await toggleUserActivation(uid, !currentActive);
+                        showToast(currentActive ? 'Usuário desativado' : 'Usuário ativado', 'success');
+                        loadUsers();
+                    } catch (error) {
+                        console.error('Error toggling user:', error);
+                        showToast('Erro ao alterar status', 'error');
+                    }
+                });
+            });
+
             // Add delete handlers
             document.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    userToDelete = btn.dataset.id;
+                    userToDelete = btn.dataset.uid;
                     deleteModal.classList.remove('hidden');
                     deleteModal.classList.add('flex');
                 });
@@ -185,7 +211,7 @@
         confirmDelete.addEventListener('click', async () => {
             if (userToDelete === null) return;
             try {
-                await deleteDoc(doc(db, 'users', userToDelete));
+                await deleteUser(userToDelete);
                 showToast('Usuário excluído', 'success');
                 loadUsers();
             } catch (error) {

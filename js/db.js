@@ -621,8 +621,67 @@ export const getAllUsers = async (limitCount = 50) => {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
         uid: doc.id,
+        ...doc.data(),
+        // Garantir que o campo active existe (para usuários antigos)
+        active: doc.data().active !== undefined ? doc.data().active : true
+    }));
+};
+
+/**
+ * Get pending users (users with active: false)
+ * @returns {Promise<array>} Pending users array
+ */
+export const getPendingUsers = async () => {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('active', '==', false), orderBy('createdAt', 'desc'));
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+        uid: doc.id,
         ...doc.data()
     }));
+};
+
+/**
+ * Toggle user activation status
+ * @param {string} uid - User ID
+ * @param {boolean} active - New active status
+ * @returns {Promise<boolean>} Success
+ */
+export const toggleUserActivation = async (uid, active) => {
+    await updateDoc(doc(db, 'users', uid), {
+        active: active,
+        updatedAt: serverTimestamp()
+    });
+    return true;
+};
+
+/**
+ * Approve user (set active to true)
+ * @param {string} uid - User ID
+ * @returns {Promise<boolean>} Success
+ */
+export const approveUser = async (uid) => {
+    return toggleUserActivation(uid, true);
+};
+
+/**
+ * Reject/block user (set active to false)
+ * @param {string} uid - User ID
+ * @returns {Promise<boolean>} Success
+ */
+export const rejectUser = async (uid) => {
+    return toggleUserActivation(uid, false);
+};
+
+/**
+ * Delete user document (admin only)
+ * @param {string} uid - User ID
+ * @returns {Promise<boolean>} Success
+ */
+export const deleteUser = async (uid) => {
+    await deleteDoc(doc(db, 'users', uid));
+    return true;
 };
 
 /**

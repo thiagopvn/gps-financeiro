@@ -35,11 +35,36 @@ export const loginWithEmail = async (email, password) => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
         // Check if user document exists (with timeout to handle network issues)
+        let userDoc;
+        let isNewUser = false;
         try {
-            const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+            userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
             if (!userDoc.exists()) {
                 // Create user document if it doesn't exist (for migrated users)
                 await createUserDocument(userCredential.user);
+                isNewUser = true;
+                userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+            }
+
+            // Verificar se é admin (admins sempre podem acessar)
+            const adminDoc = await getDoc(doc(db, 'admins', userCredential.user.uid));
+            const isAdminUser = adminDoc.exists() && adminDoc.data().active === true;
+
+            // Verificar aprovação do usuário
+            const userData = userDoc.data();
+            // Usuários existentes sem o campo active são considerados aprovados (migração)
+            const isApproved = userData.active === true || (userData.active === undefined && !isNewUser);
+
+            if (!isApproved && !isAdminUser) {
+                // Usuário não aprovado - fazer logout e mostrar mensagem
+                await signOut(auth);
+                hideLoading();
+                showToast('Seu cadastro está em análise. Aguarde a aprovação do administrador.', 'warning');
+                return {
+                    success: false,
+                    error: 'pending_approval',
+                    message: 'Seu cadastro está em análise. Aguarde a aprovação do administrador.'
+                };
             }
         } catch (firestoreError) {
             // Log but don't block login if Firestore has issues
@@ -108,12 +133,37 @@ export const loginWithGoogle = async () => {
         const result = await signInWithPopup(auth, provider);
 
         // Check if user document exists, create if not
-        const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+        let userDoc = await getDoc(doc(db, 'users', result.user.uid));
+        let isNewUser = false;
+
         if (!userDoc.exists()) {
             await createUserDocument(result.user, {
                 name: result.user.displayName,
                 photoURL: result.user.photoURL
             });
+            isNewUser = true;
+            userDoc = await getDoc(doc(db, 'users', result.user.uid));
+        }
+
+        // Verificar se é admin (admins sempre podem acessar)
+        const adminDoc = await getDoc(doc(db, 'admins', result.user.uid));
+        const isAdminUser = adminDoc.exists() && adminDoc.data().active === true;
+
+        // Verificar aprovação do usuário
+        const userData = userDoc.data();
+        // Usuários existentes sem o campo active são considerados aprovados (migração)
+        const isApproved = userData.active === true || (userData.active === undefined && !isNewUser);
+
+        if (!isApproved && !isAdminUser) {
+            // Usuário não aprovado - fazer logout e mostrar mensagem
+            await signOut(auth);
+            hideLoading();
+            showToast('Seu cadastro está em análise. Aguarde a aprovação do administrador.', 'warning');
+            return {
+                success: false,
+                error: 'pending_approval',
+                message: 'Seu cadastro está em análise. Aguarde a aprovação do administrador.'
+            };
         }
 
         hideLoading();
@@ -195,6 +245,7 @@ const createUserDocument = async (user, additionalData = {}) => {
         vehicle: additionalData.vehicle || '',
         plate: additionalData.plate || '',
         photoURL: additionalData.photoURL || user.photoURL || '',
+        active: false, // Novos usuários precisam de aprovação do admin
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     };

@@ -2,8 +2,8 @@
 // Using Firebase SDK v10+ (modular)
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { getStorage } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 import { getMessaging, isSupported } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js';
 
@@ -45,13 +45,40 @@ const waitForAuth = () => {
     });
 };
 
-// Check if user is authenticated
+// Check if user is authenticated AND approved
 const requireAuth = async (redirectTo = '/user/login/login.html') => {
     const user = await waitForAuth();
     if (!user) {
         window.location.href = redirectTo;
         return null;
     }
+
+    // Verificar se o usuário está aprovado
+    try {
+        // Verificar se é admin (admins sempre podem acessar)
+        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+        const isAdminUser = adminDoc.exists() && adminDoc.data().active === true;
+
+        if (!isAdminUser) {
+            // Verificar aprovação do usuário normal
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                // Se active é explicitamente false, bloquear
+                // Se active não existe (usuário antigo), permitir acesso
+                if (userData.active === false) {
+                    await signOut(auth);
+                    // Redirecionar para login com mensagem
+                    window.location.href = redirectTo + '?pending=1';
+                    return null;
+                }
+            }
+        }
+    } catch (error) {
+        console.warn('Erro ao verificar aprovação:', error);
+        // Em caso de erro, permitir acesso para não bloquear usuários legítimos
+    }
+
     return user;
 };
 

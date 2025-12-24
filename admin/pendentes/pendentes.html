@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Novos Cadastros - GPS Financeiro</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#1a2c20",
+                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>body { min-height: 100dvh; }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased">
+    <div class="min-h-screen max-w-4xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <a href="/admin/dashadmin/dashadmin.html" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold">Novos Cadastros</h1>
+                    <p class="text-slate-400 text-sm">Aprovar ou rejeitar solicitações</p>
+                </div>
+            </div>
+            <div id="pendingCount" class="flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-400 rounded-xl font-semibold">
+                <span class="material-symbols-outlined text-lg">hourglass_top</span>
+                <span class="text-sm">Carregando...</span>
+            </div>
+        </header>
+
+        <!-- Info Banner -->
+        <div class="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-blue-400">info</span>
+                <div>
+                    <p class="text-sm text-blue-400 font-medium">Sistema de Aprovação</p>
+                    <p class="text-xs text-slate-400 mt-1">Novos usuários precisam de aprovação manual para acessar o sistema. Verifique se o usuário faz parte da comunidade antes de aprovar.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Users List -->
+        <div id="pendingList" class="bg-white dark:bg-surface-dark rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden">
+            <div class="flex items-center justify-center py-12 text-slate-400">
+                <span class="material-symbols-outlined animate-spin text-2xl mr-2">progress_activity</span>
+                Carregando...
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-primary">check_circle</span>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">Nenhum cadastro pendente</h3>
+            <p class="text-slate-400 text-sm">Todos os usuários foram processados.</p>
+        </div>
+    </div>
+
+    <!-- Approve Modal -->
+    <div id="approveModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
+            <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl text-primary">how_to_reg</span>
+            </div>
+            <h3 class="text-lg font-bold text-center mb-2">Aprovar usuário?</h3>
+            <p id="approveUserName" class="text-slate-400 text-sm text-center mb-6"></p>
+            <div class="flex gap-3">
+                <button id="cancelApprove" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">Cancelar</button>
+                <button id="confirmApprove" class="flex-1 py-3 rounded-xl bg-primary text-background-dark font-semibold">Aprovar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
+            <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl text-red-400">person_off</span>
+            </div>
+            <h3 class="text-lg font-bold text-center mb-2">Rejeitar usuário?</h3>
+            <p id="rejectUserName" class="text-slate-400 text-sm text-center mb-2"></p>
+            <p class="text-xs text-slate-500 text-center mb-6">O usuário será excluído e precisará se cadastrar novamente.</p>
+            <div class="flex gap-3">
+                <button id="cancelReject" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">Cancelar</button>
+                <button id="confirmReject" class="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold">Rejeitar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { auth, db } from '/js/firebase-config.js';
+        import { isAdmin } from '/js/auth.js';
+        import { getPendingUsers, approveUser, deleteUser } from '/js/db.js';
+        import { showToast, formatRelativeDate } from '/js/utils.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Check admin auth
+        onAuthStateChanged(auth, async (user) => {
+            if (user === null) {
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+                return;
+            }
+            const adminCheck = await isAdmin();
+            if (adminCheck === false) {
+                window.location.href = '/admin/loginadmin/loginadmin.html';
+            }
+        });
+
+        // State
+        let pendingUsers = [];
+        let selectedUser = null;
+
+        // DOM Elements
+        const pendingList = document.getElementById('pendingList');
+        const pendingCount = document.getElementById('pendingCount');
+        const emptyState = document.getElementById('emptyState');
+
+        const approveModal = document.getElementById('approveModal');
+        const approveUserName = document.getElementById('approveUserName');
+        const cancelApprove = document.getElementById('cancelApprove');
+        const confirmApprove = document.getElementById('confirmApprove');
+
+        const rejectModal = document.getElementById('rejectModal');
+        const rejectUserName = document.getElementById('rejectUserName');
+        const cancelReject = document.getElementById('cancelReject');
+        const confirmReject = document.getElementById('confirmReject');
+
+        // Load pending users
+        async function loadPendingUsers() {
+            try {
+                pendingUsers = await getPendingUsers();
+                updateCount();
+                renderPendingUsers();
+            } catch (error) {
+                console.error('Error loading pending users:', error);
+                pendingList.innerHTML = '<div class="flex items-center justify-center py-12 text-red-400">Erro ao carregar cadastros pendentes</div>';
+            }
+        }
+
+        // Update count badge
+        function updateCount() {
+            const count = pendingUsers.length;
+            if (count === 0) {
+                pendingCount.innerHTML = '<span class="material-symbols-outlined text-lg">check_circle</span><span class="text-sm">Nenhum pendente</span>';
+                pendingCount.className = 'flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary rounded-xl font-semibold';
+            } else {
+                pendingCount.innerHTML = '<span class="material-symbols-outlined text-lg">hourglass_top</span><span class="text-sm">' + count + ' pendente' + (count > 1 ? 's' : '') + '</span>';
+                pendingCount.className = 'flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-400 rounded-xl font-semibold';
+            }
+        }
+
+        // Render pending users
+        function renderPendingUsers() {
+            if (pendingUsers.length === 0) {
+                pendingList.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            pendingList.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            let html = '';
+            pendingUsers.forEach(user => {
+                const hasPhoto = user.photoURL ? true : false;
+                const photoStyle = hasPhoto ? 'background-image: url(' + user.photoURL + ')' : '';
+                const iconHtml = hasPhoto ? '' : '<span class="material-symbols-outlined text-slate-400">person</span>';
+                const dateStr = user.createdAt ? formatRelativeDate(user.createdAt.toDate()) : 'Data desconhecida';
+                const userName = user.name || 'Sem nome';
+
+                html += '<div class="p-4 border-b border-gray-100 dark:border-white/5 last:border-0">';
+                html += '<div class="flex items-center justify-between mb-3">';
+                html += '<div class="flex items-center gap-3">';
+                html += '<div class="w-14 h-14 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center bg-cover bg-center" style="' + photoStyle + '">' + iconHtml + '</div>';
+                html += '<div>';
+                html += '<p class="font-semibold text-lg">' + userName + '</p>';
+                html += '<p class="text-sm text-slate-400">' + user.email + '</p>';
+                html += '<p class="text-xs text-slate-500 mt-1">Cadastro: ' + dateStr + '</p>';
+                html += '</div></div>';
+                html += '<span class="px-3 py-1 bg-amber-500/20 text-amber-400 text-xs font-medium rounded-full">Pendente</span>';
+                html += '</div>';
+
+                // Action buttons
+                html += '<div class="flex gap-3 mt-4">';
+                html += '<button class="reject-btn flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-red-500/10 text-red-400 font-semibold hover:bg-red-500/20 transition-colors" data-uid="' + user.uid + '" data-name="' + userName + '">';
+                html += '<span class="material-symbols-outlined text-lg">close</span>';
+                html += '<span>Rejeitar</span>';
+                html += '</button>';
+                html += '<button class="approve-btn flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-background-dark font-semibold hover:bg-primary/90 transition-colors" data-uid="' + user.uid + '" data-name="' + userName + '">';
+                html += '<span class="material-symbols-outlined text-lg">check</span>';
+                html += '<span>Aprovar</span>';
+                html += '</button>';
+                html += '</div>';
+                html += '</div>';
+            });
+            pendingList.innerHTML = html;
+
+            // Add event handlers
+            document.querySelectorAll('.approve-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedUser = { uid: btn.dataset.uid, name: btn.dataset.name };
+                    approveUserName.textContent = selectedUser.name + ' terá acesso ao sistema.';
+                    showModal(approveModal);
+                });
+            });
+
+            document.querySelectorAll('.reject-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedUser = { uid: btn.dataset.uid, name: btn.dataset.name };
+                    rejectUserName.textContent = selectedUser.name;
+                    showModal(rejectModal);
+                });
+            });
+        }
+
+        // Modal helpers
+        function showModal(modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function hideModal(modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            selectedUser = null;
+        }
+
+        // Approve modal handlers
+        cancelApprove.addEventListener('click', () => hideModal(approveModal));
+        approveModal.addEventListener('click', (e) => { if (e.target === approveModal) hideModal(approveModal); });
+
+        confirmApprove.addEventListener('click', async () => {
+            if (!selectedUser) return;
+
+            confirmApprove.disabled = true;
+            confirmApprove.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span>';
+
+            try {
+                await approveUser(selectedUser.uid);
+                showToast('Usuário aprovado com sucesso!', 'success');
+                hideModal(approveModal);
+                loadPendingUsers();
+            } catch (error) {
+                console.error('Error approving user:', error);
+                showToast('Erro ao aprovar usuário', 'error');
+            }
+
+            confirmApprove.disabled = false;
+            confirmApprove.innerHTML = 'Aprovar';
+        });
+
+        // Reject modal handlers
+        cancelReject.addEventListener('click', () => hideModal(rejectModal));
+        rejectModal.addEventListener('click', (e) => { if (e.target === rejectModal) hideModal(rejectModal); });
+
+        confirmReject.addEventListener('click', async () => {
+            if (!selectedUser) return;
+
+            confirmReject.disabled = true;
+            confirmReject.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span>';
+
+            try {
+                await deleteUser(selectedUser.uid);
+                showToast('Usuário rejeitado e removido', 'success');
+                hideModal(rejectModal);
+                loadPendingUsers();
+            } catch (error) {
+                console.error('Error rejecting user:', error);
+                showToast('Erro ao rejeitar usuário', 'error');
+            }
+
+            confirmReject.disabled = false;
+            confirmReject.innerHTML = 'Rejeitar';
+        });
+
+        // Initialize
+        loadPendingUsers();
+    </script>
+</body>
+</html>
