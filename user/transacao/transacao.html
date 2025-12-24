@@ -189,11 +189,61 @@
         </div>
     </nav>
 
+    <!-- Transaction Options Modal -->
+    <div id="optionsModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
+            <h3 id="optionsTitle" class="text-lg font-bold mb-4">Opções</h3>
+            <div class="space-y-3">
+                <button id="editTransactionBtn" class="w-full py-3 rounded-xl bg-primary/10 text-primary font-semibold flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">edit</span>
+                    Editar Transação
+                </button>
+                <button id="deleteTransactionBtn" class="w-full py-3 rounded-xl bg-red-500/10 text-red-500 font-semibold flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">delete</span>
+                    Excluir Transação
+                </button>
+                <button id="cancelOptionsBtn" class="w-full py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold mb-4">Editar Transação</h3>
+            <form id="editForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Valor</label>
+                    <input type="text" id="editAmount" inputmode="decimal" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary text-lg font-bold"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Data</label>
+                    <input type="date" id="editDate" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Descrição (Opcional)</label>
+                    <input type="text" id="editDescription" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-primary" placeholder="Adicionar nota..."/>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" id="cancelEditBtn" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="saveEditBtn" class="flex-1 py-3 rounded-xl bg-primary text-background-dark font-semibold">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
         <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
             <h3 class="text-lg font-bold mb-2">Excluir transação?</h3>
-            <p class="text-slate-500 text-sm mb-6">Esta ação não pode ser desfeita.</p>
+            <p class="text-slate-500 text-sm mb-2">Esta ação não pode ser desfeita.</p>
+            <p id="deleteImpactInfo" class="text-xs text-amber-500 mb-4 hidden"></p>
             <div class="flex gap-3">
                 <button id="cancelDelete" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">
                     Cancelar
@@ -211,7 +261,7 @@
     <!-- JavaScript -->
     <script type="module">
         import { requireAuth } from '/js/firebase-config.js';
-        import { getTransactions, deleteTransaction, getTransactionsSummary } from '/js/db.js';
+        import { getTransactions, getTransaction, deleteTransaction, updateTransaction, decrementGoalsProgress, updateGoalsProgress, getGoalCategoryForTransaction } from '/js/db.js';
         import { showToast, formatCurrency, formatDate, formatRelativeDate } from '/js/utils.js';
 
         // Wait for auth - must complete before proceeding
@@ -229,6 +279,7 @@
         let startDate = null;
         let endDate = null;
         let transactionToDelete = null;
+        let selectedTransaction = null;
 
         // Category configs
         const categoryConfig = {
@@ -267,7 +318,22 @@
         const endDateInput = document.getElementById('endDate');
         const applyDateFilter = document.getElementById('applyDateFilter');
         const filterChips = document.querySelectorAll('.filter-chip');
+        // Options Modal
+        const optionsModal = document.getElementById('optionsModal');
+        const optionsTitle = document.getElementById('optionsTitle');
+        const editTransactionBtn = document.getElementById('editTransactionBtn');
+        const deleteTransactionBtn = document.getElementById('deleteTransactionBtn');
+        const cancelOptionsBtn = document.getElementById('cancelOptionsBtn');
+        // Edit Modal
+        const editModal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+        const editAmount = document.getElementById('editAmount');
+        const editDate = document.getElementById('editDate');
+        const editDescription = document.getElementById('editDescription');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        // Delete Modal
         const deleteModal = document.getElementById('deleteModal');
+        const deleteImpactInfo = document.getElementById('deleteImpactInfo');
         const cancelDelete = document.getElementById('cancelDelete');
         const confirmDelete = document.getElementById('confirmDelete');
 
@@ -325,8 +391,11 @@
             let expense = 0;
 
             filteredTransactions.forEach(t => {
+                // Apenas type=income conta como receita
+                // Apenas type=expense conta como despesa
+                // Tipos corridas e km são registros de atividade, não financeiros
                 if (t.type === 'income') income += t.amount;
-                else expense += t.amount;
+                else if (t.type === 'expense') expense += t.amount;
             });
 
             const balance = income - expense;
@@ -425,7 +494,7 @@
                     const timeStr = time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
                     const item = document.createElement('div');
-                    item.className = 'group flex items-center justify-between gap-4 px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors rounded-lg';
+                    item.className = 'group flex items-center justify-between gap-4 px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors rounded-lg active:scale-[0.98]';
                     item.innerHTML = `
                         <div class="flex items-center gap-4">
                             <div class="flex items-center justify-center rounded-xl shrink-0 size-12 ${iconBgClass}">
@@ -438,20 +507,17 @@
                         </div>
                         <div class="shrink-0 text-right flex items-center gap-2">
                             <p class="${amountClass} text-base font-bold">${amountPrefix}${amountPrefix ? ' ' : ''}${displayValue}</p>
-                            <button class="delete-btn opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-500/20 transition-all" data-id="${t.id}">
-                                <span class="material-symbols-outlined text-red-500 text-[20px]">delete</span>
-                            </button>
+                            <span class="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
                         </div>
                     `;
                     transactionList.appendChild(item);
 
-                    // Delete button handler
-                    const deleteBtn = item.querySelector('.delete-btn');
-                    deleteBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        transactionToDelete = t.id;
-                        deleteModal.classList.remove('hidden');
-                        deleteModal.classList.add('flex');
+                    // Click handler to open options modal
+                    item.addEventListener('click', () => {
+                        selectedTransaction = t;
+                        optionsTitle.textContent = cat.label;
+                        optionsModal.classList.remove('hidden');
+                        optionsModal.classList.add('flex');
                     });
                 });
             });
@@ -496,35 +562,172 @@
             });
         });
 
-        // Delete modal handlers
-        cancelDelete.addEventListener('click', () => {
+        // ========================================
+        // Options Modal Handlers
+        // ========================================
+        function closeOptionsModal() {
+            optionsModal.classList.add('hidden');
+            optionsModal.classList.remove('flex');
+        }
+
+        cancelOptionsBtn.addEventListener('click', closeOptionsModal);
+        optionsModal.addEventListener('click', (e) => {
+            if (e.target === optionsModal) closeOptionsModal();
+        });
+
+        // Edit button handler
+        editTransactionBtn.addEventListener('click', () => {
+            if (!selectedTransaction) return;
+            closeOptionsModal();
+
+            // Get transaction date
+            const txDate = selectedTransaction.date.toDate ? selectedTransaction.date.toDate() : new Date(selectedTransaction.date);
+            const dateStr = txDate.toISOString().split('T')[0];
+
+            // Check if currency or integer value
+            const isCurrency = selectedTransaction.type === 'income' || selectedTransaction.type === 'expense';
+
+            // Populate edit form
+            if (isCurrency) {
+                editAmount.value = selectedTransaction.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else {
+                editAmount.value = selectedTransaction.amount.toLocaleString('pt-BR');
+            }
+            editDate.value = dateStr;
+            editDescription.value = selectedTransaction.description || '';
+
+            // Show edit modal
+            editModal.classList.remove('hidden');
+            editModal.classList.add('flex');
+        });
+
+        // Delete button handler
+        deleteTransactionBtn.addEventListener('click', () => {
+            if (!selectedTransaction) return;
+            closeOptionsModal();
+
+            // Show impact info if transaction affects goals
+            const goalCategory = getGoalCategoryForTransaction(selectedTransaction.type);
+            if (goalCategory) {
+                const isCurrency = selectedTransaction.type === 'income';
+                const valueDisplay = isCurrency ? formatCurrency(selectedTransaction.amount) : `${selectedTransaction.amount}`;
+                deleteImpactInfo.textContent = `Isso irá remover ${valueDisplay} do progresso das suas metas de ${goalCategory}.`;
+                deleteImpactInfo.classList.remove('hidden');
+            } else {
+                deleteImpactInfo.classList.add('hidden');
+            }
+
+            // Show delete modal
+            transactionToDelete = selectedTransaction.id;
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
+        });
+
+        // ========================================
+        // Edit Modal Handlers
+        // ========================================
+        function closeEditModal() {
+            editModal.classList.add('hidden');
+            editModal.classList.remove('flex');
+        }
+
+        cancelEditBtn.addEventListener('click', closeEditModal);
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) closeEditModal();
+        });
+
+        // Parse value from formatted string
+        function parseValue(str) {
+            return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+        }
+
+        // Save edit handler
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!selectedTransaction) return;
+
+            const newAmount = parseValue(editAmount.value);
+            if (newAmount <= 0) {
+                showToast('Digite um valor válido', 'error');
+                return;
+            }
+
+            const newDate = editDate.value;
+            if (!newDate) {
+                showToast('Selecione uma data', 'error');
+                return;
+            }
+
+            try {
+                const oldAmount = selectedTransaction.amount;
+                const goalCategory = getGoalCategoryForTransaction(selectedTransaction.type);
+
+                // Update transaction
+                await updateTransaction(selectedTransaction.id, {
+                    amount: newAmount,
+                    date: newDate + 'T12:00:00',
+                    description: editDescription.value.trim() || null
+                });
+
+                // Update goal progress if applicable
+                if (goalCategory) {
+                    const difference = newAmount - oldAmount;
+                    if (difference > 0) {
+                        // Value increased - add to goals
+                        await updateGoalsProgress(difference, goalCategory);
+                    } else if (difference < 0) {
+                        // Value decreased - subtract from goals
+                        await decrementGoalsProgress(Math.abs(difference), goalCategory);
+                    }
+                }
+
+                showToast('Transação atualizada!', 'success');
+                closeEditModal();
+                selectedTransaction = null;
+                await loadTransactions();
+            } catch (error) {
+                console.error('Error updating transaction:', error);
+                showToast('Erro ao atualizar', 'error');
+            }
+        });
+
+        // ========================================
+        // Delete Modal Handlers
+        // ========================================
+        function closeDeleteModal() {
             deleteModal.classList.add('hidden');
             deleteModal.classList.remove('flex');
             transactionToDelete = null;
+            deleteImpactInfo.classList.add('hidden');
+        }
+
+        cancelDelete.addEventListener('click', closeDeleteModal);
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) closeDeleteModal();
         });
 
         confirmDelete.addEventListener('click', async () => {
-            if (!transactionToDelete) return;
+            if (!transactionToDelete || !selectedTransaction) return;
+
             try {
+                const goalCategory = getGoalCategoryForTransaction(selectedTransaction.type);
+                const amount = selectedTransaction.amount;
+
+                // Delete transaction
                 await deleteTransaction(transactionToDelete);
+
+                // Decrement goal progress if applicable
+                if (goalCategory && amount > 0) {
+                    await decrementGoalsProgress(amount, goalCategory);
+                }
+
                 showToast('Transação excluída', 'success');
+                closeDeleteModal();
+                selectedTransaction = null;
                 await loadTransactions();
             } catch (error) {
                 console.error('Error deleting transaction:', error);
                 showToast('Erro ao excluir', 'error');
-            } finally {
-                deleteModal.classList.add('hidden');
-                deleteModal.classList.remove('flex');
-                transactionToDelete = null;
-            }
-        });
-
-        // Close modal on backdrop click
-        deleteModal.addEventListener('click', (e) => {
-            if (e.target === deleteModal) {
-                deleteModal.classList.add('hidden');
-                deleteModal.classList.remove('flex');
-                transactionToDelete = null;
             }
         });
 

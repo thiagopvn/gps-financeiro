@@ -248,9 +248,12 @@ export const getTransactionsSummary = async (startDate, endDate) => {
     };
 
     transactions.forEach(t => {
+        // Apenas type=income conta como receita
+        // Apenas type=expense conta como despesa
+        // Tipos corridas e km são registros de atividade, não financeiros
         if (t.type === 'income') {
             summary.income += t.amount;
-        } else {
+        } else if (t.type === 'expense') {
             summary.expenses += t.amount;
         }
     });
@@ -555,6 +558,77 @@ export const updateGoalsProgress = async (amount, category) => {
     }
 
     console.log('=== FIM updateGoalsProgress ===');
+};
+
+/**
+ * Decrement goals progress when transaction is deleted/edited
+ * @param {number} amount - Amount to subtract from goals
+ * @param {string} category - Category to filter goals (receita, economia, corridas, km)
+ */
+export const decrementGoalsProgress = async (amount, category) => {
+    console.log('=== decrementGoalsProgress ===');
+    console.log('Parametros recebidos:', { amount, category });
+
+    // Validate category
+    if (!category || typeof category !== 'string') {
+        console.error('ERRO: categoria invalida:', category);
+        return;
+    }
+
+    // Validate amount
+    if (typeof amount !== 'number' || amount <= 0 || isNaN(amount)) {
+        console.error('ERRO: valor invalido:', amount);
+        return;
+    }
+
+    // Normalize category
+    const targetCategory = String(category).toLowerCase().trim();
+    console.log('Categoria alvo (normalizada):', targetCategory);
+
+    // Get all goals
+    const goals = await getGoals();
+    console.log('Total de metas:', goals.length);
+
+    // Filter and update only matching goals
+    for (const goal of goals) {
+        const goalCat = String(goal.category || '').toLowerCase().trim();
+
+        console.log(`Comparando: meta "${goal.name}" categoria="${goalCat}" vs alvo="${targetCategory}"`);
+
+        // STRICT comparison - must match exactly
+        if (goalCat !== targetCategory) {
+            console.log(`>>> IGNORANDO "${goal.name}" - categorias diferentes`);
+            continue;
+        }
+
+        console.log(`>>> DECREMENTANDO "${goal.name}"`);
+
+        // Calculate new value (minimum 0)
+        const oldValue = goal.current || 0;
+        const newValue = Math.max(0, oldValue - amount);
+
+        console.log(`Calculo: ${oldValue} - ${amount} = ${newValue}`);
+
+        // Update in database
+        await updateGoal(goal.id, { current: newValue });
+        console.log(`Meta "${goal.name}" atualizada para ${newValue}`);
+    }
+
+    console.log('=== FIM decrementGoalsProgress ===');
+};
+
+/**
+ * Get the goal category for a transaction type
+ * @param {string} transactionType - Transaction type (income, expense, corridas, km)
+ * @returns {string|null} Goal category or null
+ */
+export const getGoalCategoryForTransaction = (transactionType) => {
+    switch (transactionType) {
+        case 'income': return 'receita';
+        case 'corridas': return 'corridas';
+        case 'km': return 'km';
+        default: return null;
+    }
 };
 
 /**

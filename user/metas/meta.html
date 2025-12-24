@@ -89,11 +89,24 @@
         </section>
 
         <!-- Filter Chips -->
-        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-4">
+        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-4">
             <button class="filter-chip active px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all" data-filter="all">Todas</button>
-            <button class="filter-chip px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 rounded-full text-sm whitespace-nowrap transition-all" data-filter="receita">Receita</button>
-            <button class="filter-chip px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 rounded-full text-sm whitespace-nowrap transition-all" data-filter="economia">Economia</button>
-            <button class="filter-chip px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 rounded-full text-sm whitespace-nowrap transition-all" data-filter="corridas">Corridas</button>
+            <button class="filter-chip px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 rounded-full text-sm whitespace-nowrap transition-all flex items-center gap-1.5" data-filter="receita">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Receita
+            </button>
+            <button class="filter-chip px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 rounded-full text-sm whitespace-nowrap transition-all flex items-center gap-1.5" data-filter="economia">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                Economia
+            </button>
+            <button class="filter-chip px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 rounded-full text-sm whitespace-nowrap transition-all flex items-center gap-1.5" data-filter="corridas">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                Corridas
+            </button>
+            <button class="filter-chip px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 rounded-full text-sm whitespace-nowrap transition-all flex items-center gap-1.5" data-filter="km">
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                Km
+            </button>
         </div>
 
         <!-- Goals List -->
@@ -225,27 +238,60 @@
         let selectedGoalId = null;
         let selectedGoalData = null;
 
-        // Category config
+        // Category config with fixed colors (matching transaction colors)
         const categoryConfig = {
-            receita: { icon: 'trending_up', label: 'Receita' },
-            economia: { icon: 'savings', label: 'Economia' },
-            corridas: { icon: 'directions_car', label: 'Corridas' },
-            km: { icon: 'speed', label: 'Quilometragem' }
-        };
-
-        const colorClasses = {
-            green: { bg: 'bg-green-500', bgLight: 'bg-green-500/20', text: 'text-green-500' },
-            blue: { bg: 'bg-blue-500', bgLight: 'bg-blue-500/20', text: 'text-blue-500' },
-            yellow: { bg: 'bg-yellow-500', bgLight: 'bg-yellow-500/20', text: 'text-yellow-500' },
-            purple: { bg: 'bg-purple-500', bgLight: 'bg-purple-500/20', text: 'text-purple-500' },
-            red: { bg: 'bg-red-500', bgLight: 'bg-red-500/20', text: 'text-red-500' },
-            orange: { bg: 'bg-orange-500', bgLight: 'bg-orange-500/20', text: 'text-orange-500' }
+            receita: {
+                icon: 'trending_up',
+                label: 'Receita',
+                bg: 'bg-emerald-500',
+                bgLight: 'bg-emerald-500/15',
+                bgGradient: 'from-emerald-500/20 to-emerald-500/5',
+                text: 'text-emerald-500',
+                border: 'border-emerald-500/30',
+                shadow: 'shadow-emerald-500/20'
+            },
+            economia: {
+                icon: 'savings',
+                label: 'Economia',
+                bg: 'bg-amber-500',
+                bgLight: 'bg-amber-500/15',
+                bgGradient: 'from-amber-500/20 to-amber-500/5',
+                text: 'text-amber-500',
+                border: 'border-amber-500/30',
+                shadow: 'shadow-amber-500/20'
+            },
+            corridas: {
+                icon: 'directions_car',
+                label: 'Corridas',
+                bg: 'bg-blue-500',
+                bgLight: 'bg-blue-500/15',
+                bgGradient: 'from-blue-500/20 to-blue-500/5',
+                text: 'text-blue-500',
+                border: 'border-blue-500/30',
+                shadow: 'shadow-blue-500/20'
+            },
+            km: {
+                icon: 'speed',
+                label: 'Quilometragem',
+                bg: 'bg-purple-500',
+                bgLight: 'bg-purple-500/15',
+                bgGradient: 'from-purple-500/20 to-purple-500/5',
+                text: 'text-purple-500',
+                border: 'border-purple-500/30',
+                shadow: 'shadow-purple-500/20'
+            }
         };
 
         const typeLabels = {
             daily: 'Meta diária',
             weekly: 'Meta semanal',
             monthly: 'Meta mensal'
+        };
+
+        const typeIcons = {
+            daily: 'today',
+            weekly: 'date_range',
+            monthly: 'calendar_month'
         };
 
         // DOM Elements
@@ -348,48 +394,99 @@
             emptyState.classList.remove('flex');
 
             filteredGoals.forEach(goal => {
-                const cat = categoryConfig[goal.category] || { icon: 'flag', label: 'Meta' };
-                const color = colorClasses[goal.color] || colorClasses.green;
+                // Use category-based colors (ignoring goal.color from database)
+                const cat = categoryConfig[goal.category] || {
+                    icon: 'flag',
+                    label: 'Meta',
+                    bg: 'bg-gray-500',
+                    bgLight: 'bg-gray-500/15',
+                    bgGradient: 'from-gray-500/20 to-gray-500/5',
+                    text: 'text-gray-500',
+                    border: 'border-gray-500/30',
+                    shadow: 'shadow-gray-500/20'
+                };
                 const progress = Math.min(Math.round((goal.current / goal.target) * 100), 100);
+                const typeLabel = typeLabels[goal.type] || 'Meta';
+                const typeIcon = typeIcons[goal.type] || 'flag';
 
                 const isCurrency = goal.category === 'receita' || goal.category === 'economia';
-                const currentDisplay = isCurrency ? formatCurrency(goal.current) : `${goal.current} ${goal.category === 'km' ? 'km' : ''}`;
-                const targetDisplay = isCurrency ? formatCurrency(goal.target) : `${goal.target} ${goal.category === 'km' ? 'km' : ''}`;
+                const currentDisplay = isCurrency ? formatCurrency(goal.current) : `${goal.current}`;
+                const targetDisplay = isCurrency ? formatCurrency(goal.target) : `${goal.target}`;
+                const unitLabel = goal.category === 'km' ? ' km' : (goal.category === 'corridas' ? ' corridas' : '');
+
+                const isComplete = progress >= 100;
+                const isNearComplete = progress >= 75 && progress < 100;
 
                 const card = document.createElement('div');
-                card.className = 'group bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-white/5 shadow-sm transition-all';
+                card.className = `relative overflow-hidden rounded-xl border ${cat.border} bg-gradient-to-br ${cat.bgGradient} p-4 transition-all hover:shadow-lg ${cat.shadow}`;
                 card.innerHTML = `
-                    <div class="flex justify-between items-center mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full ${color.bgLight} flex items-center justify-center">
-                                <span class="material-symbols-outlined ${color.text} text-xl">${cat.icon}</span>
+                    <!-- Background decorative element -->
+                    <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full ${cat.bgLight} blur-2xl opacity-60"></div>
+
+                    <div class="relative z-10">
+                        <!-- Header -->
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl ${cat.bgLight} ${cat.border} border">
+                                    <span class="material-symbols-outlined ${cat.text} text-2xl">${cat.icon}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-white text-base font-bold leading-tight">${goal.name}</span>
+                                    <div class="flex items-center gap-1 mt-0.5">
+                                        <span class="material-symbols-outlined text-slate-400 text-[12px]">${typeIcon}</span>
+                                        <span class="text-slate-400 text-xs font-medium">${typeLabel}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-semibold">${goal.name}</h3>
-                                <p class="text-xs text-slate-400">${typeLabels[goal.type] || 'Meta'}</p>
+                            <button class="options-btn text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10" data-id="${goal.id}" data-name="${goal.name}">
+                                <span class="material-symbols-outlined">more_vert</span>
+                            </button>
+                        </div>
+
+                        <!-- Progress section -->
+                        <div class="flex items-end justify-between mb-2">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-400 font-medium uppercase tracking-wide mb-1">Progresso</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="${cat.text} text-3xl font-bold">${progress}</span>
+                                    <span class="${cat.text} text-lg font-bold">%</span>
+                                </div>
+                            </div>
+                            ${isComplete ? `
+                                <div class="flex items-center gap-1 ${cat.bgLight} ${cat.border} border px-3 py-1.5 rounded-full">
+                                    <span class="material-symbols-outlined ${cat.text} text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                    <span class="${cat.text} text-xs font-bold">Concluída</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Progress bar -->
+                        <div class="h-3 w-full bg-black/20 rounded-full overflow-hidden mb-4">
+                            <div class="h-full ${cat.bg} rounded-full transition-all duration-700 ease-out ${isComplete ? 'animate-pulse' : ''}"
+                                 style="width: ${progress}%">
                             </div>
                         </div>
-                        <button class="options-btn text-slate-400 hover:text-white transition-colors p-1" data-id="${goal.id}" data-name="${goal.name}">
-                            <span class="material-symbols-outlined">more_vert</span>
-                        </button>
-                    </div>
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-2xl font-bold">${targetDisplay}</span>
-                        <span class="text-sm font-medium ${color.text}">${progress}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="${color.bg} h-2.5 rounded-full transition-all duration-500" style="width: ${progress}%"></div>
-                    </div>
-                    <div class="flex justify-between mt-2 text-xs text-slate-400 font-medium">
-                        <span>Atual: ${currentDisplay}</span>
-                        <span>Alvo: ${targetDisplay}</span>
-                    </div>
-                    ${progress >= 100 ? `
-                        <div class="mt-3 flex items-center gap-2 text-sm ${color.text} font-semibold">
-                            <span class="material-symbols-outlined text-lg">check_circle</span>
-                            Meta atingida!
+
+                        <!-- Stats -->
+                        <div class="flex items-center justify-between p-3 bg-black/10 rounded-lg">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-400 font-medium uppercase tracking-wide">Atual</span>
+                                <span class="${cat.text} text-sm font-bold">${currentDisplay}${unitLabel}</span>
+                            </div>
+                            <div class="h-8 w-px bg-white/10"></div>
+                            <div class="flex flex-col items-end">
+                                <span class="text-[10px] text-slate-400 font-medium uppercase tracking-wide">Meta</span>
+                                <span class="text-white text-sm font-bold">${targetDisplay}${unitLabel}</span>
+                            </div>
                         </div>
-                    ` : ''}
+
+                        ${isNearComplete && !isComplete ? `
+                            <div class="mt-3 flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined ${cat.text} text-[14px]">rocket_launch</span>
+                                <span class="${cat.text} text-xs font-medium">Quase lá! Faltam ${100 - progress}%</span>
+                            </div>
+                        ` : ''}
+                    </div>
                 `;
                 goalsList.appendChild(card);
 

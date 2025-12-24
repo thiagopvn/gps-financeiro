@@ -145,13 +145,19 @@
         <!-- Goals Section -->
         <div class="flex flex-col">
             <div class="flex items-center justify-between mb-4 px-1">
-                <h2 class="text-gray-900 dark:text-white text-lg font-bold">Metas</h2>
-                <a href="/user/metas/meta.html" class="text-primary text-sm font-medium hover:text-primary/80">Editar metas</a>
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">flag</span>
+                    <h2 class="text-gray-900 dark:text-white text-lg font-bold">Suas Metas</h2>
+                </div>
+                <a href="/user/metas/meta.html" class="flex items-center gap-1 text-primary text-sm font-medium hover:text-primary/80 transition-colors group">
+                    <span>Gerenciar</span>
+                    <span class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+                </a>
             </div>
-            <div id="goalsContainer" class="flex flex-col gap-4 rounded-xl bg-surface-light dark:bg-surface-dark p-5 border border-gray-100 dark:border-white/5 shadow-sm">
+            <div id="goalsContainer" class="flex flex-col">
                 <!-- Goals will be loaded dynamically -->
-                <div class="text-center py-4 text-gray-400">
-                    <span class="material-symbols-outlined text-4xl mb-2">flag</span>
+                <div class="text-center py-8 text-gray-400">
+                    <span class="material-symbols-outlined text-4xl mb-2 animate-spin">progress_activity</span>
                     <p class="text-sm">Carregando metas...</p>
                 </div>
             </div>
@@ -286,27 +292,60 @@
             });
         });
 
-        // Category and color configs for goals
+        // Category config with fixed colors per category (matching transaction colors)
         const categoryConfig = {
-            receita: { icon: 'trending_up', label: 'Receita' },
-            economia: { icon: 'savings', label: 'Economia' },
-            corridas: { icon: 'directions_car', label: 'Corridas' },
-            km: { icon: 'speed', label: 'Quilometragem' }
-        };
-
-        const colorClasses = {
-            green: { bg: 'bg-primary', bgLight: 'bg-primary/20', text: 'text-primary' },
-            blue: { bg: 'bg-blue-500', bgLight: 'bg-blue-500/20', text: 'text-blue-500' },
-            yellow: { bg: 'bg-yellow-400', bgLight: 'bg-yellow-400/20', text: 'text-yellow-400' },
-            purple: { bg: 'bg-purple-500', bgLight: 'bg-purple-500/20', text: 'text-purple-500' },
-            orange: { bg: 'bg-orange-500', bgLight: 'bg-orange-500/20', text: 'text-orange-500' },
-            red: { bg: 'bg-red-500', bgLight: 'bg-red-500/20', text: 'text-red-500' }
+            receita: {
+                icon: 'trending_up',
+                label: 'Receita',
+                bg: 'bg-emerald-500',
+                bgLight: 'bg-emerald-500/15',
+                bgGradient: 'from-emerald-500/20 to-emerald-500/5',
+                text: 'text-emerald-500',
+                border: 'border-emerald-500/30',
+                shadow: 'shadow-emerald-500/20'
+            },
+            economia: {
+                icon: 'savings',
+                label: 'Economia',
+                bg: 'bg-amber-500',
+                bgLight: 'bg-amber-500/15',
+                bgGradient: 'from-amber-500/20 to-amber-500/5',
+                text: 'text-amber-500',
+                border: 'border-amber-500/30',
+                shadow: 'shadow-amber-500/20'
+            },
+            corridas: {
+                icon: 'directions_car',
+                label: 'Corridas',
+                bg: 'bg-blue-500',
+                bgLight: 'bg-blue-500/15',
+                bgGradient: 'from-blue-500/20 to-blue-500/5',
+                text: 'text-blue-500',
+                border: 'border-blue-500/30',
+                shadow: 'shadow-blue-500/20'
+            },
+            km: {
+                icon: 'speed',
+                label: 'Quilometragem',
+                bg: 'bg-purple-500',
+                bgLight: 'bg-purple-500/15',
+                bgGradient: 'from-purple-500/20 to-purple-500/5',
+                text: 'text-purple-500',
+                border: 'border-purple-500/30',
+                shadow: 'shadow-purple-500/20'
+            }
         };
 
         const typeLabels = {
             daily: 'Diária',
             weekly: 'Semanal',
             monthly: 'Mensal'
+        };
+
+        const typeIcons = {
+            daily: 'today',
+            weekly: 'date_range',
+            monthly: 'calendar_month'
         };
 
         // Load goals
@@ -318,13 +357,19 @@
 
             if (goals.length === 0) {
                 goalsContainer.innerHTML = `
-                    <div class="text-center py-4">
-                        <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">flag</span>
-                        <p class="text-gray-400 text-sm mb-3">Você ainda não tem metas</p>
-                        <a href="/user/newmeta/newmeta.html" class="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:underline">
-                            <span class="material-symbols-outlined text-[18px]">add</span>
-                            Criar primeira meta
-                        </a>
+                    <div class="relative overflow-hidden rounded-xl border border-dashed border-gray-300 dark:border-white/20 bg-gradient-to-br from-gray-50 to-white dark:from-surface-dark dark:to-background-dark p-6 text-center">
+                        <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/10 blur-3xl"></div>
+                        <div class="relative z-10">
+                            <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-4">
+                                <span class="material-symbols-outlined text-primary text-3xl">flag</span>
+                            </div>
+                            <h3 class="text-gray-900 dark:text-white font-bold mb-1">Defina suas metas</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Acompanhe seu progresso e alcance seus objetivos</p>
+                            <a href="/user/newmeta/newmeta.html" class="inline-flex items-center gap-2 bg-primary text-background-dark px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                                <span class="material-symbols-outlined text-[18px]">add</span>
+                                Criar primeira meta
+                            </a>
+                        </div>
                     </div>
                 `;
                 return;
@@ -336,63 +381,109 @@
 
             // Render goals (max 3)
             const displayGoals = goals.slice(0, 3);
-            let html = '';
+            let html = '<div class="grid gap-3">';
 
-            displayGoals.forEach((goal, index) => {
+            displayGoals.forEach((goal) => {
                 const progress = Math.min(100, Math.round((goal.current / goal.target) * 100));
-                const cat = categoryConfig[goal.category] || { icon: 'flag', label: 'Meta' };
-                const color = colorClasses[goal.color] || colorClasses.green;
+                // Use category-based colors (ignoring goal.color from database)
+                const cat = categoryConfig[goal.category] || {
+                    icon: 'flag',
+                    label: 'Meta',
+                    bg: 'bg-gray-500',
+                    bgLight: 'bg-gray-500/15',
+                    bgGradient: 'from-gray-500/20 to-gray-500/5',
+                    text: 'text-gray-500',
+                    border: 'border-gray-500/30',
+                    shadow: 'shadow-gray-500/20'
+                };
                 const typeLabel = typeLabels[goal.type] || 'Meta';
+                const typeIcon = typeIcons[goal.type] || 'flag';
 
                 const isCurrency = goal.category === 'receita' || goal.category === 'economia';
                 const currentDisplay = isCurrency ? formatCurrency(goal.current) : `${goal.current}`;
                 const targetDisplay = isCurrency ? formatCurrency(goal.target) : `${goal.target}`;
+                const unitLabel = goal.category === 'km' ? ' km' : (goal.category === 'corridas' ? ' corridas' : '');
 
-                if (index > 0) {
-                    html += '<div class="h-px bg-gray-200 dark:bg-white/5 w-full"></div>';
-                }
+                // Determine status
+                const isComplete = progress >= 100;
+                const isNearComplete = progress >= 75 && progress < 100;
 
                 html += `
-                    <div class="flex flex-col gap-2">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-lg ${color.bgLight} flex items-center justify-center">
-                                    <span class="material-symbols-outlined ${color.text} text-[18px]">${cat.icon}</span>
+                    <div class="relative overflow-hidden rounded-xl border ${cat.border} bg-gradient-to-br ${cat.bgGradient} p-4 transition-all hover:shadow-lg ${cat.shadow}">
+                        <!-- Background decorative element -->
+                        <div class="absolute -right-4 -top-4 h-20 w-20 rounded-full ${cat.bgLight} blur-2xl opacity-60"></div>
+
+                        <div class="relative z-10">
+                            <!-- Header -->
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl ${cat.bgLight} ${cat.border} border">
+                                        <span class="material-symbols-outlined ${cat.text} text-xl">${cat.icon}</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-gray-900 dark:text-white text-sm font-bold leading-tight">${goal.name}</span>
+                                        <div class="flex items-center gap-1 mt-0.5">
+                                            <span class="material-symbols-outlined text-gray-400 text-[12px]">${typeIcon}</span>
+                                            <span class="text-gray-500 dark:text-gray-400 text-[10px] font-medium">${typeLabel}</span>
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="flex flex-col items-end">
+                                    <span class="${cat.text} text-lg font-bold">${progress}%</span>
+                                    ${isComplete ? `
+                                        <span class="material-symbols-outlined ${cat.text} text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                    ` : ''}
+                                </div>
+                            </div>
+
+                            <!-- Progress bar -->
+                            <div class="h-2.5 w-full bg-gray-200/50 dark:bg-black/30 rounded-full overflow-hidden mb-3">
+                                <div class="h-full ${cat.bg} rounded-full transition-all duration-700 ease-out ${isComplete ? 'animate-pulse' : ''}"
+                                     style="width: ${progress}%">
+                                </div>
+                            </div>
+
+                            <!-- Footer stats -->
+                            <div class="flex items-center justify-between">
                                 <div class="flex flex-col">
-                                    <span class="text-gray-900 dark:text-white text-sm font-semibold leading-tight">${goal.name}</span>
-                                    <span class="text-gray-500 dark:text-gray-400 text-[10px]">${typeLabel}</span>
+                                    <span class="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Atual</span>
+                                    <span class="${cat.text} text-sm font-bold balance-value" data-value="${goal.current}">
+                                        ${isHidden ? '••••' : currentDisplay}${!isCurrency ? unitLabel : ''}
+                                    </span>
+                                </div>
+                                <div class="h-8 w-px bg-gray-200 dark:bg-white/10"></div>
+                                <div class="flex flex-col items-end">
+                                    <span class="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Meta</span>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm font-bold">
+                                        ${targetDisplay}${!isCurrency ? unitLabel : ''}
+                                    </span>
                                 </div>
                             </div>
-                            <span class="${color.text} text-sm font-bold">${progress}%</span>
+
+                            ${isComplete ? `
+                                <div class="mt-3 pt-3 border-t ${cat.border} flex items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined ${cat.text} text-[16px]">celebration</span>
+                                    <span class="${cat.text} text-xs font-bold">Meta atingida!</span>
+                                </div>
+                            ` : isNearComplete ? `
+                                <div class="mt-3 pt-3 border-t ${cat.border} flex items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined ${cat.text} text-[14px]">trending_up</span>
+                                    <span class="${cat.text} text-xs font-medium">Quase lá! Faltam ${100 - progress}%</span>
+                                </div>
+                            ` : ''}
                         </div>
-                        <div class="h-2 w-full bg-gray-200 dark:bg-black/40 rounded-full overflow-hidden">
-                            <div class="h-full ${color.bg} rounded-full transition-all duration-500 ${progress >= 100 ? 'animate-pulse' : ''}" style="width: ${progress}%"></div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <p class="text-gray-500 dark:text-gray-400 text-xs balance-value" data-value="${goal.current}">
-                                ${isHidden ? '••••' : currentDisplay}
-                            </p>
-                            <p class="text-gray-500 dark:text-gray-400 text-xs">
-                                Meta: ${targetDisplay}
-                            </p>
-                        </div>
-                        ${progress >= 100 ? `
-                            <div class="flex items-center gap-1 ${color.text} text-xs font-semibold">
-                                <span class="material-symbols-outlined text-[14px]">check_circle</span>
-                                Meta atingida!
-                            </div>
-                        ` : ''}
                     </div>
                 `;
             });
 
+            html += '</div>';
+
             // Add "Ver todas" link if there are more goals
             if (goals.length > 3) {
                 html += `
-                    <div class="h-px bg-gray-200 dark:bg-white/5 w-full"></div>
-                    <a href="/user/metas/meta.html" class="text-center text-primary text-sm font-semibold py-1 hover:underline">
-                        Ver todas as ${goals.length} metas
+                    <a href="/user/metas/meta.html" class="mt-4 flex items-center justify-center gap-2 text-primary text-sm font-semibold py-2 hover:underline group">
+                        <span>Ver todas as ${goals.length} metas</span>
+                        <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
                     </a>
                 `;
             }
