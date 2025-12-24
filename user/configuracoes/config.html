@@ -200,6 +200,26 @@
                 </div>
             </div>
 
+            <!-- Section: Segurança -->
+            <div class="mt-6">
+                <h3 class="px-6 pb-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Segurança</h3>
+                <div class="mx-4 flex flex-col bg-white dark:bg-surface-dark rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-white/5 divide-y divide-slate-100 dark:divide-white/5">
+                    <!-- Item: Alterar Senha -->
+                    <button id="changePasswordBtn" class="flex items-center justify-between w-full p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center size-10 rounded-full bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 shrink-0">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">lock</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-base font-medium">Alterar Senha</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Atualize sua senha de acesso</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors" style="font-size: 20px;">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Danger Zone / Logout -->
             <div class="mt-8 mx-4">
                 <button id="logoutBtn" class="flex items-center justify-center w-full p-4 gap-3 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl transition-colors font-semibold border border-red-100 dark:border-red-500/20">
@@ -279,6 +299,52 @@
         </div>
     </div>
 
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
+            <h3 class="text-lg font-bold mb-4">Alterar Senha</h3>
+            <form id="changePasswordForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-500 mb-1">Senha Atual</label>
+                    <div class="relative">
+                        <input type="password" id="currentPassword" required class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 pr-12 border-none focus:ring-2 focus:ring-primary"/>
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-500 mb-1">Nova Senha</label>
+                    <div class="relative">
+                        <input type="password" id="newPassword" required minlength="6" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 pr-12 border-none focus:ring-2 focus:ring-primary"/>
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Mínimo 6 caracteres</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-500 mb-1">Confirmar Nova Senha</label>
+                    <div class="relative">
+                        <input type="password" id="confirmPassword" required minlength="6" class="w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-3 pr-12 border-none focus:ring-2 focus:ring-primary"/>
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="passwordError" class="hidden text-red-500 text-sm"></div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" id="cancelPasswordBtn" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="submitPasswordBtn" class="flex-1 py-3 rounded-xl bg-primary text-background-dark font-semibold">
+                        Alterar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
 
@@ -289,6 +355,7 @@
         import { getUserProfile, updateUserProfile, uploadProfilePhoto, exportUserData, importUserData } from '/js/db.js';
         import { showToast, applyPhoneMask } from '/js/utils.js';
         import { doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { db } from '/js/firebase-config.js';
 
         // Wait for auth
@@ -322,6 +389,17 @@
         const editPhone = document.getElementById('editPhone');
         const editVehicle = document.getElementById('editVehicle');
         const editPlate = document.getElementById('editPlate');
+
+        // Change password elements
+        const changePasswordBtn = document.getElementById('changePasswordBtn');
+        const changePasswordModal = document.getElementById('changePasswordModal');
+        const changePasswordForm = document.getElementById('changePasswordForm');
+        const cancelPasswordBtn = document.getElementById('cancelPasswordBtn');
+        const currentPasswordInput = document.getElementById('currentPassword');
+        const newPasswordInput = document.getElementById('newPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const passwordError = document.getElementById('passwordError');
+        const submitPasswordBtn = document.getElementById('submitPasswordBtn');
 
         // Apply phone mask
         applyPhoneMask(editPhone);
@@ -403,6 +481,114 @@
             editProfileModal.classList.add('hidden');
             editProfileModal.classList.remove('flex');
         }
+
+        // Change password modal
+        changePasswordBtn.addEventListener('click', () => {
+            // Check if user logged in with email/password
+            const user = auth.currentUser;
+            if (user) {
+                const providers = user.providerData.map(p => p.providerId);
+                if (!providers.includes('password')) {
+                    showToast('Você entrou com Google. Use a recuperação de senha do Google.', 'warning');
+                    return;
+                }
+            }
+            changePasswordModal.classList.remove('hidden');
+            changePasswordModal.classList.add('flex');
+            currentPasswordInput.focus();
+        });
+
+        cancelPasswordBtn.addEventListener('click', closePasswordModal);
+        changePasswordModal.addEventListener('click', (e) => {
+            if (e.target === changePasswordModal) closePasswordModal();
+        });
+
+        function closePasswordModal() {
+            changePasswordModal.classList.add('hidden');
+            changePasswordModal.classList.remove('flex');
+            changePasswordForm.reset();
+            passwordError.classList.add('hidden');
+            passwordError.textContent = '';
+        }
+
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = btn.parentElement.querySelector('input');
+                const icon = btn.querySelector('.material-symbols-outlined');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.textContent = 'visibility_off';
+                } else {
+                    input.type = 'password';
+                    icon.textContent = 'visibility';
+                }
+            });
+        });
+
+        // Change password form submit
+        changePasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            passwordError.classList.add('hidden');
+
+            const currentPassword = currentPasswordInput.value;
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Validate passwords match
+            if (newPassword !== confirmPassword) {
+                passwordError.textContent = 'As senhas não coincidem.';
+                passwordError.classList.remove('hidden');
+                return;
+            }
+
+            // Validate password length
+            if (newPassword.length < 6) {
+                passwordError.textContent = 'A nova senha deve ter pelo menos 6 caracteres.';
+                passwordError.classList.remove('hidden');
+                return;
+            }
+
+            // Validate new password is different
+            if (currentPassword === newPassword) {
+                passwordError.textContent = 'A nova senha deve ser diferente da atual.';
+                passwordError.classList.remove('hidden');
+                return;
+            }
+
+            submitPasswordBtn.disabled = true;
+            submitPasswordBtn.textContent = 'Alterando...';
+
+            try {
+                const user = auth.currentUser;
+
+                // Re-authenticate user
+                const credential = EmailAuthProvider.credential(user.email, currentPassword);
+                await reauthenticateWithCredential(user, credential);
+
+                // Update password
+                await updatePassword(user, newPassword);
+
+                showToast('Senha alterada com sucesso!', 'success');
+                closePasswordModal();
+            } catch (error) {
+                console.error('Error changing password:', error);
+
+                if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    passwordError.textContent = 'Senha atual incorreta.';
+                } else if (error.code === 'auth/weak-password') {
+                    passwordError.textContent = 'Senha muito fraca. Use pelo menos 6 caracteres.';
+                } else if (error.code === 'auth/requires-recent-login') {
+                    passwordError.textContent = 'Sessão expirada. Faça login novamente.';
+                } else {
+                    passwordError.textContent = 'Erro ao alterar senha. Tente novamente.';
+                }
+                passwordError.classList.remove('hidden');
+            } finally {
+                submitPasswordBtn.disabled = false;
+                submitPasswordBtn.textContent = 'Alterar';
+            }
+        });
 
         // Save profile
         profileForm.addEventListener('submit', async (e) => {
