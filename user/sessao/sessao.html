@@ -4,44 +4,24 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Registro de Horas - GPS Financeiro</title>
-    <link href="https://fonts.googleapis.com" rel="preconnect"/>
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png"/>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
+    <!-- Resource Hints -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com"/>
+    <link rel="dns-prefetch" href="//fonts.gstatic.com"/>
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <!-- Theme Persistence -->
+    <script src="/shared/theme.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="/shared/styles.css"/>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#13ec80",
-                        "primary-hover": "#0fd671",
-                        "background-light": "#f6f8f7",
-                        "background-dark": "#102219",
-                        "surface-dark": "#162e22",
-                        "surface-light": "#ffffff",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "2xl": "1rem",
-                        "full": "9999px"
-                    },
-                },
-            },
-        }
-    </script>
-    <style>
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        body { min-height: max(884px, 100dvh); }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-    </style>
+    <script src="/shared/tailwind-config.js"></script>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white overflow-hidden h-screen flex flex-col">
     <!-- Main Content Wrapper -->
@@ -76,7 +56,7 @@
                 <div class="flex gap-3 justify-center">
                     <!-- Hours -->
                     <div class="flex flex-col items-center gap-2 flex-1">
-                        <div class="w-full aspect-[4/5] flex items-center justify-center rounded-2xl bg-white dark:bg-[#1a382a] shadow-sm ring-1 ring-black/5 dark:ring-white/5 relative overflow-hidden group">
+                        <div class="w-full aspect-[4/5] flex items-center justify-center rounded-2xl bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-black/5 dark:ring-white/5 relative overflow-hidden group">
                             <div class="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 dark:to-black/20"></div>
                             <p id="hours" class="text-slate-900 dark:text-primary text-5xl sm:text-6xl font-black leading-none tracking-tighter relative z-10 tabular-nums">00</p>
                         </div>
@@ -88,7 +68,7 @@
                     </div>
                     <!-- Minutes -->
                     <div class="flex flex-col items-center gap-2 flex-1">
-                        <div class="w-full aspect-[4/5] flex items-center justify-center rounded-2xl bg-white dark:bg-[#1a382a] shadow-sm ring-1 ring-black/5 dark:ring-white/5 relative overflow-hidden">
+                        <div class="w-full aspect-[4/5] flex items-center justify-center rounded-2xl bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-black/5 dark:ring-white/5 relative overflow-hidden">
                             <div class="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 dark:to-black/20"></div>
                             <p id="minutes" class="text-slate-900 dark:text-primary text-5xl sm:text-6xl font-black leading-none tracking-tighter relative z-10 tabular-nums">00</p>
                         </div>
@@ -100,7 +80,7 @@
                     </div>
                     <!-- Seconds -->
                     <div class="flex flex-col items-center gap-2 flex-1">
-                        <div class="w-full aspect-[4/5] flex items-center justify-center rounded-2xl bg-white dark:bg-[#1a382a] shadow-sm ring-1 ring-black/5 dark:ring-white/5 relative overflow-hidden">
+                        <div class="w-full aspect-[4/5] flex items-center justify-center rounded-2xl bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-black/5 dark:ring-white/5 relative overflow-hidden">
                             <div class="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 dark:to-black/20"></div>
                             <p id="seconds" class="text-slate-900 dark:text-primary text-5xl sm:text-6xl font-black leading-none tracking-tighter relative z-10 tabular-nums">00</p>
                         </div>
@@ -111,10 +91,10 @@
 
             <!-- Main Action Button -->
             <div class="w-full max-w-sm mt-10">
-                <button id="actionBtn" class="relative group w-full cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary-hover active:scale-[0.98] transition-all duration-200 shadow-lg shadow-primary/20">
+                <button id="actionBtn" class="relative group w-full cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary-hover active:scale-[0.98] transition-all duration-200 shadow-lg shadow-primary/30">
                     <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                    <span id="actionIcon" class="material-symbols-outlined text-background-dark mr-2 text-[28px]">play_circle</span>
-                    <span id="actionText" class="text-background-dark text-lg font-bold tracking-wide z-10">INICIAR TURNO</span>
+                    <span id="actionIcon" class="material-symbols-outlined text-black mr-2 text-[28px]">play_circle</span>
+                    <span id="actionText" class="text-black text-lg font-bold tracking-wide z-10">INICIAR TURNO</span>
                 </button>
 
                 <div class="flex justify-between items-center mt-6 px-2">

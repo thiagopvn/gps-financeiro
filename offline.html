@@ -4,28 +4,24 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Offline - GPS Financeiro</title>
-    <link href="https://fonts.googleapis.com" rel="preconnect"/>
-    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png"/>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
+    <!-- Resource Hints -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com"/>
+    <link rel="dns-prefetch" href="//fonts.gstatic.com"/>
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <!-- Theme Persistence -->
+    <script src="/shared/theme.js"></script>
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="/shared/styles.css"/>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#13ec5b",
-                        "background-light": "#f6f8f6",
-                        "background-dark": "#102216",
-                        "surface-dark": "#1a2c20",
-                    },
-                    fontFamily: { "display": ["Manrope", "sans-serif"] },
-                },
-            },
-        }
-    </script>
-    <style>body { min-height: 100dvh; }</style>
+    <script src="/shared/tailwind-config.js"></script>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased">
     <div class="min-h-screen flex flex-col items-center justify-center px-6 text-center">
@@ -43,7 +39,7 @@
         </p>
 
         <!-- Retry Button -->
-        <button onclick="window.location.reload()" class="px-8 py-4 bg-primary text-background-dark font-bold rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2">
+        <button onclick="window.location.reload()" class="px-8 py-4 bg-primary text-black font-bold rounded-xl hover:bg-primary-hover transition-colors flex items-center gap-2">
             <span class="material-symbols-outlined">refresh</span>
             Tentar novamente
         </button>

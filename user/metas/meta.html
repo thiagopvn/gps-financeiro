@@ -4,49 +4,28 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Metas - GPS Financeiro</title>
-    <link href="https://fonts.googleapis.com" rel="preconnect"/>
-    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png"/>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
+    <!-- Resource Hints -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com"/>
+    <link rel="dns-prefetch" href="//fonts.gstatic.com"/>
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <!-- Theme Persistence -->
+    <script src="/shared/theme.js"></script>
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="/shared/styles.css"/>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#13ec5b",
-                        "background-light": "#f6f8f6",
-                        "background-dark": "#102216",
-                        "surface-dark": "#1a2c20",
-                    },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "1rem",
-                        "lg": "1.5rem",
-                        "xl": "2rem",
-                        "full": "9999px"
-                    },
-                },
-            },
-        }
-    </script>
+    <script src="/shared/tailwind-config.js"></script>
     <style>
-        body {
-            min-height: max(884px, 100dvh);
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
         .filter-chip.active {
-            background-color: #13ec5b;
-            color: #102216;
+            background-color: #FFD700;
+            color: #000000;
             font-weight: 700;
         }
     </style>
@@ -81,8 +60,8 @@
                         <h2 id="overallProgress" class="text-2xl font-bold mt-1">0% <span class="text-sm font-normal text-slate-400">concluído</span></h2>
                     </div>
                 </div>
-                <div class="w-full bg-gray-700 rounded-full h-3 mb-2">
-                    <div id="overallProgressBar" class="bg-gradient-to-r from-primary to-green-400 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                <div class="w-full bg-zinc-700 rounded-full h-3 mb-2">
+                    <div id="overallProgressBar" class="bg-gradient-to-r from-yellow-500 to-primary h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
                 <p id="progressMessage" class="text-xs text-slate-400">Carregando...</p>
             </div>

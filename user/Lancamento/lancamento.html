@@ -4,38 +4,25 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Novo Lançamento - GPS Financeiro</title>
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png"/>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
+    <!-- Resource Hints -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com"/>
+    <link rel="dns-prefetch" href="//fonts.gstatic.com"/>
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <!-- Theme Persistence -->
+    <script src="/shared/theme.js"></script>
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="/shared/styles.css"/>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#13ec5b",
-                        "background-light": "#f6f8f6",
-                        "background-dark": "#102216",
-                        "surface-dark": "#1a2c20",
-                    },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"],
-                    },
-                    borderRadius: {
-                        "DEFAULT": "1rem",
-                        "lg": "1.5rem",
-                        "xl": "2rem",
-                        "full": "9999px"
-                    },
-                },
-            },
-        }
-    </script>
+    <script src="/shared/tailwind-config.js"></script>
     <style>
-        html, body {
-            min-height: 100dvh;
-            overflow-x: hidden;
-        }
         .category-item:not(.selected) .check-icon {
             display: none;
         }
@@ -43,8 +30,8 @@
             border-color: var(--tw-border-opacity, 1) !important;
         }
         .type-tab.active {
-            background-color: var(--active-bg, #13ec5b);
-            color: var(--active-text, #102216);
+            background-color: var(--active-bg, #FFD700);
+            color: var(--active-text, #000000);
             font-weight: 700;
         }
     </style>
@@ -66,8 +53,8 @@
         <main class="flex-1 pb-32 px-4">
             <!-- Type Toggle - 4 Options -->
             <div class="py-4">
-                <div class="grid grid-cols-4 gap-1 h-12 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-[#1c3628] p-1">
-                    <button id="tabReceita" class="type-tab active h-full flex items-center justify-center rounded-lg text-xs font-semibold transition-all" style="--active-bg: #13ec5b; --active-text: #102216;">
+                <div class="grid grid-cols-4 gap-1 h-12 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-zinc-800 p-1">
+                    <button id="tabReceita" class="type-tab active h-full flex items-center justify-center rounded-lg text-xs font-semibold transition-all" style="--active-bg: #22c55e; --active-text: white;">
                         <span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
                         Receita
                     </button>
@@ -124,7 +111,7 @@
                 <h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight mb-4">Categoria</h3>
                 <div class="grid grid-cols-2 gap-3">
                     <!-- Uber -->
-                    <label class="category-item income-cat selected group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-primary shadow-sm transition-all" data-category="uber">
+                    <label class="category-item income-cat selected group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-green-500 shadow-sm transition-all" data-category="uber">
                         <input checked class="peer sr-only" name="income-category" type="radio" value="uber"/>
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-black text-white">
                             <span class="material-symbols-outlined">directions_car</span>
@@ -133,7 +120,7 @@
                             <span class="text-sm font-bold text-slate-900 dark:text-white">Uber</span>
                             <span class="text-xs text-slate-500 dark:text-slate-400">Aplicativo</span>
                         </div>
-                        <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-green-500" style="font-size: 20px;">check_circle</span>
                     </label>
                     <!-- 99 -->
                     <label class="category-item income-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="99">
@@ -145,7 +132,7 @@
                             <span class="text-sm font-bold text-slate-900 dark:text-white">99</span>
                             <span class="text-xs text-slate-500 dark:text-slate-400">Aplicativo</span>
                         </div>
-                        <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-green-500" style="font-size: 20px;">check_circle</span>
                     </label>
                     <!-- Indrive -->
                     <label class="category-item income-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="indrive">
@@ -157,7 +144,7 @@
                             <span class="text-sm font-bold text-slate-900 dark:text-white">Indrive</span>
                             <span class="text-xs text-slate-500 dark:text-slate-400">Negociacao</span>
                         </div>
-                        <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-green-500" style="font-size: 20px;">check_circle</span>
                     </label>
                     <!-- Particular -->
                     <label class="category-item income-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="particular">
@@ -169,7 +156,7 @@
                             <span class="text-sm font-bold text-slate-900 dark:text-white">Particular</span>
                             <span class="text-xs text-slate-500 dark:text-slate-400">Corrida extra</span>
                         </div>
-                        <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-green-500" style="font-size: 20px;">check_circle</span>
                     </label>
                     <!-- Outros -->
                     <label class="category-item income-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="outros_receita">
@@ -181,7 +168,7 @@
                             <span class="text-sm font-bold text-slate-900 dark:text-white">Outros</span>
                             <span class="text-xs text-slate-500 dark:text-slate-400">Outras receitas</span>
                         </div>
-                        <span class="check-icon material-symbols-outlined absolute right-3 text-primary" style="font-size: 20px;">check_circle</span>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-green-500" style="font-size: 20px;">check_circle</span>
                     </label>
                 </div>
             </div>
@@ -305,7 +292,7 @@
 
         <!-- Fixed Bottom Action -->
         <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-8 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark dark:to-transparent pt-12 z-20">
-            <button id="saveBtn" class="w-full rounded-xl bg-primary py-4 text-center text-base font-bold text-slate-900 shadow-lg shadow-primary/20 hover:bg-[#34f574] transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
+            <button id="saveBtn" class="w-full rounded-xl bg-green-500 py-4 text-center text-base font-bold text-white shadow-lg shadow-green-500/20 hover:bg-green-600 transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined">check</span>
                 <span id="saveBtnText">Salvar Lancamento</span>
             </button>
@@ -448,7 +435,7 @@
                     amountPrefix.classList.remove('hidden');
                     incomeCategories.classList.remove('hidden');
                     saveBtnText.textContent = 'Salvar Receita';
-                    saveBtn.className = 'w-full rounded-xl bg-primary py-4 text-center text-base font-bold text-slate-900 shadow-lg shadow-primary/20 hover:bg-[#34f574] transition-colors active:scale-[0.98] flex items-center justify-center gap-2';
+                    saveBtn.className = 'w-full rounded-xl bg-green-500 py-4 text-center text-base font-bold text-white shadow-lg shadow-green-500/20 hover:bg-green-600 transition-colors active:scale-[0.98] flex items-center justify-center gap-2';
                     isCurrency = true;
                     break;
                 case 'expense':
@@ -519,7 +506,7 @@
 
         const incomeCats = document.querySelectorAll('.income-cat');
         const expenseCats = document.querySelectorAll('.expense-cat');
-        setupCategorySelection(incomeCats, 'border-primary');
+        setupCategorySelection(incomeCats, 'border-green-500');
         setupCategorySelection(expenseCats, 'border-red-500');
 
         // Get selected category

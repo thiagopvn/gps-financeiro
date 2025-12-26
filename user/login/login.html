@@ -6,50 +6,28 @@
     <title>Login - GPS Financeiro</title>
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json"/>
-    <meta name="theme-color" content="#13ec5b"/>
+    <meta name="theme-color" content="#FFD700"/>
     <meta name="description" content="Controle financeiro para motoristas de aplicativo"/>
-    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg"/>
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png"/>
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <!-- Resource Hints -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com"/>
+    <link rel="dns-prefetch" href="//fonts.gstatic.com"/>
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <!-- Theme Persistence -->
+    <script src="/shared/theme.js"></script>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect"/>
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
-    <!-- Material Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="/shared/styles.css"/>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <!-- Theme Configuration -->
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#13ec5b",
-                        "background-light": "#f6f8f6",
-                        "background-dark": "#102216",
-                        "surface-dark": "#1a2c20",
-                    },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "1rem",
-                        "lg": "1.5rem",
-                        "xl": "2rem",
-                        "full": "9999px"
-                    },
-                },
-            },
-        }
-    </script>
-    <style>
-        body {
-            min-height: max(884px, 100dvh);
-        }
-    </style>
+    <script src="/shared/tailwind-config.js"></script>
 </head>
 <body class="font-display antialiased bg-background-light dark:bg-background-dark text-slate-900 dark:text-white h-screen overflow-hidden flex flex-col">
     <div class="flex-1 flex flex-col justify-center w-full max-w-md mx-auto px-6 py-8 relative">
@@ -68,12 +46,9 @@
             </div>
         </div>
 
-        <!-- Header Section -->
+        <!-- Header Section - Logo Águia Dourada -->
         <div class="w-full flex flex-col items-center mb-10 z-10">
-            <div class="w-20 h-20 bg-gradient-to-tr from-primary/20 to-surface-dark rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/5 border border-primary/20">
-                <span class="material-symbols-outlined text-primary text-[40px]">local_taxi</span>
-            </div>
-            <h1 class="text-3xl font-bold tracking-tight text-center mb-2">Bem-vindo de volta</h1>
+            <img src="/icons/logo.png" alt="GPS Financeiro" class="w-44 h-auto object-contain mb-4"/>
             <p class="text-slate-400 text-sm text-center">Gerencie seus ganhos com inteligência</p>
         </div>
 
@@ -121,7 +96,7 @@
             <button
                 type="submit"
                 id="submitBtn"
-                class="flex w-full justify-center items-center rounded-xl bg-primary px-3 py-4 text-sm font-bold leading-6 text-background-dark shadow-sm hover:bg-[#34f574] hover:shadow-primary/25 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all duration-200 mt-4"
+                class="flex w-full justify-center items-center rounded-xl bg-primary px-3 py-4 text-sm font-bold leading-6 text-black shadow-lg shadow-primary/30 hover:bg-primary-hover hover:shadow-primary/40 hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all duration-200 mt-4"
             >
                 Entrar
                 <span class="material-symbols-outlined text-[20px] ml-2 font-bold">arrow_forward</span>
@@ -159,7 +134,7 @@
         <!-- Footer -->
         <p class="mt-10 text-center text-sm text-slate-400 z-10">
             Ainda não tem conta?
-            <a class="font-semibold text-primary hover:text-[#34f574] hover:underline transition-all ml-1" href="newlogin.html">
+            <a class="font-semibold text-primary hover:text-primary-hover hover:underline transition-all ml-1" href="newlogin.html">
                 Cadastre-se
             </a>
         </p>

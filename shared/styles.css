@@ -1,0 +1,64 @@
+/* Estilos compartilhados - GPS Financeiro */
+
+/* Material Symbols */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Safe area padding para iOS */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pt-safe { padding-top: env(safe-area-inset-top); }
+
+/* Altura mínima do body */
+body {
+    min-height: max(884px, 100dvh);
+}
+
+/* Skeleton loading animation */
+.skeleton {
+    background: linear-gradient(90deg, #18181b 25%, #27272a 50%, #18181b 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Ocultar scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Toggle switch styles */
+.toggle-checkbox:checked {
+    right: 0;
+    border-color: #FFD700;
+}
+.toggle-checkbox:checked + .toggle-label {
+    background-color: #FFD700;
+}
+
+/* Smooth transitions */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Focus styles para acessibilidade */
+:focus-visible {
+    outline: 2px solid #FFD700;
+    outline-offset: 2px;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.animate-spin {
+    animation: spin 1s linear infinite;
+}

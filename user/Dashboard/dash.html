@@ -6,59 +6,27 @@
     <title>Painel Financeiro - GPS Financeiro</title>
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json"/>
-    <meta name="theme-color" content="#13ec5b"/>
-    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg"/>
+    <meta name="theme-color" content="#FFD700"/>
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png"/>
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <!-- Resource Hints -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com"/>
+    <link rel="dns-prefetch" href="//fonts.gstatic.com"/>
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <!-- Theme Persistence (must load before content) -->
+    <script src="/shared/theme.js"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect"/>
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-    <!-- Material Symbols -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="/shared/styles.css"/>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <!-- Tailwind Config -->
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#13ec80",
-                        "background-light": "#f6f8f7",
-                        "background-dark": "#102219",
-                        "surface-dark": "#1c2721",
-                        "surface-light": "#ffffff",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-        .pt-safe { padding-top: env(safe-area-inset-top); }
-        body {
-            min-height: max(884px, 100dvh);
-        }
-        .skeleton {
-            background: linear-gradient(90deg, #1c2721 25%, #2a3830 50%, #1c2721 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-    </style>
+    <script src="/shared/tailwind-config.js"></script>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-background-dark pb-24">
     <!-- Header Section -->
@@ -93,7 +61,7 @@
                 <div class="flex flex-col px-5 pb-5 -mt-8 relative z-10">
                     <div class="flex justify-between items-end mb-2">
                         <div>
-                            <p class="text-gray-500 dark:text-[#9db9ab] text-sm font-medium mb-1">Saldo em conta</p>
+                            <p class="text-gray-500 dark:text-zinc-400 text-sm font-medium mb-1">Saldo em conta</p>
                             <h3 id="balance" class="text-gray-900 dark:text-white text-3xl font-bold tracking-tight balance-value">R$ 0,00</h3>
                         </div>
                         <div class="bg-primary/10 rounded-lg p-2">
@@ -102,7 +70,7 @@
                     </div>
                     <div class="h-px w-full bg-gray-200 dark:bg-white/10 my-4"></div>
                     <div class="flex items-center justify-between">
-                        <p class="text-gray-500 dark:text-[#9db9ab] text-sm">Disponível para saque</p>
+                        <p class="text-gray-500 dark:text-zinc-400 text-sm">Disponível para saque</p>
                         <a href="/user/transacao/transacao.html" class="group flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
                             Ver extrato
                             <span class="material-symbols-outlined text-[18px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>

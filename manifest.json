@@ -4,8 +4,8 @@
   "description": "Controle financeiro para motoristas de aplicativo",
   "start_url": "/user/login/login.html",
   "display": "standalone",
-  "background_color": "#102216",
-  "theme_color": "#13ec5b",
+  "background_color": "#000000",
+  "theme_color": "#FFD700",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "pt-BR",
@@ -60,15 +60,6 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshots/dashboard.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Dashboard principal"
-    }
-  ],
   "shortcuts": [
     {
       "name": "Nova Transação",
@@ -77,7 +68,7 @@
       "url": "/user/Lancamento/lancamento.html",
       "icons": [
         {
-          "src": "/icons/shortcut-add.png",
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96",
           "type": "image/png"
         }
@@ -90,7 +81,7 @@
       "url": "/user/sessao/sessao.html",
       "icons": [
         {
-          "src": "/icons/shortcut-timer.png",
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96",
           "type": "image/png"
         }
