@@ -481,7 +481,7 @@
 
             const goals = await getGoals();
             console.log('Goals loaded:', goals);
-            console.log('Goals categories:', goals.map(g => g.category));
+            console.log('Goals with details:', goals.map(g => ({ name: g.name, category: g.category, type: g.type })));
 
             if (goals.length === 0) {
                 goalsContainer.innerHTML = `
@@ -507,8 +507,8 @@
             const typeOrder = { daily: 1, weekly: 2, monthly: 3 };
             goals.sort((a, b) => (typeOrder[a.type] || 4) - (typeOrder[b.type] || 4));
 
-            // Render goals (max 3)
-            const displayGoals = goals.slice(0, 3);
+            // Render goals (max 5 to show more variety)
+            const displayGoals = goals.slice(0, 5);
             let html = '<div class="grid gap-3">';
 
             displayGoals.forEach((goal) => {
@@ -607,7 +607,7 @@
             html += '</div>';
 
             // Add "Ver todas" link if there are more goals
-            if (goals.length > 3) {
+            if (goals.length > 5) {
                 html += `
                     <a href="/user/metas/meta.html" class="mt-4 flex items-center justify-center gap-2 text-primary text-sm font-semibold py-2 hover:underline group">
                         <span>Ver todas as ${goals.length} metas</span>
