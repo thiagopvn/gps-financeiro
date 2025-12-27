@@ -5,9 +5,14 @@
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* Safe area padding para iOS */
+/* Safe area padding para iOS/Android */
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 .pt-safe { padding-top: env(safe-area-inset-top); }
+
+/* Safe area para navegação inferior - combina padding fixo + safe area */
+.nav-safe {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+}
 
 /* Altura mínima do body */
 body {
