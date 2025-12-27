@@ -344,9 +344,11 @@ export const startSession = async () => {
  * @param {string} sessionId - Session ID
  * @param {number} duration - Duration in seconds
  * @param {number} earnings - Total earnings
+ * @param {number} rides - Number of rides (optional)
+ * @param {number} expenses - Total expenses (optional)
  * @returns {Promise<boolean>} Success
  */
-export const endSession = async (sessionId, duration, earnings) => {
+export const endSession = async (sessionId, duration, earnings, rides = 0, expenses = 0) => {
     const uid = auth.currentUser?.uid;
     if (!uid) return false;
 
@@ -354,13 +356,14 @@ export const endSession = async (sessionId, duration, earnings) => {
         endTime: serverTimestamp(),
         duration,
         earnings,
+        rides: rides || 0,
+        expenses: expenses || 0,
+        netProfit: earnings - (expenses || 0),
         status: 'completed'
     });
 
-    // Update goals with session earnings (receita category)
-    if (earnings > 0) {
-        await updateGoalsProgress(earnings, 'receita');
-    }
+    // Goals are now updated by the calling page to avoid double-counting
+    // when auto-register is enabled
 
     return true;
 };

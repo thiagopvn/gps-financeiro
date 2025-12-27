@@ -28,7 +28,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="/shared/tailwind-config.js"></script>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-background-dark pb-32">
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-background-dark pb-40">
     <!-- Header Section -->
     <header class="sticky top-0 z-30 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 pt-safe">
         <div class="flex items-center p-4 justify-between">
@@ -79,6 +79,24 @@
                 </div>
             </div>
         </div>
+
+        <!-- Shift/Session Card -->
+        <a href="/user/sessao/sessao.html" id="shiftCard" class="block">
+            <div id="shiftCardInner" class="relative overflow-hidden rounded-xl border-2 border-dashed border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10 p-4 transition-all hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div id="shiftIcon" class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 text-primary">
+                            <span class="material-symbols-outlined text-2xl">play_circle</span>
+                        </div>
+                        <div>
+                            <h3 id="shiftTitle" class="text-gray-900 dark:text-white font-bold text-base">Iniciar Turno</h3>
+                            <p id="shiftSubtitle" class="text-gray-500 dark:text-gray-400 text-sm">Comece a registrar suas horas</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-primary text-2xl">chevron_right</span>
+                </div>
+            </div>
+        </a>
 
         <!-- Period Filter -->
         <div class="flex gap-2 overflow-x-auto no-scrollbar">
@@ -179,7 +197,7 @@
     <!-- JavaScript -->
     <script type="module">
         import { requireAuth } from '/js/firebase-config.js';
-        import { getUserProfile, subscribeToTransactionsSummary, getGoals, checkAndResetGoals } from '/js/db.js';
+        import { getUserProfile, subscribeToTransactionsSummary, getGoals, checkAndResetGoals, getActiveSession } from '/js/db.js';
         import { formatCurrency, formatDate, getStartOfDay, getStartOfWeek, getStartOfMonth, getLocal, saveLocal } from '/js/utils.js';
 
         // Require authentication
@@ -198,6 +216,10 @@
         const goalsContainer = document.getElementById('goalsContainer');
         const toggleVisibility = document.getElementById('toggleVisibility');
         const periodFilters = document.querySelectorAll('.period-filter');
+        const shiftCardInner = document.getElementById('shiftCardInner');
+        const shiftIcon = document.getElementById('shiftIcon');
+        const shiftTitle = document.getElementById('shiftTitle');
+        const shiftSubtitle = document.getElementById('shiftSubtitle');
 
         // State
         let isHidden = getLocal('balanceHidden', false);
@@ -226,6 +248,30 @@
                     userAvatar.innerHTML = '';
                     userAvatar.style.backgroundImage = `url("${profile.photoURL}")`;
                 }
+            }
+        };
+
+        // Check active session and update shift card
+        const checkActiveSession = async () => {
+            try {
+                const activeSession = await getActiveSession();
+                if (activeSession) {
+                    // Session active - show "Em Andamento"
+                    shiftCardInner.classList.remove('border-dashed', 'border-primary/30', 'from-primary/5', 'to-primary/10');
+                    shiftCardInner.classList.add('border-solid', 'border-primary', 'from-primary/20', 'to-primary/30', 'animate-pulse');
+                    shiftIcon.innerHTML = '<span class="material-symbols-outlined text-2xl">timer</span>';
+                    shiftTitle.textContent = 'Turno em Andamento';
+                    shiftSubtitle.textContent = 'Clique para ver detalhes';
+                } else {
+                    // No active session - show "Iniciar Turno"
+                    shiftCardInner.classList.add('border-dashed', 'border-primary/30', 'from-primary/5', 'to-primary/10');
+                    shiftCardInner.classList.remove('border-solid', 'border-primary', 'from-primary/20', 'to-primary/30', 'animate-pulse');
+                    shiftIcon.innerHTML = '<span class="material-symbols-outlined text-2xl">play_circle</span>';
+                    shiftTitle.textContent = 'Iniciar Turno';
+                    shiftSubtitle.textContent = 'Comece a registrar suas horas';
+                }
+            } catch (error) {
+                console.error('Erro ao verificar sessão ativa:', error);
             }
         };
 
@@ -551,10 +597,11 @@
                 // Start real-time summary listener (sync function)
                 loadSummary(currentPeriod);
 
-                // Load profile and goals
+                // Load profile, goals and check active session
                 await Promise.all([
                     loadProfile().catch(e => console.error('Erro ao carregar perfil:', e)),
-                    loadGoals().catch(e => console.error('Erro ao carregar metas:', e))
+                    loadGoals().catch(e => console.error('Erro ao carregar metas:', e)),
+                    checkActiveSession().catch(e => console.error('Erro ao verificar sessão:', e))
                 ]);
 
                 // Update visibility icon if hidden

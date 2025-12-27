@@ -54,7 +54,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto no-scrollbar pb-32 px-4">
+    <main class="flex-1 overflow-y-auto no-scrollbar pb-40 px-4">
         <!-- Title & Description -->
         <section class="space-y-4 mb-6">
             <div class="bg-white dark:bg-surface-dark rounded-2xl overflow-hidden border border-gray-200 dark:border-white/5">
@@ -185,33 +185,17 @@
             </p>
         </section>
 
-        <!-- Color Selection -->
-        <section class="mb-6">
-            <h2 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 ml-1">Cor do Card</h2>
-            <div class="flex gap-3 flex-wrap">
-                <label class="cursor-pointer">
-                    <input checked class="sr-only peer" name="goal_color" type="radio" value="green"/>
-                    <div class="w-10 h-10 rounded-full bg-green-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
-                </label>
-                <label class="cursor-pointer">
-                    <input class="sr-only peer" name="goal_color" type="radio" value="blue"/>
-                    <div class="w-10 h-10 rounded-full bg-blue-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
-                </label>
-                <label class="cursor-pointer">
-                    <input class="sr-only peer" name="goal_color" type="radio" value="yellow"/>
-                    <div class="w-10 h-10 rounded-full bg-yellow-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
-                </label>
-                <label class="cursor-pointer">
-                    <input class="sr-only peer" name="goal_color" type="radio" value="purple"/>
-                    <div class="w-10 h-10 rounded-full bg-purple-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
-                </label>
-                <label class="cursor-pointer">
-                    <input class="sr-only peer" name="goal_color" type="radio" value="orange"/>
-                    <div class="w-10 h-10 rounded-full bg-orange-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
-                </label>
-                <label class="cursor-pointer">
-                    <input class="sr-only peer" name="goal_color" type="radio" value="red"/>
-                    <div class="w-10 h-10 rounded-full bg-red-500 ring-2 ring-transparent peer-checked:ring-white peer-checked:ring-offset-2 peer-checked:ring-offset-background-dark transition-all"></div>
+        <!-- Retroactivity Option (for weekly/monthly) -->
+        <section id="retroactivitySection" class="mb-6 hidden">
+            <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" id="retroactiveCheckbox" class="mt-1 rounded border-slate-300 text-primary focus:ring-primary">
+                    <div>
+                        <span class="text-sm font-medium text-slate-900 dark:text-white">Considerar lançamentos anteriores</span>
+                        <p id="retroactiveInfo" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            O progresso atual será calculado com base nos lançamentos já feitos neste período
+                        </p>
+                    </div>
                 </label>
             </div>
         </section>
@@ -233,8 +217,8 @@
     <!-- JavaScript -->
     <script type="module">
         import { requireAuth } from '/js/firebase-config.js';
-        import { addGoal } from '/js/db.js';
-        import { showToast, formatCurrency, parseCurrency } from '/js/utils.js';
+        import { addGoal, getTransactions, updateGoal } from '/js/db.js';
+        import { showToast, formatCurrency, parseCurrency, getStartOfWeek, getStartOfMonth } from '/js/utils.js';
 
         // Wait for auth - must complete before proceeding
         const user = await requireAuth();
@@ -243,10 +227,17 @@
             throw new Error('Not authenticated');
         }
 
+        // Category to color mapping (automatic)
+        const categoryColors = {
+            receita: 'green',
+            economia: 'yellow',
+            corridas: 'blue',
+            km: 'purple'
+        };
+
         // State
         let selectedCategory = 'receita';
         let selectedPeriod = 'daily';
-        let selectedColor = 'green';
 
         // DOM Elements
         const backBtn = document.getElementById('backBtn');
@@ -259,7 +250,9 @@
         const saveBtn = document.getElementById('saveBtn');
         const categoryCards = document.querySelectorAll('.type-card');
         const periodChips = document.querySelectorAll('.period-chip');
-        const colorInputs = document.querySelectorAll('input[name="goal_color"]');
+        const retroactivitySection = document.getElementById('retroactivitySection');
+        const retroactiveCheckbox = document.getElementById('retroactiveCheckbox');
+        const retroactiveInfo = document.getElementById('retroactiveInfo');
 
         // Category selection
         categoryCards.forEach(card => {
@@ -269,6 +262,7 @@
                 card.classList.add('selected');
                 selectedCategory = input.value;
                 updateTargetPrefix();
+                updateRetroactivityInfo();
             });
         });
 
@@ -299,6 +293,7 @@
                 chip.classList.add('bg-primary', 'text-background-dark', 'font-bold');
                 selectedPeriod = chip.dataset.period;
                 updatePeriodInfo();
+                updateRetroactivityVisibility();
             });
         });
 
@@ -317,12 +312,26 @@
             }
         }
 
-        // Color selection
-        colorInputs.forEach(input => {
-            input.addEventListener('change', () => {
-                selectedColor = input.value;
-            });
-        });
+        // Show/hide retroactivity section based on period
+        function updateRetroactivityVisibility() {
+            if (selectedPeriod === 'weekly' || selectedPeriod === 'monthly') {
+                retroactivitySection.classList.remove('hidden');
+            } else {
+                retroactivitySection.classList.add('hidden');
+                retroactiveCheckbox.checked = false;
+            }
+        }
+
+        // Update retroactivity info text
+        function updateRetroactivityInfo() {
+            const categoryLabel = {
+                receita: 'receitas',
+                economia: 'economias',
+                corridas: 'corridas',
+                km: 'quilômetros'
+            };
+            retroactiveInfo.textContent = `O progresso será calculado somando ${categoryLabel[selectedCategory] || 'lançamentos'} deste período`;
+        }
 
         // Format target value input
         targetValue.addEventListener('input', (e) => {
@@ -346,6 +355,40 @@
         function parseTargetValue() {
             const value = targetValue.value.replace(/\./g, '').replace(',', '.');
             return parseFloat(value) || 0;
+        }
+
+        // Calculate initial value from past transactions (retroactivity)
+        async function calculateRetroactiveValue() {
+            let startDate;
+            if (selectedPeriod === 'weekly') {
+                startDate = getStartOfWeek();
+            } else if (selectedPeriod === 'monthly') {
+                startDate = getStartOfMonth();
+            } else {
+                return 0;
+            }
+
+            try {
+                const transactions = await getTransactions({ startDate });
+                let total = 0;
+
+                transactions.forEach(t => {
+                    // Match category to transaction type
+                    if (selectedCategory === 'receita' && t.type === 'income') {
+                        total += t.amount || 0;
+                    } else if (selectedCategory === 'corridas' && t.type === 'corridas') {
+                        total += t.amount || 0;
+                    } else if (selectedCategory === 'km' && t.type === 'km') {
+                        total += t.amount || 0;
+                    }
+                    // Note: economia não tem correspondência direta em transações
+                });
+
+                return total;
+            } catch (error) {
+                console.error('Error calculating retroactive value:', error);
+                return 0;
+            }
         }
 
         // Save goal
@@ -376,19 +419,31 @@
             saveBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Salvando...';
 
             try {
+                // Get automatic color based on category
+                const autoColor = categoryColors[selectedCategory] || 'green';
+
                 const goalData = {
                     name: name,
                     description: goalDescription.value.trim() || null,
                     category: selectedCategory,
                     type: selectedPeriod,
                     target: target,
-                    color: selectedColor
+                    color: autoColor
                 };
 
                 console.log('Saving goal:', goalData);
 
                 const goalId = await addGoal(goalData);
                 console.log('Goal created with ID:', goalId);
+
+                // Calculate and set retroactive value if checkbox is checked
+                if (retroactiveCheckbox.checked && (selectedPeriod === 'weekly' || selectedPeriod === 'monthly')) {
+                    const retroactiveValue = await calculateRetroactiveValue();
+                    if (retroactiveValue > 0) {
+                        await updateGoal(goalId, { current: retroactiveValue });
+                        console.log('Retroactive value set:', retroactiveValue);
+                    }
+                }
 
                 showToast('Meta criada com sucesso!', 'success');
 
@@ -411,6 +466,8 @@
         // Initialize
         updateTargetPrefix();
         updatePeriodInfo();
+        updateRetroactivityVisibility();
+        updateRetroactivityInfo();
     </script>
 </body>
 </html>
