@@ -69,6 +69,23 @@
                         </div>
                     </div>
                     <div class="h-px w-full bg-gray-200 dark:bg-white/10 my-4"></div>
+                    <!-- Savings (Guardado) integrated row -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15">
+                                <span class="material-symbols-outlined text-amber-500 text-lg">savings</span>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 dark:text-zinc-400 text-xs">Guardado</p>
+                                <p id="savings" class="text-amber-500 text-base font-bold balance-value" data-value="0">R$ 0</p>
+                            </div>
+                        </div>
+                        <a href="/user/Lancamento/lancamento.html" class="flex items-center gap-1 text-amber-500 text-xs font-medium hover:text-amber-400 transition-colors">
+                            <span class="material-symbols-outlined text-[14px]">add_circle</span>
+                            Guardar
+                        </a>
+                    </div>
+                    <div class="h-px w-full bg-gray-200 dark:bg-white/10 mb-4"></div>
                     <div class="flex items-center justify-between">
                         <p class="text-gray-500 dark:text-zinc-400 text-sm">Disponível para saque</p>
                         <a href="/user/transacao/transacao.html" class="group flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
@@ -76,29 +93,6 @@
                             <span class="material-symbols-outlined text-[18px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
                         </a>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Savings Card (Cofrinho) -->
-        <div class="relative overflow-hidden rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-amber-500/5 p-4 transition-all hover:shadow-lg hover:shadow-amber-500/10">
-            <div class="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-amber-500/15 blur-2xl opacity-60"></div>
-            <div class="relative z-10 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/20 border border-amber-500/30">
-                        <span class="material-symbols-outlined text-amber-500 text-2xl">savings</span>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm font-medium">Guardado</p>
-                        <p id="savings" class="text-amber-500 text-xl font-bold tracking-tight balance-value" data-value="0">R$ 0</p>
-                    </div>
-                </div>
-                <div class="flex flex-col items-end">
-                    <p id="savingsChange" class="text-amber-500/80 text-xs font-semibold">Este mês</p>
-                    <a href="/user/Lancamento/lancamento.html" class="mt-2 flex items-center gap-1 text-amber-500 text-xs font-medium hover:text-amber-400 transition-colors">
-                        <span class="material-symbols-outlined text-[14px]">add_circle</span>
-                        Guardar mais
-                    </a>
                 </div>
             </div>
         </div>
@@ -237,7 +231,6 @@
         const savings = document.getElementById('savings');
         const incomeChange = document.getElementById('incomeChange');
         const expensesChange = document.getElementById('expensesChange');
-        const savingsChange = document.getElementById('savingsChange');
         const goalsContainer = document.getElementById('goalsContainer');
         const toggleVisibility = document.getElementById('toggleVisibility');
         const periodFilters = document.querySelectorAll('.period-filter');
@@ -341,7 +334,6 @@
             const label = periodLabels[period];
             incomeChange.textContent = label;
             expensesChange.textContent = label;
-            savingsChange.textContent = label;
         };
 
         // Update balance display
