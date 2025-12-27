@@ -254,10 +254,11 @@
         const retroactiveCheckbox = document.getElementById('retroactiveCheckbox');
         const retroactiveInfo = document.getElementById('retroactiveInfo');
 
-        // Category selection
+        // Category selection - use click on card for better reliability
         categoryCards.forEach(card => {
-            const input = card.querySelector('input');
-            input.addEventListener('change', () => {
+            card.addEventListener('click', () => {
+                const input = card.querySelector('input');
+                input.checked = true;
                 categoryCards.forEach(c => c.classList.remove('selected'));
                 card.classList.add('selected');
                 selectedCategory = input.value;
