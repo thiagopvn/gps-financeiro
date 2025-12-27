@@ -6,12 +6,22 @@
 }
 
 /* Safe area padding para iOS/Android */
-.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-.pt-safe { padding-top: env(safe-area-inset-top); }
+.pb-safe {
+    padding-bottom: 0;
+    padding-bottom: constant(safe-area-inset-bottom); /* iOS 11.0-11.2 */
+    padding-bottom: env(safe-area-inset-bottom); /* iOS 11.2+ */
+}
+.pt-safe {
+    padding-top: 0;
+    padding-top: constant(safe-area-inset-top); /* iOS 11.0-11.2 */
+    padding-top: env(safe-area-inset-top); /* iOS 11.2+ */
+}
 
 /* Safe area para navegação inferior - combina padding fixo + safe area */
 .nav-safe {
-    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    padding-bottom: 1.5rem; /* Fallback */
+    padding-bottom: calc(1.5rem + constant(safe-area-inset-bottom)); /* iOS 11.0-11.2 */
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); /* iOS 11.2+ */
 }
 
 /* Altura mínima do body */
