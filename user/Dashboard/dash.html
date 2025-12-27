@@ -480,6 +480,8 @@
             await checkAndResetGoals();
 
             const goals = await getGoals();
+            console.log('Goals loaded:', goals);
+            console.log('Goals categories:', goals.map(g => g.category));
 
             if (goals.length === 0) {
                 goalsContainer.innerHTML = `
