@@ -251,7 +251,7 @@
                 </div>
             </div>
 
-            <h3 class="text-xl font-bold text-center text-slate-900 dark:text-white mb-2">Turno Finalizado!</h3>
+            <h3 id="summaryTitle" class="text-xl font-bold text-center text-slate-900 dark:text-white mb-2">Turno Finalizado!</h3>
             <p class="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">Confira o resumo do seu turno</p>
 
             <!-- Stats Grid -->
@@ -283,13 +283,21 @@
             </div>
 
             <!-- Net Profit -->
-            <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6">
+            <div id="summaryProfitContainer" class="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs text-green-600 dark:text-green-400 font-medium uppercase tracking-wide">Lucro Líquido</p>
                         <p id="summaryProfit" class="text-2xl font-bold text-green-600 dark:text-green-400">R$ 0,00</p>
                     </div>
                     <span class="material-symbols-outlined text-green-500 text-3xl">savings</span>
+                </div>
+            </div>
+
+            <!-- Expenses Info (if any) -->
+            <div id="summaryExpensesInfo" class="hidden bg-red-500/10 border border-red-500/20 rounded-xl p-3 mb-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-red-500 text-lg">remove_circle</span>
+                    <span class="text-sm text-red-600 dark:text-red-400">Despesas: <strong id="summaryExpenses">R$ 0,00</strong></span>
                 </div>
             </div>
 
@@ -300,13 +308,95 @@
         </div>
     </div>
 
+    <!-- History Details Modal -->
+    <div id="historyModal" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 text-primary">
+                        <span class="material-symbols-outlined text-2xl">history</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Detalhes do Turno</h3>
+                        <p id="historyModalDate" class="text-sm text-slate-500 dark:text-slate-400">Data</p>
+                    </div>
+                </div>
+                <button id="closeHistoryModal" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-slate-400">close</span>
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <!-- Duration -->
+                <div class="bg-slate-100 dark:bg-white/5 rounded-xl p-4 text-center">
+                    <span class="material-symbols-outlined text-slate-400 text-xl mb-1">schedule</span>
+                    <p id="historyModalDuration" class="text-lg font-bold text-slate-900 dark:text-white">0h 0m</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Duração</p>
+                </div>
+                <!-- Rides -->
+                <div class="bg-slate-100 dark:bg-white/5 rounded-xl p-4 text-center">
+                    <span class="material-symbols-outlined text-blue-500 text-xl mb-1">directions_car</span>
+                    <p id="historyModalRides" class="text-lg font-bold text-slate-900 dark:text-white">0</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Corridas</p>
+                </div>
+                <!-- Hourly Rate -->
+                <div class="bg-primary/10 rounded-xl p-4 text-center">
+                    <span class="material-symbols-outlined text-primary text-xl mb-1">trending_up</span>
+                    <p id="historyModalHourly" class="text-lg font-bold text-primary">R$ 0/h</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Por Hora</p>
+                </div>
+                <!-- Per Ride -->
+                <div class="bg-blue-500/10 rounded-xl p-4 text-center">
+                    <span class="material-symbols-outlined text-blue-500 text-xl mb-1">local_taxi</span>
+                    <p id="historyModalPerRide" class="text-lg font-bold text-blue-500">R$ 0</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Por Corrida</p>
+                </div>
+            </div>
+
+            <!-- Earnings -->
+            <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-3">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-green-600 dark:text-green-400 font-medium uppercase tracking-wide">Faturamento</p>
+                        <p id="historyModalEarnings" class="text-2xl font-bold text-green-600 dark:text-green-400">R$ 0,00</p>
+                    </div>
+                    <span class="material-symbols-outlined text-green-500 text-3xl">payments</span>
+                </div>
+            </div>
+
+            <!-- Expenses (if any) -->
+            <div id="historyModalExpensesContainer" class="hidden bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-3">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-red-600 dark:text-red-400 font-medium uppercase tracking-wide">Despesas</p>
+                        <p id="historyModalExpenses" class="text-xl font-bold text-red-600 dark:text-red-400">R$ 0,00</p>
+                    </div>
+                    <span class="material-symbols-outlined text-red-500 text-2xl">remove_circle</span>
+                </div>
+            </div>
+
+            <!-- Net Profit -->
+            <div class="bg-primary/10 border border-primary/20 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-primary font-medium uppercase tracking-wide">Lucro Líquido</p>
+                        <p id="historyModalProfit" class="text-2xl font-bold text-primary">R$ 0,00</p>
+                    </div>
+                    <span class="material-symbols-outlined text-primary text-3xl">savings</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
 
     <!-- JavaScript -->
     <script type="module">
         import { requireAuth } from '/js/firebase-config.js';
-        import { startSession, endSession, getSessions, getActiveSession, addTransaction, updateGoalsProgress } from '/js/db.js';
+        import { startSession, endSession, getSessions, getActiveSession, getSession, addTransaction, updateGoalsProgress, cleanupAbandonedSessions } from '/js/db.js';
         import { formatCurrency, formatDuration, formatDurationHuman, formatRelativeDate, formatDate, showToast, saveLocal, getLocal } from '/js/utils.js';
 
         // Require authentication
@@ -341,18 +431,34 @@
 
         // Summary Modal Elements
         const summaryModal = document.getElementById('summaryModal');
+        const summaryTitle = document.getElementById('summaryTitle');
         const summaryDuration = document.getElementById('summaryDuration');
         const summaryRides = document.getElementById('summaryRides');
         const summaryHourly = document.getElementById('summaryHourly');
         const summaryPerRide = document.getElementById('summaryPerRide');
         const summaryProfit = document.getElementById('summaryProfit');
+        const summaryProfitContainer = document.getElementById('summaryProfitContainer');
+        const summaryExpensesInfo = document.getElementById('summaryExpensesInfo');
+        const summaryExpenses = document.getElementById('summaryExpenses');
         const closeSummary = document.getElementById('closeSummary');
+
+        // History Modal Elements
+        const historyModal = document.getElementById('historyModal');
+        const historyModalDate = document.getElementById('historyModalDate');
+        const historyModalDuration = document.getElementById('historyModalDuration');
+        const historyModalRides = document.getElementById('historyModalRides');
+        const historyModalHourly = document.getElementById('historyModalHourly');
+        const historyModalPerRide = document.getElementById('historyModalPerRide');
+        const historyModalEarnings = document.getElementById('historyModalEarnings');
+        const historyModalExpenses = document.getElementById('historyModalExpenses');
+        const historyModalExpensesContainer = document.getElementById('historyModalExpensesContainer');
+        const historyModalProfit = document.getElementById('historyModalProfit');
+        const closeHistoryModal = document.getElementById('closeHistoryModal');
 
         // State
         let isRunning = false;
         let currentSessionId = null;
-        let startTime = null;
-        let elapsedSeconds = 0;
+        let sessionStartTime = null; // Firebase startTime as Date
         let timerInterval = null;
 
         // Format current date
@@ -360,8 +466,18 @@
         const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
         currentDateEl.textContent = today.toLocaleDateString('pt-BR', dateOptions);
 
-        // Update timer display
+        /**
+         * Calculate elapsed seconds from Firebase startTime
+         * This is the KEY fix - always calculate from the original startTime
+         */
+        const calculateElapsedSeconds = () => {
+            if (!sessionStartTime) return 0;
+            return Math.floor((Date.now() - sessionStartTime.getTime()) / 1000);
+        };
+
+        // Update timer display based on calculated seconds
         const updateTimerDisplay = () => {
+            const elapsedSeconds = calculateElapsedSeconds();
             const hours = Math.floor(elapsedSeconds / 3600);
             const minutes = Math.floor((elapsedSeconds % 3600) / 60);
             const seconds = elapsedSeconds % 60;
@@ -379,10 +495,43 @@
             return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         };
 
-        // Start timer
-        const startTimer = () => {
+        /**
+         * Calculate hourly rate with safety checks
+         * Prevents absurd values for very short sessions
+         */
+        const calculateHourlyRate = (earnings, durationSeconds) => {
+            if (!earnings || earnings <= 0) return 0;
+            if (!durationSeconds || durationSeconds <= 0) return 0;
+
+            const hoursWorked = durationSeconds / 3600;
+
+            // Minimum 5 minutes (0.0833 hours) to avoid crazy high rates
+            if (hoursWorked < 0.0833) {
+                // For very short sessions, just return the earnings as "rate"
+                return earnings;
+            }
+
+            return earnings / hoursWorked;
+        };
+
+        /**
+         * Calculate per-ride rate with safety checks
+         */
+        const calculatePerRideRate = (earnings, rides) => {
+            if (!earnings || earnings <= 0) return 0;
+            if (!rides || rides <= 0) return 0;
+            return earnings / rides;
+        };
+
+        // Start timer interval (only updates display, doesn't increment)
+        const startTimerInterval = () => {
+            // Clear any existing interval
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            // Update every second - calculates from startTime each time
             timerInterval = setInterval(() => {
-                elapsedSeconds++;
                 updateTimerDisplay();
             }, 1000);
 
@@ -391,8 +540,8 @@
             sep2.classList.add('animate-pulse');
         };
 
-        // Stop timer
-        const stopTimer = () => {
+        // Stop timer interval
+        const stopTimerInterval = () => {
             if (timerInterval) {
                 clearInterval(timerInterval);
                 timerInterval = null;
@@ -412,8 +561,8 @@
                 statusText.textContent = 'Turno em andamento';
                 actionIcon.textContent = 'stop_circle';
                 actionText.textContent = 'FINALIZAR TURNO';
-                actionBtn.classList.remove('bg-primary', 'hover:bg-primary-hover', 'shadow-primary/20');
-                actionBtn.classList.add('bg-red-500', 'hover:bg-red-600', 'shadow-red-500/20');
+                actionBtn.classList.remove('bg-primary', 'hover:bg-primary-hover', 'shadow-primary/30');
+                actionBtn.classList.add('bg-red-500', 'hover:bg-red-600', 'shadow-red-500/30');
                 runningInfo.classList.remove('hidden');
             } else {
                 statusDot.classList.remove('bg-primary', 'animate-pulse');
@@ -422,8 +571,8 @@
                 statusText.textContent = 'Você está offline';
                 actionIcon.textContent = 'play_circle';
                 actionText.textContent = 'INICIAR TURNO';
-                actionBtn.classList.remove('bg-red-500', 'hover:bg-red-600', 'shadow-red-500/20');
-                actionBtn.classList.add('bg-primary', 'hover:bg-primary-hover', 'shadow-primary/20');
+                actionBtn.classList.remove('bg-red-500', 'hover:bg-red-600', 'shadow-red-500/30');
+                actionBtn.classList.add('bg-primary', 'hover:bg-primary-hover', 'shadow-primary/30');
                 runningInfo.classList.add('hidden');
             }
         };
@@ -454,7 +603,8 @@
         actionBtn.addEventListener('click', async () => {
             if (isRunning) {
                 // Show end session modal
-                modalDuration.textContent = `Duração: ${formatDurationDisplay(elapsedSeconds)}`;
+                const elapsed = calculateElapsedSeconds();
+                modalDuration.textContent = `Duração: ${formatDurationDisplay(elapsed)}`;
                 inputEarnings.value = '';
                 inputRides.value = '';
                 inputExpenses.value = '';
@@ -464,22 +614,30 @@
             } else {
                 // Start session
                 try {
-                    currentSessionId = await startSession();
-                    startTime = Date.now();
-                    elapsedSeconds = 0;
+                    actionBtn.disabled = true;
+                    actionText.textContent = 'INICIANDO...';
 
-                    // Save to local storage for recovery
-                    saveLocal('activeSession', {
-                        sessionId: currentSessionId,
-                        startTime: startTime
-                    });
+                    // startSession now returns existing session if one exists (Singleton)
+                    currentSessionId = await startSession();
+
+                    // Fetch the session to get the actual startTime from Firebase
+                    const session = await getSession(currentSessionId);
+                    if (session && session.startTime) {
+                        sessionStartTime = session.startTime;
+                    } else {
+                        sessionStartTime = new Date();
+                    }
 
                     setRunningState(true);
-                    startTimer();
+                    updateTimerDisplay();
+                    startTimerInterval();
                     showToast('Turno iniciado! Bom trabalho!', 'success');
+
                 } catch (error) {
                     console.error('Erro ao iniciar sessão:', error);
                     showToast('Erro ao iniciar turno', 'error');
+                } finally {
+                    actionBtn.disabled = false;
                 }
             }
         });
@@ -511,8 +669,11 @@
                 return;
             }
 
+            // Get final elapsed time
+            const finalElapsedSeconds = calculateElapsedSeconds();
+
             // Stop timer
-            stopTimer();
+            stopTimerInterval();
 
             // Hide modal
             endSessionModal.classList.add('hidden');
@@ -520,7 +681,7 @@
 
             try {
                 // Save session with new data
-                await endSession(currentSessionId, elapsedSeconds, earnings, rides, expenses);
+                await endSession(currentSessionId, finalElapsedSeconds, earnings, rides, expenses);
 
                 // Auto-register transactions if checked
                 if (autoRegister.checked) {
@@ -529,9 +690,9 @@
                         await addTransaction({
                             type: 'income',
                             amount: earnings,
-                            category: 'uber', // Default category
+                            category: 'uber',
                             date: new Date(),
-                            description: `Turno de ${formatDurationHuman(elapsedSeconds)}`
+                            description: `Turno de ${formatDurationHuman(finalElapsedSeconds)}`
                         });
                         await updateGoalsProgress(earnings, 'receita');
                     }
@@ -541,7 +702,7 @@
                         await addTransaction({
                             type: 'expense',
                             amount: expenses,
-                            category: 'combustivel', // Default category
+                            category: 'combustivel',
                             date: new Date(),
                             description: 'Gastos do turno'
                         });
@@ -560,20 +721,27 @@
                     }
                 }
 
-                // Calculate summary stats
-                const hoursWorked = elapsedSeconds / 3600;
-                const hourlyRate = hoursWorked > 0 ? earnings / hoursWorked : 0;
-                const perRide = rides > 0 ? earnings / rides : 0;
+                // Calculate summary stats with safety checks
+                const hourlyRate = calculateHourlyRate(earnings, finalElapsedSeconds);
+                const perRide = calculatePerRideRate(earnings, rides);
                 const netProfit = earnings - expenses;
 
                 // Update summary modal
-                const durationHours = Math.floor(elapsedSeconds / 3600);
-                const durationMins = Math.floor((elapsedSeconds % 3600) / 60);
+                const durationHours = Math.floor(finalElapsedSeconds / 3600);
+                const durationMins = Math.floor((finalElapsedSeconds % 3600) / 60);
                 summaryDuration.textContent = `${durationHours}h ${durationMins}m`;
                 summaryRides.textContent = rides.toString();
                 summaryHourly.textContent = formatCurrency(hourlyRate) + '/h';
                 summaryPerRide.textContent = rides > 0 ? formatCurrency(perRide) : '-';
                 summaryProfit.textContent = formatCurrency(netProfit);
+
+                // Show expenses if any
+                if (expenses > 0) {
+                    summaryExpensesInfo.classList.remove('hidden');
+                    summaryExpenses.textContent = formatCurrency(expenses);
+                } else {
+                    summaryExpensesInfo.classList.add('hidden');
+                }
 
                 // Show summary modal
                 summaryModal.classList.remove('hidden');
@@ -581,11 +749,11 @@
 
                 // Reset state
                 currentSessionId = null;
-                startTime = null;
-                elapsedSeconds = 0;
-                updateTimerDisplay();
+                sessionStartTime = null;
+                hoursEl.textContent = '00';
+                minutesEl.textContent = '00';
+                secondsEl.textContent = '00';
                 setRunningState(false);
-                saveLocal('activeSession', null);
 
                 // Reload history
                 await loadHistory();
@@ -594,7 +762,7 @@
                 console.error('Erro ao finalizar sessão:', error);
                 showToast('Erro ao finalizar turno', 'error');
                 // Restart timer if error
-                startTimer();
+                startTimerInterval();
             }
         });
 
@@ -611,12 +779,68 @@
             }
         });
 
+        // Close history modal
+        closeHistoryModal.addEventListener('click', () => {
+            historyModal.classList.add('hidden');
+            historyModal.classList.remove('flex');
+        });
+
+        historyModal.addEventListener('click', (e) => {
+            if (e.target === historyModal) {
+                historyModal.classList.add('hidden');
+                historyModal.classList.remove('flex');
+            }
+        });
+
+        // Show history details modal
+        const showHistoryDetails = (session) => {
+            const dateStr = session.startTime.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            const duration = session.duration || 0;
+            const earnings = session.earnings || 0;
+            const rides = session.rides || 0;
+            const expenses = session.expenses || 0;
+            const netProfit = earnings - expenses;
+
+            const hourlyRate = calculateHourlyRate(earnings, duration);
+            const perRide = calculatePerRideRate(earnings, rides);
+
+            const durationHours = Math.floor(duration / 3600);
+            const durationMins = Math.floor((duration % 3600) / 60);
+
+            historyModalDate.textContent = dateStr;
+            historyModalDuration.textContent = `${durationHours}h ${durationMins}m`;
+            historyModalRides.textContent = rides.toString();
+            historyModalHourly.textContent = formatCurrency(hourlyRate) + '/h';
+            historyModalPerRide.textContent = rides > 0 ? formatCurrency(perRide) : '-';
+            historyModalEarnings.textContent = formatCurrency(earnings);
+            historyModalProfit.textContent = formatCurrency(netProfit);
+
+            if (expenses > 0) {
+                historyModalExpensesContainer.classList.remove('hidden');
+                historyModalExpenses.textContent = formatCurrency(expenses);
+            } else {
+                historyModalExpensesContainer.classList.add('hidden');
+            }
+
+            historyModal.classList.remove('hidden');
+            historyModal.classList.add('flex');
+        };
+
         // Load history
         const loadHistory = async () => {
             try {
-                const sessions = await getSessions({ limit: 5 });
+                const sessions = await getSessions({ limit: 10 });
 
-                if (!sessions || sessions.length === 0) {
+                // Filter only completed sessions
+                const completedSessions = sessions.filter(s => s.status === 'completed');
+
+                if (!completedSessions || completedSessions.length === 0) {
                     historyContainer.innerHTML = `
                         <div class="text-center py-8 text-slate-400">
                             <span class="material-symbols-outlined text-3xl mb-2">work_history</span>
@@ -627,42 +851,52 @@
                 }
 
                 let html = '';
-                sessions.forEach(session => {
-                    if (session.status === 'completed') {
-                        const dateStr = formatRelativeDate(session.startTime);
-                        const shortDate = session.startTime.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
-                        const hoursWorked = (session.duration || 0) / 3600;
-                        const hourlyRate = hoursWorked > 0 ? (session.earnings || 0) / hoursWorked : 0;
+                completedSessions.slice(0, 5).forEach((session, index) => {
+                    const dateStr = formatRelativeDate(session.startTime);
+                    const duration = session.duration || 0;
+                    const earnings = session.earnings || 0;
+                    const rides = session.rides || 0;
+                    const hourlyRate = calculateHourlyRate(earnings, duration);
 
-                        html += `
-                            <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-surface-dark border border-slate-200 dark:border-white/5 shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <div class="size-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400">
-                                        <span class="material-symbols-outlined text-xl">calendar_today</span>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-slate-900 dark:text-white font-bold text-sm">${dateStr}</span>
-                                        <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                                            <span>${formatDurationHuman(session.duration || 0)}</span>
-                                            ${session.rides ? `<span>• ${session.rides} corrida${session.rides > 1 ? 's' : ''}</span>` : ''}
-                                        </div>
-                                    </div>
+                    html += `
+                        <div class="history-item flex items-center justify-between p-4 rounded-xl bg-white dark:bg-surface-dark border border-slate-200 dark:border-white/5 shadow-sm cursor-pointer hover:border-primary/30 hover:shadow-md transition-all"
+                             data-session-index="${index}">
+                            <div class="flex items-center gap-3">
+                                <div class="size-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                                    <span class="material-symbols-outlined text-xl">calendar_today</span>
                                 </div>
-                                <div class="flex flex-col items-end gap-0.5">
-                                    <span class="text-primary font-bold text-sm">+ ${formatCurrency(session.earnings || 0)}</span>
-                                    <span class="text-xs text-slate-500 dark:text-slate-400">${formatCurrency(hourlyRate)}/h</span>
+                                <div class="flex flex-col">
+                                    <span class="text-slate-900 dark:text-white font-bold text-sm">${dateStr}</span>
+                                    <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                        <span>${formatDurationHuman(duration)}</span>
+                                        ${rides ? `<span>• ${rides} corrida${rides > 1 ? 's' : ''}</span>` : ''}
+                                    </div>
                                 </div>
                             </div>
-                        `;
-                    }
+                            <div class="flex items-center gap-2">
+                                <div class="flex flex-col items-end gap-0.5">
+                                    <span class="text-primary font-bold text-sm">+ ${formatCurrency(earnings)}</span>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400">${formatCurrency(hourlyRate)}/h</span>
+                                </div>
+                                <span class="material-symbols-outlined text-slate-300 dark:text-slate-600 text-lg">chevron_right</span>
+                            </div>
+                        </div>
+                    `;
                 });
 
-                historyContainer.innerHTML = html || `
-                    <div class="text-center py-8 text-slate-400">
-                        <span class="material-symbols-outlined text-3xl mb-2">work_history</span>
-                        <p class="text-sm">Nenhum turno finalizado ainda</p>
-                    </div>
-                `;
+                historyContainer.innerHTML = html;
+
+                // Add click handlers to history items
+                document.querySelectorAll('.history-item').forEach((item) => {
+                    item.addEventListener('click', () => {
+                        const index = parseInt(item.dataset.sessionIndex);
+                        const session = completedSessions[index];
+                        if (session) {
+                            showHistoryDetails(session);
+                        }
+                    });
+                });
+
             } catch (error) {
                 console.error('Erro ao carregar histórico:', error);
                 historyContainer.innerHTML = `
@@ -675,31 +909,34 @@
             }
         };
 
-        // Check for active session (recovery)
+        // Check for active session and resume timer
         const checkActiveSession = async () => {
             try {
-                // First check Firebase
+                // First cleanup any abandoned sessions (older than 24h)
+                await cleanupAbandonedSessions();
+
+                // Check Firebase for active session
                 const activeSession = await getActiveSession();
 
                 if (activeSession) {
+                    console.log('Sessão ativa encontrada:', activeSession.id);
                     currentSessionId = activeSession.id;
-                    startTime = activeSession.startTime.getTime();
-                    elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+                    sessionStartTime = activeSession.startTime;
+
+                    // Calculate current elapsed time
+                    const elapsed = calculateElapsedSeconds();
+                    console.log('Tempo decorrido:', formatDurationDisplay(elapsed));
 
                     setRunningState(true);
                     updateTimerDisplay();
-                    startTimer();
+                    startTimerInterval();
                 } else {
-                    // Check local storage for recovery
-                    const savedSession = getLocal('activeSession');
-                    if (savedSession && savedSession.sessionId) {
-                        // Session might have been lost, clear it
-                        saveLocal('activeSession', null);
-                    }
+                    console.log('Nenhuma sessão ativa');
+                    setRunningState(false);
                 }
             } catch (error) {
                 console.error('Erro ao verificar sessão ativa:', error);
-                // Continue anyway, user can start new session
+                // Continue anyway
             }
         };
 

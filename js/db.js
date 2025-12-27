@@ -315,18 +315,28 @@ export const subscribeToTransactionsSummary = (startDate, callback) => {
 // ============================================
 
 /**
- * Start new work session
- * @returns {Promise<string>} Session ID
+ * Start new work session (Singleton - only one active session allowed)
+ * @returns {Promise<string>} Session ID (existing or new)
  */
 export const startSession = async () => {
     const uid = auth.currentUser?.uid;
     if (!uid) throw new Error('Usuário não autenticado');
 
+    // SINGLETON: Check if there's already an active session
+    const existingSession = await getActiveSession();
+    if (existingSession) {
+        console.log('Sessão ativa já existe:', existingSession.id);
+        return existingSession.id;
+    }
+
+    // Create new session with proper timestamp
     const sessionData = {
         startTime: serverTimestamp(),
         endTime: null,
         duration: 0,
         earnings: 0,
+        rides: 0,
+        expenses: 0,
         status: 'active',
         date: Timestamp.fromDate(getStartOfDay())
     };
@@ -336,6 +346,7 @@ export const startSession = async () => {
         sessionData
     );
 
+    console.log('Nova sessão criada:', docRef.id);
     return docRef.id;
 };
 
@@ -403,6 +414,67 @@ export const getSessions = async (filters = {}) => {
 export const getActiveSession = async () => {
     const sessions = await getSessions({ status: 'active', limit: 1 });
     return sessions.length > 0 ? sessions[0] : null;
+};
+
+/**
+ * Get session by ID
+ * @param {string} sessionId - Session ID
+ * @returns {Promise<object|null>} Session data or null
+ */
+export const getSession = async (sessionId) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return null;
+
+    const docRef = doc(db, 'users', uid, 'sessions', sessionId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) return null;
+
+    return {
+        id: docSnap.id,
+        ...docSnap.data(),
+        startTime: docSnap.data().startTime?.toDate() || new Date(),
+        endTime: docSnap.data().endTime?.toDate() || null
+    };
+};
+
+/**
+ * Cleanup abandoned active sessions (older than 24 hours)
+ * Call this periodically to prevent orphan sessions
+ * @returns {Promise<number>} Number of sessions cleaned
+ */
+export const cleanupAbandonedSessions = async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return 0;
+
+    const sessionsRef = collection(db, 'users', uid, 'sessions');
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const q = query(
+        sessionsRef,
+        where('status', '==', 'active'),
+        where('startTime', '<', Timestamp.fromDate(twentyFourHoursAgo))
+    );
+
+    const snapshot = await getDocs(q);
+    let cleaned = 0;
+
+    for (const docSnap of snapshot.docs) {
+        // Mark as abandoned instead of deleting
+        await updateDoc(doc(db, 'users', uid, 'sessions', docSnap.id), {
+            status: 'abandoned',
+            endTime: serverTimestamp(),
+            duration: 0,
+            earnings: 0
+        });
+        cleaned++;
+    }
+
+    if (cleaned > 0) {
+        console.log(`Limpas ${cleaned} sessões abandonadas`);
+    }
+
+    return cleaned;
 };
 
 // ============================================
