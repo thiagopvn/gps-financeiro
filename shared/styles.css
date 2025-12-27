@@ -62,3 +62,37 @@ body {
 .animate-spin {
     animation: spin 1s linear infinite;
 }
+
+/* Smooth fade-in animation for content */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Staggered list animation */
+.stagger-children > * {
+    animation: fadeIn 0.3s ease-out forwards;
+    opacity: 0;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(n+6) { animation-delay: 0.3s; }
+
+/* Global smooth transitions */
+.transition-smooth {
+    transition: all 0.2s ease-out;
+}

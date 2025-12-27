@@ -28,7 +28,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="/shared/tailwind-config.js"></script>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-background-dark pb-24">
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-background-dark pb-32">
     <!-- Header Section -->
     <header class="sticky top-0 z-30 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 pt-safe">
         <div class="flex items-center p-4 justify-between">
@@ -78,6 +78,22 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Period Filter -->
+        <div class="flex gap-2 overflow-x-auto no-scrollbar">
+            <button id="filterDay" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="day">
+                <span class="material-symbols-outlined text-[16px]">today</span>
+                Hoje
+            </button>
+            <button id="filterWeek" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="week">
+                <span class="material-symbols-outlined text-[16px]">date_range</span>
+                Semana
+            </button>
+            <button id="filterMonth" class="period-filter active flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all bg-primary text-background-dark" data-period="month">
+                <span class="material-symbols-outlined text-[16px]">calendar_month</span>
+                Mês
+            </button>
         </div>
 
         <!-- Stats Row -->
@@ -164,7 +180,7 @@
     <script type="module">
         import { requireAuth } from '/js/firebase-config.js';
         import { getUserProfile, subscribeToTransactionsSummary, getGoals, checkAndResetGoals } from '/js/db.js';
-        import { formatCurrency, formatDate, getStartOfMonth, getLocal, saveLocal } from '/js/utils.js';
+        import { formatCurrency, formatDate, getStartOfDay, getStartOfWeek, getStartOfMonth, getLocal, saveLocal } from '/js/utils.js';
 
         // Require authentication
         const user = await requireAuth();
@@ -177,11 +193,22 @@
         const balance = document.getElementById('balance');
         const income = document.getElementById('income');
         const expenses = document.getElementById('expenses');
+        const incomeChange = document.getElementById('incomeChange');
+        const expensesChange = document.getElementById('expensesChange');
         const goalsContainer = document.getElementById('goalsContainer');
         const toggleVisibility = document.getElementById('toggleVisibility');
+        const periodFilters = document.querySelectorAll('.period-filter');
 
         // State
         let isHidden = getLocal('balanceHidden', false);
+        let currentPeriod = getLocal('dashboardPeriod', 'month'); // day, week, month
+
+        // Period labels
+        const periodLabels = {
+            day: 'Hoje',
+            week: 'Esta semana',
+            month: 'Este mês'
+        };
 
         // Format current date
         const today = new Date();
@@ -202,10 +229,23 @@
             }
         };
 
+        // Get start date based on period
+        const getStartDateForPeriod = (period) => {
+            switch (period) {
+                case 'day':
+                    return getStartOfDay();
+                case 'week':
+                    return getStartOfWeek();
+                case 'month':
+                default:
+                    return getStartOfMonth();
+            }
+        };
+
         // Subscribe to financial summary (real-time updates)
         let unsubscribeSummary = null;
-        const loadSummary = () => {
-            const startOfMonth = getStartOfMonth();
+        const loadSummary = (period = currentPeriod) => {
+            const startDate = getStartDateForPeriod(period);
 
             // Unsubscribe from previous listener if exists
             if (unsubscribeSummary) {
@@ -213,9 +253,14 @@
             }
 
             // Subscribe to real-time updates
-            unsubscribeSummary = subscribeToTransactionsSummary(startOfMonth, (summary) => {
+            unsubscribeSummary = subscribeToTransactionsSummary(startDate, (summary) => {
                 updateBalanceDisplay(summary);
             });
+
+            // Update period labels
+            const label = periodLabels[period];
+            incomeChange.textContent = label;
+            expensesChange.textContent = label;
         };
 
         // Update balance display
@@ -257,6 +302,32 @@
                 } else if (el.dataset.value) {
                     el.textContent = formatCurrency(parseFloat(el.dataset.value));
                 }
+            });
+        });
+
+        // Period filter click handlers
+        const updatePeriodFilterUI = (selectedPeriod) => {
+            periodFilters.forEach(btn => {
+                const period = btn.dataset.period;
+                if (period === selectedPeriod) {
+                    btn.classList.add('active', 'bg-primary', 'text-background-dark', 'font-semibold');
+                    btn.classList.remove('bg-white', 'dark:bg-surface-dark', 'border', 'border-gray-200', 'dark:border-white/10', 'text-gray-600', 'dark:text-gray-400', 'font-medium');
+                } else {
+                    btn.classList.remove('active', 'bg-primary', 'text-background-dark', 'font-semibold');
+                    btn.classList.add('bg-white', 'dark:bg-surface-dark', 'border', 'border-gray-200', 'dark:border-white/10', 'text-gray-600', 'dark:text-gray-400', 'font-medium');
+                }
+            });
+        };
+
+        periodFilters.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const period = btn.dataset.period;
+                if (period === currentPeriod) return;
+
+                currentPeriod = period;
+                saveLocal('dashboardPeriod', period);
+                updatePeriodFilterUI(period);
+                loadSummary(period);
             });
         });
 
@@ -474,8 +545,11 @@
         // Initialize
         const init = async () => {
             try {
+                // Apply saved period filter UI
+                updatePeriodFilterUI(currentPeriod);
+
                 // Start real-time summary listener (sync function)
-                loadSummary();
+                loadSummary(currentPeriod);
 
                 // Load profile and goals
                 await Promise.all([

@@ -530,3 +530,38 @@ export const getStartOfMonth = (date = new Date()) => {
     d.setHours(0, 0, 0, 0);
     return d;
 };
+
+/**
+ * Get end of day (23:59:59.999)
+ * @returns {Date} End of the given day
+ */
+export const getEndOfDay = (date = new Date()) => {
+    const d = new Date(date);
+    d.setHours(23, 59, 59, 999);
+    return d;
+};
+
+/**
+ * Get end of week (Sunday 23:59:59.999)
+ * @returns {Date} Sunday of current week
+ */
+export const getEndOfWeek = (date = new Date()) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = 7 - day; // days until Sunday
+    d.setDate(d.getDate() + (day === 0 ? 0 : diff));
+    d.setHours(23, 59, 59, 999);
+    return d;
+};
+
+/**
+ * Get end of month
+ * @returns {Date} Last day of current month
+ */
+export const getEndOfMonth = (date = new Date()) => {
+    const d = new Date(date);
+    d.setMonth(d.getMonth() + 1);
+    d.setDate(0); // Last day of previous month (which is current month)
+    d.setHours(23, 59, 59, 999);
+    return d;
+};
