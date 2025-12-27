@@ -144,6 +144,29 @@
             </div>
         </div>
 
+        <!-- Savings Card (Cofrinho) -->
+        <div class="relative overflow-hidden rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-amber-500/5 p-4 transition-all hover:shadow-lg hover:shadow-amber-500/10">
+            <div class="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-amber-500/15 blur-2xl opacity-60"></div>
+            <div class="relative z-10 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/20 border border-amber-500/30">
+                        <span class="material-symbols-outlined text-amber-500 text-2xl">savings</span>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm font-medium">Guardado</p>
+                        <p id="savings" class="text-amber-500 text-xl font-bold tracking-tight balance-value" data-value="0">R$ 0</p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end">
+                    <p id="savingsChange" class="text-amber-500/80 text-xs font-semibold">Este mês</p>
+                    <a href="/user/Lancamento/lancamento.html" class="mt-2 flex items-center gap-1 text-amber-500 text-xs font-medium hover:text-amber-400 transition-colors">
+                        <span class="material-symbols-outlined text-[14px]">add_circle</span>
+                        Guardar mais
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Goals Section -->
         <div class="flex flex-col">
             <div class="flex items-center justify-between mb-4 px-1">
@@ -197,7 +220,7 @@
     <!-- JavaScript -->
     <script type="module">
         import { requireAuth } from '/js/firebase-config.js';
-        import { getUserProfile, subscribeToTransactionsSummary, getGoals, checkAndResetGoals, getActiveSession } from '/js/db.js';
+        import { getUserProfile, subscribeToTransactionsSummary, subscribeToSavingsSummary, getGoals, checkAndResetGoals, getActiveSession } from '/js/db.js';
         import { formatCurrency, formatDate, getStartOfDay, getStartOfWeek, getStartOfMonth, getLocal, saveLocal } from '/js/utils.js';
 
         // Require authentication
@@ -211,8 +234,10 @@
         const balance = document.getElementById('balance');
         const income = document.getElementById('income');
         const expenses = document.getElementById('expenses');
+        const savings = document.getElementById('savings');
         const incomeChange = document.getElementById('incomeChange');
         const expensesChange = document.getElementById('expensesChange');
+        const savingsChange = document.getElementById('savingsChange');
         const goalsContainer = document.getElementById('goalsContainer');
         const toggleVisibility = document.getElementById('toggleVisibility');
         const periodFilters = document.querySelectorAll('.period-filter');
@@ -290,23 +315,33 @@
 
         // Subscribe to financial summary (real-time updates)
         let unsubscribeSummary = null;
+        let unsubscribeSavings = null;
         const loadSummary = (period = currentPeriod) => {
             const startDate = getStartDateForPeriod(period);
 
-            // Unsubscribe from previous listener if exists
+            // Unsubscribe from previous listeners if exist
             if (unsubscribeSummary) {
                 unsubscribeSummary();
             }
+            if (unsubscribeSavings) {
+                unsubscribeSavings();
+            }
 
-            // Subscribe to real-time updates
+            // Subscribe to real-time updates for transactions
             unsubscribeSummary = subscribeToTransactionsSummary(startDate, (summary) => {
                 updateBalanceDisplay(summary);
+            });
+
+            // Subscribe to real-time updates for savings
+            unsubscribeSavings = subscribeToSavingsSummary(startDate, (savingsData) => {
+                updateSavingsDisplay(savingsData);
             });
 
             // Update period labels
             const label = periodLabels[period];
             incomeChange.textContent = label;
             expensesChange.textContent = label;
+            savingsChange.textContent = label;
         };
 
         // Update balance display
@@ -329,6 +364,20 @@
             balance.dataset.value = balanceValue;
             income.dataset.value = incomeValue;
             expenses.dataset.value = expensesValue;
+        };
+
+        // Update savings display
+        const updateSavingsDisplay = (savingsData) => {
+            const savingsValue = savingsData.savings;
+
+            if (isHidden) {
+                savings.textContent = '••••';
+            } else {
+                savings.textContent = formatCurrency(savingsValue);
+            }
+
+            // Store for toggle
+            savings.dataset.value = savingsValue;
         };
 
         // Toggle visibility
@@ -617,6 +666,9 @@
         window.addEventListener('beforeunload', () => {
             if (unsubscribeSummary) {
                 unsubscribeSummary();
+            }
+            if (unsubscribeSavings) {
+                unsubscribeSavings();
             }
         });
 

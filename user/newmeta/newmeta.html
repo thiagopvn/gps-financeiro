@@ -376,12 +376,14 @@
                     // Match category to transaction type
                     if (selectedCategory === 'receita' && t.type === 'income') {
                         total += t.amount || 0;
+                    } else if (selectedCategory === 'economia' && t.type === 'expense' && t.subType === 'saving') {
+                        // Economia são despesas com subType 'saving'
+                        total += t.amount || 0;
                     } else if (selectedCategory === 'corridas' && t.type === 'corridas') {
                         total += t.amount || 0;
                     } else if (selectedCategory === 'km' && t.type === 'km') {
                         total += t.amount || 0;
                     }
-                    // Note: economia não tem correspondência direta em transações
                 });
 
                 return total;

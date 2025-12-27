@@ -310,6 +310,43 @@ export const subscribeToTransactionsSummary = (startDate, callback) => {
     return unsubscribe;
 };
 
+/**
+ * Subscribe to savings summary in real-time (transactions with subType 'saving')
+ * @param {Date} startDate - Start date filter
+ * @param {function} callback - Callback with savings total
+ * @returns {function} Unsubscribe function
+ */
+export const subscribeToSavingsSummary = (startDate, callback) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+        callback({ savings: 0, count: 0 });
+        return () => {};
+    }
+
+    const transactionsRef = collection(db, 'users', uid, 'transactions');
+    const q = query(
+        transactionsRef,
+        where('date', '>=', Timestamp.fromDate(startDate)),
+        where('subType', '==', 'saving'),
+        orderBy('date', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        let savings = 0;
+        snapshot.docs.forEach(doc => {
+            const t = doc.data();
+            savings += t.amount || 0;
+        });
+
+        callback({ savings, count: snapshot.docs.length });
+    }, (error) => {
+        console.error('Erro ao ouvir economias:', error);
+        callback({ savings: 0, count: 0 });
+    });
+
+    return unsubscribe;
+};
+
 // ============================================
 // Session Operations
 // ============================================

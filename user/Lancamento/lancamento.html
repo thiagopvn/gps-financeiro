@@ -51,23 +51,27 @@
 
         <!-- Main Content Scrollable Area -->
         <main class="flex-1 pb-40 px-4">
-            <!-- Type Toggle - 4 Options -->
+            <!-- Type Toggle - 5 Options -->
             <div class="py-4">
-                <div class="grid grid-cols-4 gap-1 h-12 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-zinc-800 p-1">
-                    <button id="tabReceita" class="type-tab active h-full flex items-center justify-center rounded-lg text-xs font-semibold transition-all" style="--active-bg: #22c55e; --active-text: white;">
-                        <span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
+                <div class="grid grid-cols-5 gap-1 h-12 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-zinc-800 p-1">
+                    <button id="tabReceita" class="type-tab active h-full flex flex-col items-center justify-center rounded-lg text-[10px] font-semibold transition-all" style="--active-bg: #22c55e; --active-text: white;">
+                        <span class="material-symbols-outlined text-[16px]">trending_up</span>
                         Receita
                     </button>
-                    <button id="tabDespesa" class="type-tab h-full flex items-center justify-center rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 transition-all" style="--active-bg: #ef4444; --active-text: white;">
-                        <span class="material-symbols-outlined text-[16px] mr-1">trending_down</span>
+                    <button id="tabDespesa" class="type-tab h-full flex flex-col items-center justify-center rounded-lg text-[10px] font-semibold text-slate-500 dark:text-slate-400 transition-all" style="--active-bg: #ef4444; --active-text: white;">
+                        <span class="material-symbols-outlined text-[16px]">trending_down</span>
                         Despesa
                     </button>
-                    <button id="tabCorridas" class="type-tab h-full flex items-center justify-center rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 transition-all" style="--active-bg: #3b82f6; --active-text: white;">
-                        <span class="material-symbols-outlined text-[16px] mr-1">directions_car</span>
+                    <button id="tabGuardar" class="type-tab h-full flex flex-col items-center justify-center rounded-lg text-[10px] font-semibold text-slate-500 dark:text-slate-400 transition-all" style="--active-bg: #f59e0b; --active-text: white;">
+                        <span class="material-symbols-outlined text-[16px]">savings</span>
+                        Guardar
+                    </button>
+                    <button id="tabCorridas" class="type-tab h-full flex flex-col items-center justify-center rounded-lg text-[10px] font-semibold text-slate-500 dark:text-slate-400 transition-all" style="--active-bg: #3b82f6; --active-text: white;">
+                        <span class="material-symbols-outlined text-[16px]">directions_car</span>
                         Corridas
                     </button>
-                    <button id="tabKm" class="type-tab h-full flex items-center justify-center rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 transition-all" style="--active-bg: #a855f7; --active-text: white;">
-                        <span class="material-symbols-outlined text-[16px] mr-1">speed</span>
+                    <button id="tabKm" class="type-tab h-full flex flex-col items-center justify-center rounded-lg text-[10px] font-semibold text-slate-500 dark:text-slate-400 transition-all" style="--active-bg: #a855f7; --active-text: white;">
+                        <span class="material-symbols-outlined text-[16px]">speed</span>
                         KM
                     </button>
                 </div>
@@ -252,7 +256,74 @@
                 </div>
             </div>
 
-            <!-- Info Card for Corridas/KM -->
+            <!-- Categories for Saving/Guardar (hidden by default) -->
+            <div id="savingCategories" class="mb-6 hidden">
+                <h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight mb-4">Para onde vai o dinheiro?</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Reserva de Emergência -->
+                    <label class="category-item saving-cat selected group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-amber-500 shadow-sm transition-all" data-category="reserva">
+                        <input checked class="peer sr-only" name="saving-category" type="radio" value="reserva"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
+                            <span class="material-symbols-outlined">shield</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Reserva</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Emergência</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-amber-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Investimento -->
+                    <label class="category-item saving-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="investimento">
+                        <input class="peer sr-only" name="saving-category" type="radio" value="investimento"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-yellow-500 text-white">
+                            <span class="material-symbols-outlined">trending_up</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Investimento</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Render mais</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-amber-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Manutenção Futura -->
+                    <label class="category-item saving-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="manutencao_futura">
+                        <input class="peer sr-only" name="saving-category" type="radio" value="manutencao_futura"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white">
+                            <span class="material-symbols-outlined">build</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Manutenção</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Veículo futuro</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-amber-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Projeto Pessoal -->
+                    <label class="category-item saving-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="projeto_pessoal">
+                        <input class="peer sr-only" name="saving-category" type="radio" value="projeto_pessoal"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-600 text-white">
+                            <span class="material-symbols-outlined">star</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Projeto</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Sonho pessoal</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-amber-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                    <!-- Outros -->
+                    <label class="category-item saving-cat group cursor-pointer relative flex items-center gap-3 rounded-xl p-3 bg-white dark:bg-surface-dark border-2 border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all" data-category="outros_economia">
+                        <input class="peer sr-only" name="saving-category" type="radio" value="outros_economia"/>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-yellow-600 text-white">
+                            <span class="material-symbols-outlined">more_horiz</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">Outros</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Outras economias</span>
+                        </div>
+                        <span class="check-icon material-symbols-outlined absolute right-3 text-amber-500" style="font-size: 20px;">check_circle</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Info Card for Corridas/KM/Guardar -->
             <div id="infoCard" class="mb-6 hidden">
                 <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
                     <div class="flex items-start gap-3">
@@ -320,15 +391,17 @@
         console.log('Usuario autenticado:', user.uid);
 
         // State
-        let currentType = 'income'; // income, expense, corridas, km
+        let currentType = 'income'; // income, expense, guardar, corridas, km
         let rawValue = '0';
         let isCurrency = true;
 
         // DOM Elements
         const tabReceita = document.getElementById('tabReceita');
         const tabDespesa = document.getElementById('tabDespesa');
+        const tabGuardar = document.getElementById('tabGuardar');
         const tabCorridas = document.getElementById('tabCorridas');
         const tabKm = document.getElementById('tabKm');
+        const savingCategories = document.getElementById('savingCategories');
         const amountInput = document.getElementById('amountInput');
         const amountLabel = document.getElementById('amountLabel');
         const amountPrefix = document.getElementById('amountPrefix');
@@ -346,7 +419,7 @@
         const numKeys = document.querySelectorAll('.num-key');
         const backspaceKey = document.getElementById('backspaceKey');
         const decimalKey = document.getElementById('decimalKey');
-        const allTabs = [tabReceita, tabDespesa, tabCorridas, tabKm];
+        const allTabs = [tabReceita, tabDespesa, tabGuardar, tabCorridas, tabKm];
 
         // Set today's date as default
         const today = new Date().toISOString().split('T')[0];
@@ -424,6 +497,7 @@
             // Hide all sections
             incomeCategories.classList.add('hidden');
             expenseCategories.classList.add('hidden');
+            savingCategories.classList.add('hidden');
             infoCard.classList.add('hidden');
             decimalKey.classList.remove('hidden');
 
@@ -449,6 +523,23 @@
                     expenseCategories.classList.remove('hidden');
                     saveBtnText.textContent = 'Salvar Despesa';
                     saveBtn.className = 'w-full rounded-xl bg-red-500 py-4 text-center text-base font-bold text-white shadow-lg shadow-red-500/20 hover:bg-red-600 transition-colors active:scale-[0.98] flex items-center justify-center gap-2';
+                    isCurrency = true;
+                    break;
+                case 'guardar':
+                    tabGuardar.classList.add('active');
+                    tabGuardar.classList.remove('text-slate-500', 'dark:text-slate-400');
+                    amountLabel.textContent = 'Quanto vai guardar?';
+                    amountPrefix.textContent = 'R$';
+                    amountPrefix.classList.remove('hidden');
+                    savingCategories.classList.remove('hidden');
+                    infoCard.classList.remove('hidden');
+                    infoTitle.textContent = 'Guardar Dinheiro';
+                    infoText.textContent = 'Este valor será contabilizado na sua meta de economia e subtraído do saldo disponível.';
+                    // Change info card to amber color
+                    infoCard.querySelector('div').className = 'bg-amber-500/10 border border-amber-500/20 rounded-xl p-4';
+                    infoCard.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-amber-500 text-xl';
+                    saveBtnText.textContent = 'Guardar Dinheiro';
+                    saveBtn.className = 'w-full rounded-xl bg-amber-500 py-4 text-center text-base font-bold text-white shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-colors active:scale-[0.98] flex items-center justify-center gap-2';
                     isCurrency = true;
                     break;
                 case 'corridas':
@@ -487,6 +578,7 @@
         // Tab click events
         tabReceita.addEventListener('click', () => switchTab('income'));
         tabDespesa.addEventListener('click', () => switchTab('expense'));
+        tabGuardar.addEventListener('click', () => switchTab('guardar'));
         tabCorridas.addEventListener('click', () => switchTab('corridas'));
         tabKm.addEventListener('click', () => switchTab('km'));
 
@@ -508,15 +600,25 @@
 
         const incomeCats = document.querySelectorAll('.income-cat');
         const expenseCats = document.querySelectorAll('.expense-cat');
+        const savingCats = document.querySelectorAll('.saving-cat');
         setupCategorySelection(incomeCats, 'border-green-500');
         setupCategorySelection(expenseCats, 'border-red-500');
+        setupCategorySelection(savingCats, 'border-amber-500');
 
         // Get selected category
         function getSelectedCategory() {
             if (currentType === 'corridas') return 'corridas';
             if (currentType === 'km') return 'km';
 
-            const selector = currentType === 'income' ? 'income-category' : 'expense-category';
+            let selector;
+            if (currentType === 'income') {
+                selector = 'income-category';
+            } else if (currentType === 'expense') {
+                selector = 'expense-category';
+            } else if (currentType === 'guardar') {
+                selector = 'saving-category';
+            }
+
             const checked = document.querySelector(`input[name="${selector}"]:checked`);
             return checked ? checked.value : null;
         }
@@ -575,6 +677,7 @@
                 // Map type to transaction type
                 let transactionType;
                 let goalCategory = null;
+                let subType = null;
 
                 switch (currentType) {
                     case 'income':
@@ -583,6 +686,13 @@
                         break;
                     case 'expense':
                         transactionType = 'expense';
+                        break;
+                    case 'guardar':
+                        // Guardar é salvo como 'expense' mas com subType 'saving'
+                        // para que seja subtraído do saldo, mas atualize metas de economia
+                        transactionType = 'expense';
+                        subType = 'saving';
+                        goalCategory = 'economia';
                         break;
                     case 'corridas':
                         transactionType = 'corridas';
@@ -596,20 +706,29 @@
 
                 console.log('Salvando transacao:', {
                     type: transactionType,
+                    subType: subType,
                     amount: value,
                     category: category,
                     date: date,
                     description: description
                 });
 
-                // Save transaction to Firebase
-                const transactionId = await addTransaction({
+                // Build transaction data
+                const transactionData = {
                     type: transactionType,
                     amount: value,
                     category: category,
                     date: date,
                     description: description || null
-                });
+                };
+
+                // Add subType if it's a saving transaction
+                if (subType) {
+                    transactionData.subType = subType;
+                }
+
+                // Save transaction to Firebase
+                const transactionId = await addTransaction(transactionData);
 
                 console.log('Transacao salva com ID:', transactionId);
 
@@ -624,6 +743,7 @@
                 switch (currentType) {
                     case 'income': successMessage = 'Receita salva com sucesso!'; break;
                     case 'expense': successMessage = 'Despesa salva com sucesso!'; break;
+                    case 'guardar': successMessage = 'Dinheiro guardado com sucesso!'; break;
                     case 'corridas': successMessage = `${value} corrida(s) registrada(s)!`; break;
                     case 'km': successMessage = `${value} km registrado(s)!`; break;
                 }
