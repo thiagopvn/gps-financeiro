@@ -497,10 +497,12 @@
             if (e.target === goalModal) closeModal();
         });
 
-        function closeModal() {
+        function closeModal(resetId = true) {
             goalModal.classList.add('hidden');
             goalModal.classList.remove('flex');
-            selectedGoalId = null;
+            if (resetId) {
+                selectedGoalId = null;
+            }
         }
 
         resetGoalBtn.addEventListener('click', async () => {
@@ -532,11 +534,13 @@
         // Edit goal handlers
         editGoalBtn.addEventListener('click', async () => {
             if (!selectedGoalId) return;
-            closeModal();
 
             // Get current goal data
             selectedGoalData = allGoals.find(g => g.id === selectedGoalId);
             if (!selectedGoalData) return;
+
+            // Close options modal without resetting selectedGoalId
+            closeModal(false);
 
             // Populate edit form
             editGoalName.value = selectedGoalData.name || '';
@@ -563,6 +567,7 @@
         function closeEditModal() {
             editGoalModal.classList.add('hidden');
             editGoalModal.classList.remove('flex');
+            selectedGoalId = null;
             selectedGoalData = null;
         }
 
