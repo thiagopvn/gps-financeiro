@@ -274,16 +274,31 @@
             try {
                 const activeSession = await getActiveSession();
                 if (activeSession) {
-                    // Session active - show "Em Andamento"
-                    shiftCardInner.classList.remove('border-dashed', 'border-primary/30', 'from-primary/5', 'to-primary/10');
-                    shiftCardInner.classList.add('border-solid', 'border-primary', 'from-primary/20', 'to-primary/30', 'animate-pulse');
-                    shiftIcon.innerHTML = '<span class="material-symbols-outlined text-2xl">timer</span>';
-                    shiftTitle.textContent = 'Turno em Andamento';
-                    shiftSubtitle.textContent = 'Clique para ver detalhes';
+                    if (activeSession.status === 'paused') {
+                        // Session paused - show "Turno Pausado" with amber color
+                        shiftCardInner.classList.remove('border-dashed', 'border-primary/30', 'from-primary/5', 'to-primary/10', 'border-primary', 'from-primary/20', 'to-primary/30');
+                        shiftCardInner.classList.add('border-solid', 'border-amber-500', 'from-amber-500/20', 'to-amber-500/30', 'animate-pulse');
+                        shiftIcon.classList.remove('bg-primary/20', 'text-primary');
+                        shiftIcon.classList.add('bg-amber-500/20', 'text-amber-500');
+                        shiftIcon.innerHTML = '<span class="material-symbols-outlined text-2xl">pause_circle</span>';
+                        shiftTitle.textContent = 'Turno Pausado';
+                        shiftSubtitle.textContent = 'Clique para retomar';
+                    } else {
+                        // Session active - show "Em Andamento"
+                        shiftCardInner.classList.remove('border-dashed', 'border-primary/30', 'from-primary/5', 'to-primary/10', 'border-amber-500', 'from-amber-500/20', 'to-amber-500/30');
+                        shiftCardInner.classList.add('border-solid', 'border-primary', 'from-primary/20', 'to-primary/30', 'animate-pulse');
+                        shiftIcon.classList.remove('bg-amber-500/20', 'text-amber-500');
+                        shiftIcon.classList.add('bg-primary/20', 'text-primary');
+                        shiftIcon.innerHTML = '<span class="material-symbols-outlined text-2xl">timer</span>';
+                        shiftTitle.textContent = 'Turno em Andamento';
+                        shiftSubtitle.textContent = 'Clique para ver detalhes';
+                    }
                 } else {
                     // No active session - show "Iniciar Turno"
                     shiftCardInner.classList.add('border-dashed', 'border-primary/30', 'from-primary/5', 'to-primary/10');
-                    shiftCardInner.classList.remove('border-solid', 'border-primary', 'from-primary/20', 'to-primary/30', 'animate-pulse');
+                    shiftCardInner.classList.remove('border-solid', 'border-primary', 'border-amber-500', 'from-primary/20', 'to-primary/30', 'from-amber-500/20', 'to-amber-500/30', 'animate-pulse');
+                    shiftIcon.classList.remove('bg-amber-500/20', 'text-amber-500');
+                    shiftIcon.classList.add('bg-primary/20', 'text-primary');
                     shiftIcon.innerHTML = '<span class="material-symbols-outlined text-2xl">play_circle</span>';
                     shiftTitle.textContent = 'Iniciar Turno';
                     shiftSubtitle.textContent = 'Comece a registrar suas horas';

@@ -390,7 +390,7 @@ export const startSession = async () => {
 /**
  * End work session
  * @param {string} sessionId - Session ID
- * @param {number} duration - Duration in seconds
+ * @param {number} duration - Duration in seconds (real work time, excluding pauses)
  * @param {number} earnings - Total earnings
  * @param {number} rides - Number of rides (optional)
  * @param {number} expenses - Total expenses (optional)
@@ -400,13 +400,34 @@ export const endSession = async (sessionId, duration, earnings, rides = 0, expen
     const uid = auth.currentUser?.uid;
     if (!uid) return false;
 
-    await updateDoc(doc(db, 'users', uid, 'sessions', sessionId), {
+    const sessionRef = doc(db, 'users', uid, 'sessions', sessionId);
+    const sessionDoc = await getDoc(sessionRef);
+
+    if (!sessionDoc.exists()) return false;
+
+    const sessionData = sessionDoc.data();
+    let pauses = sessionData.pauses || [];
+
+    // If session was paused, close the pending pause
+    if (sessionData.status === 'paused') {
+        const lastPauseIndex = pauses.findIndex(p => p.end === null);
+        if (lastPauseIndex !== -1) {
+            pauses[lastPauseIndex].end = Timestamp.now();
+        }
+    }
+
+    // Calculate total pause duration
+    const totalPauseDuration = calculatePauseDuration(pauses);
+
+    await updateDoc(sessionRef, {
         endTime: serverTimestamp(),
         duration,
+        totalPauseDuration,
         earnings,
         rides: rides || 0,
         expenses: expenses || 0,
         netProfit: earnings - (expenses || 0),
+        pauses: pauses,
         status: 'completed'
     });
 
@@ -445,12 +466,136 @@ export const getSessions = async (filters = {}) => {
 };
 
 /**
- * Get active session (if any)
+ * Get active session (if any) - includes 'active' and 'paused' statuses
  * @returns {Promise<object|null>} Active session or null
  */
 export const getActiveSession = async () => {
-    const sessions = await getSessions({ status: 'active', limit: 1 });
-    return sessions.length > 0 ? sessions[0] : null;
+    const uid = auth.currentUser?.uid;
+    if (!uid) return null;
+
+    // Check for active sessions first
+    const sessionsRef = collection(db, 'users', uid, 'sessions');
+    let q = query(
+        sessionsRef,
+        where('status', 'in', ['active', 'paused']),
+        orderBy('startTime', 'desc'),
+        limit(1)
+    );
+
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return null;
+
+    const doc = snapshot.docs[0];
+    return {
+        id: doc.id,
+        ...doc.data(),
+        startTime: doc.data().startTime?.toDate() || new Date(),
+        endTime: doc.data().endTime?.toDate() || null,
+        pauses: doc.data().pauses || []
+    };
+};
+
+/**
+ * Pause work session
+ * @param {string} sessionId - Session ID
+ * @returns {Promise<boolean>} Success
+ */
+export const pauseSession = async (sessionId) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return false;
+
+    const sessionRef = doc(db, 'users', uid, 'sessions', sessionId);
+    const sessionDoc = await getDoc(sessionRef);
+
+    if (!sessionDoc.exists()) return false;
+
+    const sessionData = sessionDoc.data();
+    if (sessionData.status !== 'active') {
+        console.warn('Sessão não está ativa, não pode ser pausada');
+        return false;
+    }
+
+    // Get existing pauses array or create new one
+    const pauses = sessionData.pauses || [];
+
+    // Add new pause with start time
+    pauses.push({
+        start: Timestamp.now(),
+        end: null
+    });
+
+    await updateDoc(sessionRef, {
+        status: 'paused',
+        pauses: pauses
+    });
+
+    console.log('Sessão pausada:', sessionId);
+    return true;
+};
+
+/**
+ * Resume work session
+ * @param {string} sessionId - Session ID
+ * @returns {Promise<boolean>} Success
+ */
+export const resumeSession = async (sessionId) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return false;
+
+    const sessionRef = doc(db, 'users', uid, 'sessions', sessionId);
+    const sessionDoc = await getDoc(sessionRef);
+
+    if (!sessionDoc.exists()) return false;
+
+    const sessionData = sessionDoc.data();
+    if (sessionData.status !== 'paused') {
+        console.warn('Sessão não está pausada, não pode ser retomada');
+        return false;
+    }
+
+    // Get pauses array
+    const pauses = sessionData.pauses || [];
+
+    // Find the last pause without end time and close it
+    const lastPauseIndex = pauses.findIndex(p => p.end === null);
+    if (lastPauseIndex !== -1) {
+        pauses[lastPauseIndex].end = Timestamp.now();
+    }
+
+    await updateDoc(sessionRef, {
+        status: 'active',
+        pauses: pauses
+    });
+
+    console.log('Sessão retomada:', sessionId);
+    return true;
+};
+
+/**
+ * Calculate total pause duration in seconds
+ * @param {Array} pauses - Array of pause objects {start, end}
+ * @returns {number} Total pause duration in seconds
+ */
+export const calculatePauseDuration = (pauses) => {
+    if (!pauses || !Array.isArray(pauses)) return 0;
+
+    let totalPauseMs = 0;
+
+    for (const pause of pauses) {
+        const startTime = pause.start?.toDate ? pause.start.toDate() : new Date(pause.start);
+        let endTime;
+
+        if (pause.end === null) {
+            // Pause still ongoing - calculate until now
+            endTime = new Date();
+        } else {
+            endTime = pause.end?.toDate ? pause.end.toDate() : new Date(pause.end);
+        }
+
+        totalPauseMs += endTime.getTime() - startTime.getTime();
+    }
+
+    return Math.floor(totalPauseMs / 1000);
 };
 
 /**
@@ -471,12 +616,13 @@ export const getSession = async (sessionId) => {
         id: docSnap.id,
         ...docSnap.data(),
         startTime: docSnap.data().startTime?.toDate() || new Date(),
-        endTime: docSnap.data().endTime?.toDate() || null
+        endTime: docSnap.data().endTime?.toDate() || null,
+        pauses: docSnap.data().pauses || []
     };
 };
 
 /**
- * Cleanup abandoned active sessions (older than 24 hours)
+ * Cleanup abandoned active/paused sessions (older than 24 hours)
  * Call this periodically to prevent orphan sessions
  * @returns {Promise<number>} Number of sessions cleaned
  */
@@ -487,9 +633,10 @@ export const cleanupAbandonedSessions = async () => {
     const sessionsRef = collection(db, 'users', uid, 'sessions');
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
+    // Query for both active and paused sessions older than 24h
     const q = query(
         sessionsRef,
-        where('status', '==', 'active'),
+        where('status', 'in', ['active', 'paused']),
         where('startTime', '<', Timestamp.fromDate(twentyFourHoursAgo))
     );
 

@@ -89,19 +89,56 @@
                 </div>
             </div>
 
-            <!-- Main Action Button -->
+            <!-- Main Action Buttons -->
             <div class="w-full max-w-sm mt-10">
-                <button id="actionBtn" class="relative group w-full cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary-hover active:scale-[0.98] transition-all duration-200 shadow-lg shadow-primary/30">
+                <!-- Start Button (shown when not running) -->
+                <button id="startBtn" class="relative group w-full cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary-hover active:scale-[0.98] transition-all duration-200 shadow-lg shadow-primary/30">
                     <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                    <span id="actionIcon" class="material-symbols-outlined text-black mr-2 text-[28px]">play_circle</span>
-                    <span id="actionText" class="text-black text-lg font-bold tracking-wide z-10">INICIAR TURNO</span>
+                    <span class="material-symbols-outlined text-black mr-2 text-[28px]">play_circle</span>
+                    <span class="text-black text-lg font-bold tracking-wide z-10">INICIAR TURNO</span>
                 </button>
+
+                <!-- Running Buttons (shown when active) -->
+                <div id="runningButtons" class="hidden flex gap-3">
+                    <button id="pauseBtn" class="relative group flex-1 cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-14 bg-amber-500 hover:bg-amber-600 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-amber-500/30">
+                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                        <span class="material-symbols-outlined text-black mr-2 text-[24px]">pause_circle</span>
+                        <span class="text-black text-base font-bold tracking-wide z-10">PAUSAR</span>
+                    </button>
+                    <button id="endBtn" class="relative group flex-1 cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-14 bg-red-500 hover:bg-red-600 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-red-500/30">
+                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                        <span class="material-symbols-outlined text-white mr-2 text-[24px]">stop_circle</span>
+                        <span class="text-white text-base font-bold tracking-wide z-10">FINALIZAR</span>
+                    </button>
+                </div>
+
+                <!-- Paused Buttons (shown when paused) -->
+                <div id="pausedButtons" class="hidden flex gap-3">
+                    <button id="resumeBtn" class="relative group flex-1 cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary-hover active:scale-[0.98] transition-all duration-200 shadow-lg shadow-primary/30">
+                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                        <span class="material-symbols-outlined text-black mr-2 text-[24px]">play_circle</span>
+                        <span class="text-black text-base font-bold tracking-wide z-10">RETOMAR</span>
+                    </button>
+                    <button id="endBtnPaused" class="relative group flex-1 cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-14 bg-red-500 hover:bg-red-600 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-red-500/30">
+                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                        <span class="material-symbols-outlined text-white mr-2 text-[24px]">stop_circle</span>
+                        <span class="text-white text-base font-bold tracking-wide z-10">FINALIZAR</span>
+                    </button>
+                </div>
 
                 <!-- Info Card (shown when running) -->
                 <div id="runningInfo" class="hidden mt-4 p-4 rounded-xl bg-primary/10 border border-primary/20">
                     <p class="text-center text-sm text-slate-600 dark:text-slate-300">
                         <span class="material-symbols-outlined text-primary text-[16px] align-middle mr-1">info</span>
                         Ao finalizar, você informará quanto ganhou
+                    </p>
+                </div>
+
+                <!-- Pause Info Card (shown when paused) -->
+                <div id="pausedInfo" class="hidden mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                    <p class="text-center text-sm text-amber-600 dark:text-amber-400">
+                        <span class="material-symbols-outlined text-amber-500 text-[16px] align-middle mr-1">pause</span>
+                        Turno pausado - o cronômetro está parado
                     </p>
                 </div>
             </div>
@@ -396,7 +433,7 @@
     <!-- JavaScript -->
     <script type="module">
         import { requireAuth } from '/js/firebase-config.js';
-        import { startSession, endSession, getSessions, getActiveSession, getSession, addTransaction, updateGoalsProgress, cleanupAbandonedSessions } from '/js/db.js';
+        import { startSession, endSession, pauseSession, resumeSession, calculatePauseDuration, getSessions, getActiveSession, getSession, addTransaction, updateGoalsProgress, cleanupAbandonedSessions } from '/js/db.js';
         import { formatCurrency, formatDuration, formatDurationHuman, formatRelativeDate, formatDate, showToast, saveLocal, getLocal } from '/js/utils.js';
 
         // Require authentication
@@ -413,10 +450,15 @@
         const secondsEl = document.getElementById('seconds');
         const sep1 = document.getElementById('sep1');
         const sep2 = document.getElementById('sep2');
-        const actionBtn = document.getElementById('actionBtn');
-        const actionIcon = document.getElementById('actionIcon');
-        const actionText = document.getElementById('actionText');
+        const startBtn = document.getElementById('startBtn');
+        const runningButtons = document.getElementById('runningButtons');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const endBtn = document.getElementById('endBtn');
+        const pausedButtons = document.getElementById('pausedButtons');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const endBtnPaused = document.getElementById('endBtnPaused');
         const runningInfo = document.getElementById('runningInfo');
+        const pausedInfo = document.getElementById('pausedInfo');
         const historyContainer = document.getElementById('historyContainer');
 
         // Modal Elements
@@ -456,9 +498,10 @@
         const closeHistoryModal = document.getElementById('closeHistoryModal');
 
         // State
-        let isRunning = false;
+        let sessionStatus = 'idle'; // 'idle', 'active', 'paused'
         let currentSessionId = null;
         let sessionStartTime = null; // Firebase startTime as Date
+        let sessionPauses = []; // Array of pause objects {start, end}
         let timerInterval = null;
 
         // Format current date
@@ -467,12 +510,32 @@
         currentDateEl.textContent = today.toLocaleDateString('pt-BR', dateOptions);
 
         /**
-         * Calculate elapsed seconds from Firebase startTime
-         * This is the KEY fix - always calculate from the original startTime
+         * Calculate elapsed seconds from Firebase startTime, excluding pause time
+         * This calculates real work time by subtracting all pause durations
          */
         const calculateElapsedSeconds = () => {
             if (!sessionStartTime) return 0;
-            return Math.floor((Date.now() - sessionStartTime.getTime()) / 1000);
+
+            const totalElapsed = Date.now() - sessionStartTime.getTime();
+
+            // Calculate total pause time
+            let totalPauseMs = 0;
+            for (const pause of sessionPauses) {
+                const pauseStart = pause.start?.toDate ? pause.start.toDate() : new Date(pause.start);
+                let pauseEnd;
+
+                if (pause.end === null) {
+                    // Pause still ongoing - calculate until now
+                    pauseEnd = new Date();
+                } else {
+                    pauseEnd = pause.end?.toDate ? pause.end.toDate() : new Date(pause.end);
+                }
+
+                totalPauseMs += pauseEnd.getTime() - pauseStart.getTime();
+            }
+
+            const realWorkTime = totalElapsed - totalPauseMs;
+            return Math.max(0, Math.floor(realWorkTime / 1000));
         };
 
         // Update timer display based on calculated seconds
@@ -550,30 +613,73 @@
             sep2.classList.remove('animate-pulse');
         };
 
-        // Update UI for running state
-        const setRunningState = (running) => {
-            isRunning = running;
+        // Update UI for session state
+        const setSessionState = (status) => {
+            sessionStatus = status;
 
-            if (running) {
-                statusDot.classList.remove('bg-slate-400');
+            // Hide all button groups first
+            startBtn.classList.add('hidden');
+            runningButtons.classList.add('hidden');
+            runningButtons.classList.remove('flex');
+            pausedButtons.classList.add('hidden');
+            pausedButtons.classList.remove('flex');
+            runningInfo.classList.add('hidden');
+            pausedInfo.classList.add('hidden');
+
+            // Reset status dot classes
+            statusDot.classList.remove('bg-slate-400', 'bg-primary', 'bg-amber-500', 'animate-pulse');
+
+            if (status === 'active') {
+                // Active state - show pause and end buttons
                 statusDot.classList.add('bg-primary', 'animate-pulse');
                 statusLabel.textContent = 'Em andamento';
                 statusText.textContent = 'Turno em andamento';
-                actionIcon.textContent = 'stop_circle';
-                actionText.textContent = 'FINALIZAR TURNO';
-                actionBtn.classList.remove('bg-primary', 'hover:bg-primary-hover', 'shadow-primary/30');
-                actionBtn.classList.add('bg-red-500', 'hover:bg-red-600', 'shadow-red-500/30');
+                runningButtons.classList.remove('hidden');
+                runningButtons.classList.add('flex');
                 runningInfo.classList.remove('hidden');
+
+                // Animate separators
+                sep1.classList.add('animate-pulse');
+                sep2.classList.add('animate-pulse');
+
+                // Timer digits normal color
+                hoursEl.classList.remove('opacity-50');
+                minutesEl.classList.remove('opacity-50');
+                secondsEl.classList.remove('opacity-50');
+
+            } else if (status === 'paused') {
+                // Paused state - show resume and end buttons
+                statusDot.classList.add('bg-amber-500', 'animate-pulse');
+                statusLabel.textContent = 'Em pausa';
+                statusText.textContent = 'Turno pausado';
+                pausedButtons.classList.remove('hidden');
+                pausedButtons.classList.add('flex');
+                pausedInfo.classList.remove('hidden');
+
+                // Stop separator animation
+                sep1.classList.remove('animate-pulse');
+                sep2.classList.remove('animate-pulse');
+
+                // Timer digits dimmed
+                hoursEl.classList.add('opacity-50');
+                minutesEl.classList.add('opacity-50');
+                secondsEl.classList.add('opacity-50');
+
             } else {
-                statusDot.classList.remove('bg-primary', 'animate-pulse');
+                // Idle state - show start button
                 statusDot.classList.add('bg-slate-400');
                 statusLabel.textContent = 'Status Atual';
                 statusText.textContent = 'Você está offline';
-                actionIcon.textContent = 'play_circle';
-                actionText.textContent = 'INICIAR TURNO';
-                actionBtn.classList.remove('bg-red-500', 'hover:bg-red-600', 'shadow-red-500/30');
-                actionBtn.classList.add('bg-primary', 'hover:bg-primary-hover', 'shadow-primary/30');
-                runningInfo.classList.add('hidden');
+                startBtn.classList.remove('hidden');
+
+                // Stop separator animation
+                sep1.classList.remove('animate-pulse');
+                sep2.classList.remove('animate-pulse');
+
+                // Timer digits normal
+                hoursEl.classList.remove('opacity-50');
+                minutesEl.classList.remove('opacity-50');
+                secondsEl.classList.remove('opacity-50');
             }
         };
 
@@ -599,48 +705,107 @@
             return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
         };
 
-        // Handle action button click
-        actionBtn.addEventListener('click', async () => {
-            if (isRunning) {
-                // Show end session modal
-                const elapsed = calculateElapsedSeconds();
-                modalDuration.textContent = `Duração: ${formatDurationDisplay(elapsed)}`;
-                inputEarnings.value = '';
-                inputRides.value = '';
-                inputExpenses.value = '';
-                endSessionModal.classList.remove('hidden');
-                endSessionModal.classList.add('flex');
-                inputEarnings.focus();
-            } else {
-                // Start session
-                try {
-                    actionBtn.disabled = true;
-                    actionText.textContent = 'INICIANDO...';
+        // Handle start button click
+        startBtn.addEventListener('click', async () => {
+            try {
+                startBtn.disabled = true;
+                startBtn.querySelector('span:last-child').textContent = 'INICIANDO...';
 
-                    // startSession now returns existing session if one exists (Singleton)
-                    currentSessionId = await startSession();
+                // startSession now returns existing session if one exists (Singleton)
+                currentSessionId = await startSession();
 
-                    // Fetch the session to get the actual startTime from Firebase
-                    const session = await getSession(currentSessionId);
-                    if (session && session.startTime) {
-                        sessionStartTime = session.startTime;
-                    } else {
-                        sessionStartTime = new Date();
-                    }
-
-                    setRunningState(true);
-                    updateTimerDisplay();
-                    startTimerInterval();
-                    showToast('Turno iniciado! Bom trabalho!', 'success');
-
-                } catch (error) {
-                    console.error('Erro ao iniciar sessão:', error);
-                    showToast('Erro ao iniciar turno', 'error');
-                } finally {
-                    actionBtn.disabled = false;
+                // Fetch the session to get the actual startTime from Firebase
+                const session = await getSession(currentSessionId);
+                if (session && session.startTime) {
+                    sessionStartTime = session.startTime;
+                    sessionPauses = session.pauses || [];
+                } else {
+                    sessionStartTime = new Date();
+                    sessionPauses = [];
                 }
+
+                setSessionState('active');
+                updateTimerDisplay();
+                startTimerInterval();
+                showToast('Turno iniciado! Bom trabalho!', 'success');
+
+            } catch (error) {
+                console.error('Erro ao iniciar sessão:', error);
+                showToast('Erro ao iniciar turno', 'error');
+            } finally {
+                startBtn.disabled = false;
+                startBtn.querySelector('span:last-child').textContent = 'INICIAR TURNO';
             }
         });
+
+        // Handle pause button click
+        pauseBtn.addEventListener('click', async () => {
+            try {
+                pauseBtn.disabled = true;
+
+                await pauseSession(currentSessionId);
+
+                // Add a new pause entry locally
+                sessionPauses.push({
+                    start: new Date(),
+                    end: null
+                });
+
+                // Stop timer but keep the current display
+                stopTimerInterval();
+                setSessionState('paused');
+                showToast('Turno pausado', 'info');
+
+            } catch (error) {
+                console.error('Erro ao pausar sessão:', error);
+                showToast('Erro ao pausar turno', 'error');
+            } finally {
+                pauseBtn.disabled = false;
+            }
+        });
+
+        // Handle resume button click
+        resumeBtn.addEventListener('click', async () => {
+            try {
+                resumeBtn.disabled = true;
+
+                await resumeSession(currentSessionId);
+
+                // Close the last pause locally
+                const lastPauseIndex = sessionPauses.findIndex(p => p.end === null);
+                if (lastPauseIndex !== -1) {
+                    sessionPauses[lastPauseIndex].end = new Date();
+                }
+
+                setSessionState('active');
+                startTimerInterval();
+                showToast('Turno retomado!', 'success');
+
+            } catch (error) {
+                console.error('Erro ao retomar sessão:', error);
+                showToast('Erro ao retomar turno', 'error');
+            } finally {
+                resumeBtn.disabled = false;
+            }
+        });
+
+        // Show end session modal (shared function)
+        const showEndSessionModal = () => {
+            const elapsed = calculateElapsedSeconds();
+            modalDuration.textContent = `Duração: ${formatDurationDisplay(elapsed)}`;
+            inputEarnings.value = '';
+            inputRides.value = '';
+            inputExpenses.value = '';
+            endSessionModal.classList.remove('hidden');
+            endSessionModal.classList.add('flex');
+            inputEarnings.focus();
+        };
+
+        // Handle end button click (from active state)
+        endBtn.addEventListener('click', showEndSessionModal);
+
+        // Handle end button click (from paused state)
+        endBtnPaused.addEventListener('click', showEndSessionModal);
 
         // Cancel end session modal
         cancelEndSession.addEventListener('click', () => {
@@ -750,10 +915,11 @@
                 // Reset state
                 currentSessionId = null;
                 sessionStartTime = null;
+                sessionPauses = [];
                 hoursEl.textContent = '00';
                 minutesEl.textContent = '00';
                 secondsEl.textContent = '00';
-                setRunningState(false);
+                setSessionState('idle');
 
                 // Reload history
                 await loadHistory();
@@ -915,28 +1081,37 @@
                 // First cleanup any abandoned sessions (older than 24h)
                 await cleanupAbandonedSessions();
 
-                // Check Firebase for active session
+                // Check Firebase for active or paused session
                 const activeSession = await getActiveSession();
 
                 if (activeSession) {
-                    console.log('Sessão ativa encontrada:', activeSession.id);
+                    console.log('Sessão encontrada:', activeSession.id, 'Status:', activeSession.status);
                     currentSessionId = activeSession.id;
                     sessionStartTime = activeSession.startTime;
+                    sessionPauses = activeSession.pauses || [];
 
-                    // Calculate current elapsed time
+                    // Calculate current elapsed time (excluding pauses)
                     const elapsed = calculateElapsedSeconds();
-                    console.log('Tempo decorrido:', formatDurationDisplay(elapsed));
+                    console.log('Tempo real de trabalho:', formatDurationDisplay(elapsed));
 
-                    setRunningState(true);
-                    updateTimerDisplay();
-                    startTimerInterval();
+                    if (activeSession.status === 'paused') {
+                        // Session is paused - don't start timer
+                        setSessionState('paused');
+                        updateTimerDisplay();
+                    } else {
+                        // Session is active - start timer
+                        setSessionState('active');
+                        updateTimerDisplay();
+                        startTimerInterval();
+                    }
                 } else {
                     console.log('Nenhuma sessão ativa');
-                    setRunningState(false);
+                    setSessionState('idle');
                 }
             } catch (error) {
                 console.error('Erro ao verificar sessão ativa:', error);
                 // Continue anyway
+                setSessionState('idle');
             }
         };
 
