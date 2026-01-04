@@ -671,13 +671,56 @@
             }
         };
 
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            if (unsubscribeSummary) {
-                unsubscribeSummary();
+        // Cleanup on page unload (only for full navigation, not bfcache)
+        window.addEventListener('pagehide', (event) => {
+            // Only cleanup if page is NOT being cached (persisted = false means full unload)
+            if (!event.persisted) {
+                if (unsubscribeSummary) {
+                    unsubscribeSummary();
+                    unsubscribeSummary = null;
+                }
+                if (unsubscribeSavings) {
+                    unsubscribeSavings();
+                    unsubscribeSavings = null;
+                }
             }
-            if (unsubscribeSavings) {
-                unsubscribeSavings();
+        });
+
+        // Handle page restored from bfcache (back-forward cache)
+        // This is critical for updating data after user returns from lancamento.html
+        window.addEventListener('pageshow', (event) => {
+            console.log('pageshow event - persisted:', event.persisted);
+
+            // If page was restored from bfcache OR first load
+            // Re-initialize real-time listeners to ensure fresh data
+            if (event.persisted) {
+                console.log('Página restaurada do cache - reinicializando dados...');
+
+                // Re-subscribe to real-time updates
+                loadSummary(currentPeriod);
+
+                // Reload goals (they may have been updated)
+                loadGoals().catch(e => console.error('Erro ao recarregar metas:', e));
+
+                // Check active session status
+                checkActiveSession().catch(e => console.error('Erro ao verificar sessão:', e));
+            }
+        });
+
+        // Also handle visibility change for when user switches tabs/apps
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                console.log('Página visível - verificando dados...');
+
+                // If listeners were somehow lost, recreate them
+                if (!unsubscribeSummary || !unsubscribeSavings) {
+                    console.log('Listeners perdidos - reinicializando...');
+                    loadSummary(currentPeriod);
+                }
+
+                // Always refresh goals and session on visibility
+                loadGoals().catch(e => console.error('Erro ao recarregar metas:', e));
+                checkActiveSession().catch(e => console.error('Erro ao verificar sessão:', e));
             }
         });
 
