@@ -353,7 +353,9 @@
 
         // Update balance display
         const updateBalanceDisplay = (summary) => {
-            const balanceValue = summary.balance;
+            // Saldo total (todas as transações)
+            const totalBalanceValue = summary.totalBalance;
+            // Receita e despesas do período selecionado
             const incomeValue = summary.income;
             const expensesValue = summary.expenses;
 
@@ -362,13 +364,13 @@
                 income.textContent = '••••';
                 expenses.textContent = '••••';
             } else {
-                balance.textContent = formatCurrency(balanceValue);
+                balance.textContent = formatCurrency(totalBalanceValue);
                 income.textContent = formatCurrency(incomeValue);
                 expenses.textContent = formatCurrency(expensesValue);
             }
 
             // Store for toggle
-            balance.dataset.value = balanceValue;
+            balance.dataset.value = totalBalanceValue;
             income.dataset.value = incomeValue;
             expenses.dataset.value = expensesValue;
         };

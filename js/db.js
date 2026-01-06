@@ -271,40 +271,58 @@ export const getTransactionsSummary = async (startDate, endDate) => {
  */
 export const subscribeToTransactionsSummary = (startDate, callback) => {
     const uid = auth.currentUser?.uid;
+
     if (!uid) {
-        callback({ income: 0, expenses: 0, balance: 0, count: 0 });
+        callback({ income: 0, expenses: 0, balance: 0, totalBalance: 0, count: 0 });
         return () => {};
     }
 
     const transactionsRef = collection(db, 'users', uid, 'transactions');
-    const q = query(
-        transactionsRef,
-        where('date', '>=', Timestamp.fromDate(startDate)),
-        orderBy('date', 'desc')
-    );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    // Query para TODAS as transações (para calcular saldo total)
+    const qAll = query(transactionsRef, orderBy('date', 'desc'));
+
+    const unsubscribe = onSnapshot(qAll, (snapshot) => {
         const summary = {
-            income: 0,
-            expenses: 0,
-            balance: 0,
-            count: snapshot.docs.length
+            income: 0,        // Receita do período
+            expenses: 0,      // Despesas do período
+            balance: 0,       // Saldo do período
+            totalBalance: 0,  // Saldo total (todas as transações)
+            count: 0          // Transações do período
         };
+
+        let totalIncome = 0;
+        let totalExpenses = 0;
 
         snapshot.docs.forEach(doc => {
             const t = doc.data();
+            const transactionDate = t.date?.toDate?.() || new Date(0);
+
+            // Calcular totais gerais (para saldo total)
             if (t.type === 'income') {
-                summary.income += t.amount || 0;
+                totalIncome += t.amount || 0;
             } else if (t.type === 'expense') {
-                summary.expenses += t.amount || 0;
+                totalExpenses += t.amount || 0;
+            }
+
+            // Calcular valores do período selecionado
+            if (transactionDate >= startDate) {
+                summary.count++;
+                if (t.type === 'income') {
+                    summary.income += t.amount || 0;
+                } else if (t.type === 'expense') {
+                    summary.expenses += t.amount || 0;
+                }
             }
         });
 
         summary.balance = summary.income - summary.expenses;
+        summary.totalBalance = totalIncome - totalExpenses;
+
         callback(summary);
     }, (error) => {
         console.error('Erro ao ouvir transações:', error);
-        callback({ income: 0, expenses: 0, balance: 0, count: 0 });
+        callback({ income: 0, expenses: 0, balance: 0, totalBalance: 0, count: 0 });
     });
 
     return unsubscribe;
@@ -319,29 +337,46 @@ export const subscribeToTransactionsSummary = (startDate, callback) => {
 export const subscribeToSavingsSummary = (startDate, callback) => {
     const uid = auth.currentUser?.uid;
     if (!uid) {
-        callback({ savings: 0, count: 0 });
+        callback({ savings: 0, totalSavings: 0, count: 0 });
         return () => {};
     }
 
     const transactionsRef = collection(db, 'users', uid, 'transactions');
+    // Query para TODAS as economias (sem filtro de data)
     const q = query(
         transactionsRef,
-        where('date', '>=', Timestamp.fromDate(startDate)),
         where('subType', '==', 'saving'),
         orderBy('date', 'desc')
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-        let savings = 0;
+        let totalSavings = 0;
+        let periodSavings = 0;
+        let periodCount = 0;
+
         snapshot.docs.forEach(doc => {
             const t = doc.data();
-            savings += t.amount || 0;
+            const amount = t.amount || 0;
+            const transactionDate = t.date?.toDate?.() || new Date(0);
+
+            // Total de economias (todas)
+            totalSavings += amount;
+
+            // Economias do período
+            if (transactionDate >= startDate) {
+                periodSavings += amount;
+                periodCount++;
+            }
         });
 
-        callback({ savings, count: snapshot.docs.length });
+        callback({
+            savings: totalSavings,      // Total geral
+            periodSavings: periodSavings, // Do período
+            count: periodCount
+        });
     }, (error) => {
         console.error('Erro ao ouvir economias:', error);
-        callback({ savings: 0, count: 0 });
+        callback({ savings: 0, totalSavings: 0, count: 0 });
     });
 
     return unsubscribe;
