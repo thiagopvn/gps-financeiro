@@ -433,6 +433,7 @@ export const startSession = async () => {
  * @returns {Promise<boolean>} Success
  */
 export const endSession = async (sessionId, duration, earnings, rides = 0, expenses = 0, totalKm = 0) => {
+    console.log('endSession chamado - totalKm recebido:', totalKm);
     const uid = auth.currentUser?.uid;
     if (!uid) return false;
 
