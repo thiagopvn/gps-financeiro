@@ -1071,11 +1071,13 @@
             historyModalProfit.textContent = formatCurrency(netProfit);
 
             // Show per KM if KM was recorded
-            if (totalKm > 0) {
+            console.log('Session totalKm:', totalKm, 'perKm:', perKm);
+            console.log('historyModalKmContainer:', historyModalKmContainer);
+            if (totalKm > 0 && historyModalKmContainer) {
                 historyModalKmContainer.classList.remove('hidden');
-                historyModalPerKm.textContent = formatCurrency(perKm) + '/km';
-                historyModalTotalKm.textContent = `${totalKm.toLocaleString('pt-BR')} km`;
-            } else {
+                if (historyModalPerKm) historyModalPerKm.textContent = formatCurrency(perKm) + '/km';
+                if (historyModalTotalKm) historyModalTotalKm.textContent = `${totalKm.toLocaleString('pt-BR')} km`;
+            } else if (historyModalKmContainer) {
                 historyModalKmContainer.classList.add('hidden');
             }
 
