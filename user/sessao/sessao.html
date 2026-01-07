@@ -254,6 +254,25 @@
                     </div>
                 </div>
 
+                <!-- KM Input -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                        Quilometragem rodada (opcional)
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">KM</span>
+                        <input
+                            type="number"
+                            id="inputKm"
+                            inputmode="decimal"
+                            placeholder="0"
+                            min="0"
+                            step="0.1"
+                            class="w-full bg-slate-100 dark:bg-white/5 rounded-xl pl-12 pr-4 py-4 border-none focus:ring-2 focus:ring-primary text-lg font-bold"
+                        />
+                    </div>
+                </div>
+
                 <!-- Auto-register checkbox -->
                 <div class="pt-2">
                     <label class="flex items-start gap-3 cursor-pointer">
@@ -316,6 +335,23 @@
                     <span class="material-symbols-outlined text-blue-500 text-xl mb-1">local_taxi</span>
                     <p id="summaryPerRide" class="text-lg font-bold text-blue-500">R$ 0</p>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Por Corrida</p>
+                </div>
+            </div>
+
+            <!-- Per KM (shown only if KM was informed) -->
+            <div id="summaryPerKmContainer" class="hidden bg-purple-500/10 rounded-xl p-4 mb-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-purple-500 text-2xl">speed</span>
+                        <div>
+                            <p class="text-xs text-purple-600 dark:text-purple-400 font-medium uppercase tracking-wide">Ganho por KM</p>
+                            <p id="summaryPerKm" class="text-xl font-bold text-purple-600 dark:text-purple-400">R$ 0,00/km</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Rodados</p>
+                        <p id="summaryTotalKm" class="text-lg font-bold text-slate-900 dark:text-white">0 km</p>
+                    </div>
                 </div>
             </div>
 
@@ -389,6 +425,23 @@
                     <span class="material-symbols-outlined text-blue-500 text-xl mb-1">local_taxi</span>
                     <p id="historyModalPerRide" class="text-lg font-bold text-blue-500">R$ 0</p>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Por Corrida</p>
+                </div>
+            </div>
+
+            <!-- Per KM (shown only if KM was recorded) -->
+            <div id="historyModalKmContainer" class="hidden bg-purple-500/10 rounded-xl p-4 mb-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-purple-500 text-xl">speed</span>
+                        <div>
+                            <p class="text-xs text-purple-600 dark:text-purple-400 font-medium uppercase tracking-wide">Ganho por KM</p>
+                            <p id="historyModalPerKm" class="text-lg font-bold text-purple-600 dark:text-purple-400">R$ 0,00/km</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Rodados</p>
+                        <p id="historyModalTotalKm" class="text-base font-bold text-slate-900 dark:text-white">0 km</p>
+                    </div>
                 </div>
             </div>
 
@@ -468,6 +521,7 @@
         const inputEarnings = document.getElementById('inputEarnings');
         const inputRides = document.getElementById('inputRides');
         const inputExpenses = document.getElementById('inputExpenses');
+        const inputKm = document.getElementById('inputKm');
         const autoRegister = document.getElementById('autoRegister');
         const cancelEndSession = document.getElementById('cancelEndSession');
 
@@ -482,6 +536,9 @@
         const summaryProfitContainer = document.getElementById('summaryProfitContainer');
         const summaryExpensesInfo = document.getElementById('summaryExpensesInfo');
         const summaryExpenses = document.getElementById('summaryExpenses');
+        const summaryPerKmContainer = document.getElementById('summaryPerKmContainer');
+        const summaryPerKm = document.getElementById('summaryPerKm');
+        const summaryTotalKm = document.getElementById('summaryTotalKm');
         const closeSummary = document.getElementById('closeSummary');
 
         // History Modal Elements
@@ -495,6 +552,9 @@
         const historyModalExpenses = document.getElementById('historyModalExpenses');
         const historyModalExpensesContainer = document.getElementById('historyModalExpensesContainer');
         const historyModalProfit = document.getElementById('historyModalProfit');
+        const historyModalKmContainer = document.getElementById('historyModalKmContainer');
+        const historyModalPerKm = document.getElementById('historyModalPerKm');
+        const historyModalTotalKm = document.getElementById('historyModalTotalKm');
         const closeHistoryModal = document.getElementById('closeHistoryModal');
 
         // State
@@ -584,6 +644,15 @@
             if (!earnings || earnings <= 0) return 0;
             if (!rides || rides <= 0) return 0;
             return earnings / rides;
+        };
+
+        /**
+         * Calculate per-KM rate with safety checks
+         */
+        const calculatePerKmRate = (earnings, km) => {
+            if (!earnings || earnings <= 0) return 0;
+            if (!km || km <= 0) return 0;
+            return earnings / km;
         };
 
         // Start timer interval (only updates display, doesn't increment)
@@ -796,6 +865,7 @@
             inputEarnings.value = '';
             inputRides.value = '';
             inputExpenses.value = '';
+            inputKm.value = '';
             endSessionModal.classList.remove('hidden');
             endSessionModal.classList.add('flex');
             inputEarnings.focus();
@@ -827,6 +897,7 @@
             const earnings = parseCurrencyValue(inputEarnings.value);
             const rides = parseInt(inputRides.value) || 0;
             const expenses = parseCurrencyValue(inputExpenses.value);
+            const totalKm = parseFloat(inputKm.value) || 0;
 
             if (earnings <= 0) {
                 showToast('Informe o valor faturado', 'error');
@@ -845,8 +916,8 @@
             endSessionModal.classList.remove('flex');
 
             try {
-                // Save session with new data
-                await endSession(currentSessionId, finalElapsedSeconds, earnings, rides, expenses);
+                // Save session with new data (including KM)
+                await endSession(currentSessionId, finalElapsedSeconds, earnings, rides, expenses, totalKm);
 
                 // Auto-register transactions if checked
                 if (autoRegister.checked) {
@@ -889,6 +960,7 @@
                 // Calculate summary stats with safety checks
                 const hourlyRate = calculateHourlyRate(earnings, finalElapsedSeconds);
                 const perRide = calculatePerRideRate(earnings, rides);
+                const perKm = calculatePerKmRate(earnings, totalKm);
                 const netProfit = earnings - expenses;
 
                 // Update summary modal
@@ -899,6 +971,15 @@
                 summaryHourly.textContent = formatCurrency(hourlyRate) + '/h';
                 summaryPerRide.textContent = rides > 0 ? formatCurrency(perRide) : '-';
                 summaryProfit.textContent = formatCurrency(netProfit);
+
+                // Show per KM if KM was informed
+                if (totalKm > 0) {
+                    summaryPerKmContainer.classList.remove('hidden');
+                    summaryPerKm.textContent = formatCurrency(perKm) + '/km';
+                    summaryTotalKm.textContent = `${totalKm.toLocaleString('pt-BR')} km`;
+                } else {
+                    summaryPerKmContainer.classList.add('hidden');
+                }
 
                 // Show expenses if any
                 if (expenses > 0) {
@@ -971,10 +1052,12 @@
             const earnings = session.earnings || 0;
             const rides = session.rides || 0;
             const expenses = session.expenses || 0;
+            const totalKm = session.totalKm || 0;
             const netProfit = earnings - expenses;
 
             const hourlyRate = calculateHourlyRate(earnings, duration);
             const perRide = calculatePerRideRate(earnings, rides);
+            const perKm = calculatePerKmRate(earnings, totalKm);
 
             const durationHours = Math.floor(duration / 3600);
             const durationMins = Math.floor((duration % 3600) / 60);
@@ -986,6 +1069,15 @@
             historyModalPerRide.textContent = rides > 0 ? formatCurrency(perRide) : '-';
             historyModalEarnings.textContent = formatCurrency(earnings);
             historyModalProfit.textContent = formatCurrency(netProfit);
+
+            // Show per KM if KM was recorded
+            if (totalKm > 0) {
+                historyModalKmContainer.classList.remove('hidden');
+                historyModalPerKm.textContent = formatCurrency(perKm) + '/km';
+                historyModalTotalKm.textContent = `${totalKm.toLocaleString('pt-BR')} km`;
+            } else {
+                historyModalKmContainer.classList.add('hidden');
+            }
 
             if (expenses > 0) {
                 historyModalExpensesContainer.classList.remove('hidden');

@@ -429,9 +429,10 @@ export const startSession = async () => {
  * @param {number} earnings - Total earnings
  * @param {number} rides - Number of rides (optional)
  * @param {number} expenses - Total expenses (optional)
+ * @param {number} totalKm - Total kilometers driven (optional)
  * @returns {Promise<boolean>} Success
  */
-export const endSession = async (sessionId, duration, earnings, rides = 0, expenses = 0) => {
+export const endSession = async (sessionId, duration, earnings, rides = 0, expenses = 0, totalKm = 0) => {
     const uid = auth.currentUser?.uid;
     if (!uid) return false;
 
@@ -454,6 +455,9 @@ export const endSession = async (sessionId, duration, earnings, rides = 0, expen
     // Calculate total pause duration
     const totalPauseDuration = calculatePauseDuration(pauses);
 
+    // Calculate earnings per KM (if KM was informed)
+    const earningsPerKm = totalKm > 0 ? earnings / totalKm : 0;
+
     await updateDoc(sessionRef, {
         endTime: serverTimestamp(),
         duration,
@@ -461,6 +465,8 @@ export const endSession = async (sessionId, duration, earnings, rides = 0, expen
         earnings,
         rides: rides || 0,
         expenses: expenses || 0,
+        totalKm: totalKm || 0,
+        earningsPerKm: earningsPerKm,
         netProfit: earnings - (expenses || 0),
         pauses: pauses,
         status: 'completed'
