@@ -433,6 +433,9 @@ export const startSession = async () => {
  * @returns {Promise<boolean>} Success
  */
 export const endSession = async (sessionId, duration, earnings, rides = 0, expenses = 0, totalKm = 0) => {
+    console.log('=== endSession v2 ===');
+    console.log('Params:', { sessionId, duration, earnings, rides, expenses, totalKm });
+
     const uid = auth.currentUser?.uid;
     if (!uid) return false;
 
@@ -458,6 +461,8 @@ export const endSession = async (sessionId, duration, earnings, rides = 0, expen
     // Calculate earnings per KM (if KM was informed)
     const earningsPerKm = totalKm > 0 ? earnings / totalKm : 0;
 
+    console.log('Saving to Firebase:', { totalKm, earningsPerKm });
+
     await updateDoc(sessionRef, {
         endTime: serverTimestamp(),
         duration,
@@ -471,6 +476,8 @@ export const endSession = async (sessionId, duration, earnings, rides = 0, expen
         pauses: pauses,
         status: 'completed'
     });
+
+    console.log('Session saved successfully');
 
     // Goals are now updated by the calling page to avoid double-counting
     // when auto-register is enabled
