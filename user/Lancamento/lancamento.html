@@ -707,7 +707,17 @@
             saveBtnText.textContent = 'Salvando...';
 
             try {
-                const date = new Date(dateInput.value + 'T12:00:00');
+                // Use current time if date is today, otherwise use noon
+                const selectedDate = dateInput.value;
+                const todayStr = new Date().toISOString().split('T')[0];
+                let date;
+                if (selectedDate === todayStr) {
+                    // Today - use current time
+                    date = new Date();
+                } else {
+                    // Other date - use noon to avoid timezone issues
+                    date = new Date(selectedDate + 'T12:00:00');
+                }
                 const description = descriptionInput.value.trim();
 
                 // Map type to transaction type

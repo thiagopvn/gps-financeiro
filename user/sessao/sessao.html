@@ -899,8 +899,6 @@
             const expenses = parseCurrencyValue(inputExpenses.value);
             const totalKm = parseFloat(inputKm.value) || 0;
 
-            console.log('Finalizando turno - KM informado:', inputKm.value, 'totalKm parsed:', totalKm);
-
             if (earnings <= 0) {
                 showToast('Informe o valor faturado', 'error');
                 inputEarnings.focus();
@@ -956,6 +954,18 @@
                             description: `Corridas do turno`
                         });
                         await updateGoalsProgress(rides, 'corridas');
+                    }
+
+                    // Register KM
+                    if (totalKm > 0) {
+                        await addTransaction({
+                            type: 'km',
+                            amount: totalKm,
+                            category: 'km',
+                            date: new Date(),
+                            description: `KM do turno`
+                        });
+                        await updateGoalsProgress(totalKm, 'km');
                     }
                 }
 
@@ -1073,8 +1083,6 @@
             historyModalProfit.textContent = formatCurrency(netProfit);
 
             // Show per KM if KM was recorded
-            console.log('Session totalKm:', totalKm, 'perKm:', perKm);
-            console.log('historyModalKmContainer:', historyModalKmContainer);
             if (totalKm > 0 && historyModalKmContainer) {
                 historyModalKmContainer.classList.remove('hidden');
                 if (historyModalPerKm) historyModalPerKm.textContent = formatCurrency(perKm) + '/km';
