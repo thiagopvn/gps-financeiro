@@ -1,5 +1,5 @@
-// GPS Financeiro Service Worker v2 - Performance Optimized
-const CACHE_NAME = 'gps-financeiro-v2';
+// GPS Financeiro Service Worker v3 - Always Fresh JS
+const CACHE_NAME = 'gps-financeiro-v3';
 const OFFLINE_URL = '/offline.html';
 
 // Critical resources to cache immediately
@@ -144,7 +144,27 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Cache-first for static assets (JS, CSS, images)
+    // Network-first for JS files (always get fresh version)
+    if (url.pathname.endsWith('.js')) {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    if (response.ok) {
+                        const clone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, clone);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    return caches.match(request);
+                })
+        );
+        return;
+    }
+
+    // Cache-first for static assets (CSS, images)
     event.respondWith(
         caches.match(request).then((cachedResponse) => {
             if (cachedResponse) {

@@ -76,12 +76,12 @@
 
     <!-- JavaScript -->
     <script type="module">
-        import { auth } from '/js/firebase-config.js?v=1767837644';
-        import { isAdmin } from '/js/auth.js?v=1767837644';
-        import { getAllUsers, toggleUserActivation, deleteUser } from '/js/db.js?v=1767837644';
-        import { showToast, formatRelativeDate } from '/js/utils.js?v=1767837644';
+        import { auth } from '/js/firebase-config.js';
+        import { isAdmin } from '/js/auth.js';
+        import { getAllUsers, toggleUserActivation, deleteUser } from '/js/db.js';
+        import { showToast, formatRelativeDate } from '/js/utils.js';
         import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { db } from '/js/firebase-config.js?v=1767837644';
+        import { db } from '/js/firebase-config.js';
 
         // Check admin auth
         onAuthStateChanged(auth, async (user) => {

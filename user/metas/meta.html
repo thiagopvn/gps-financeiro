@@ -199,9 +199,9 @@
 
     <!-- JavaScript -->
     <script type="module">
-        import { requireAuth } from '/js/firebase-config.js?v=1767837644';
-        import { getGoals, getGoal, deleteGoal, resetGoal, updateGoal, checkAndResetGoals } from '/js/db.js?v=1767837644';
-        import { showToast, formatCurrency } from '/js/utils.js?v=1767837644';
+        import { requireAuth } from '/js/firebase-config.js';
+        import { getGoals, getGoal, deleteGoal, resetGoal, updateGoal, checkAndResetGoals } from '/js/db.js';
+        import { showToast, formatCurrency } from '/js/utils.js';
 
         // Wait for auth - must complete before proceeding
         const user = await requireAuth();
