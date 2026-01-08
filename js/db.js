@@ -433,6 +433,9 @@ export const startSession = async () => {
  * @returns {Promise<boolean>} Success
  */
 export const endSession = async (sessionId, duration, earnings, rides = 0, expenses = 0, totalKm = 0) => {
+    console.log('=== DB.JS endSession ===');
+    console.log('totalKm recebido:', totalKm, 'tipo:', typeof totalKm);
+
     const uid = auth.currentUser?.uid;
     if (!uid) return false;
 
@@ -457,6 +460,8 @@ export const endSession = async (sessionId, duration, earnings, rides = 0, expen
 
     // Calculate earnings per KM (if KM was informed)
     const earningsPerKm = totalKm > 0 ? earnings / totalKm : 0;
+
+    console.log('Salvando no Firebase - totalKm:', totalKm, 'earningsPerKm:', earningsPerKm);
 
     await updateDoc(sessionRef, {
         endTime: serverTimestamp(),

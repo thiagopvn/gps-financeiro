@@ -899,6 +899,11 @@
             const expenses = parseCurrencyValue(inputExpenses.value);
             const totalKm = parseFloat(inputKm.value) || 0;
 
+            console.log('=== ENCERRAMENTO DO TURNO ===');
+            console.log('inputKm.value:', inputKm.value);
+            console.log('totalKm parseado:', totalKm);
+            console.log('earnings:', earnings, 'rides:', rides, 'expenses:', expenses);
+
             if (earnings <= 0) {
                 showToast('Informe o valor faturado', 'error');
                 inputEarnings.focus();
