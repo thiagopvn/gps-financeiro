@@ -30,18 +30,7 @@ const storage = getStorage(app);
 // Enable offline persistence for faster loading (only once)
 if (!window.__firestorePersistenceEnabled) {
     window.__firestorePersistenceEnabled = true;
-    enableIndexedDbPersistence(db).catch((err) => {
-        if (err.code === 'failed-precondition') {
-            // Multiple tabs open, persistence can only be enabled in one tab at a time
-            console.warn('Persistence failed: Multiple tabs open');
-        } else if (err.code === 'unimplemented') {
-            // The current browser doesn't support persistence
-            console.warn('Persistence not supported by browser');
-        } else {
-            // Already started error - ignore
-            console.warn('Persistence already enabled');
-        }
-    });
+    enableIndexedDbPersistence(db).catch(() => {});
 }
 
 // Initialize messaging only if supported

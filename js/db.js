@@ -397,7 +397,6 @@ export const startSession = async () => {
     // SINGLETON: Check if there's already an active session
     const existingSession = await getActiveSession();
     if (existingSession) {
-        console.log('Sessão ativa já existe:', existingSession.id);
         return existingSession.id;
     }
 
@@ -418,7 +417,6 @@ export const startSession = async () => {
         sessionData
     );
 
-    console.log('Nova sessão criada:', docRef.id);
     return docRef.id;
 };
 
@@ -433,8 +431,6 @@ export const startSession = async () => {
  * @returns {Promise<boolean>} Success
  */
 export const endSession = async (sessionId, duration, earnings, rides = 0, expenses = 0, totalKm = 0) => {
-    console.log('=== DB.JS endSession ===');
-    console.log('totalKm recebido:', totalKm, 'tipo:', typeof totalKm);
 
     const uid = auth.currentUser?.uid;
     if (!uid) return false;
@@ -461,7 +457,6 @@ export const endSession = async (sessionId, duration, earnings, rides = 0, expen
     // Calculate earnings per KM (if KM was informed)
     const earningsPerKm = totalKm > 0 ? earnings / totalKm : 0;
 
-    console.log('Salvando no Firebase - totalKm:', totalKm, 'earningsPerKm:', earningsPerKm);
 
     await updateDoc(sessionRef, {
         endTime: serverTimestamp(),
@@ -575,7 +570,6 @@ export const pauseSession = async (sessionId) => {
         pauses: pauses
     });
 
-    console.log('Sessão pausada:', sessionId);
     return true;
 };
 
@@ -613,7 +607,6 @@ export const resumeSession = async (sessionId) => {
         pauses: pauses
     });
 
-    console.log('Sessão retomada:', sessionId);
     return true;
 };
 
@@ -701,7 +694,6 @@ export const cleanupAbandonedSessions = async () => {
     }
 
     if (cleaned > 0) {
-        console.log(`Limpas ${cleaned} sessões abandonadas`);
     }
 
     return cleaned;
@@ -807,8 +799,6 @@ export const deleteGoal = async (goalId) => {
  * @param {string} category - Category to filter goals (receita, economia, corridas, km)
  */
 export const updateGoalsProgress = async (amount, category) => {
-    console.log('=== updateGoalsProgress v2 ===');
-    console.log('Parametros recebidos:', { amount, category });
 
     // Validate category
     if (!category || typeof category !== 'string') {
@@ -824,26 +814,20 @@ export const updateGoalsProgress = async (amount, category) => {
 
     // Normalize category
     const targetCategory = String(category).toLowerCase().trim();
-    console.log('Categoria alvo (normalizada):', targetCategory);
 
     // Get all goals
     const goals = await getGoals();
-    console.log('Total de metas:', goals.length);
-    console.log('Metas:', goals.map(g => ({ name: g.name, category: g.category })));
 
     // Filter and update only matching goals
     for (const goal of goals) {
         const goalCat = String(goal.category || '').toLowerCase().trim();
 
-        console.log(`Comparando: meta "${goal.name}" categoria="${goalCat}" vs alvo="${targetCategory}"`);
 
         // STRICT comparison - must match exactly
         if (goalCat !== targetCategory) {
-            console.log(`>>> IGNORANDO "${goal.name}" - categorias diferentes`);
             continue;
         }
 
-        console.log(`>>> ATUALIZANDO "${goal.name}"`);
 
         // Check reset
         const shouldReset = checkGoalNeedsReset(goal);
@@ -855,14 +839,11 @@ export const updateGoalsProgress = async (amount, category) => {
         const oldValue = shouldReset ? 0 : (goal.current || 0);
         const newValue = oldValue + amount;
 
-        console.log(`Calculo: ${oldValue} + ${amount} = ${newValue}`);
 
         // Update in database
         await updateGoal(goal.id, { current: newValue });
-        console.log(`Meta "${goal.name}" atualizada para ${newValue}`);
     }
 
-    console.log('=== FIM updateGoalsProgress ===');
 };
 
 /**
@@ -871,8 +852,6 @@ export const updateGoalsProgress = async (amount, category) => {
  * @param {string} category - Category to filter goals (receita, economia, corridas, km)
  */
 export const decrementGoalsProgress = async (amount, category) => {
-    console.log('=== decrementGoalsProgress ===');
-    console.log('Parametros recebidos:', { amount, category });
 
     // Validate category
     if (!category || typeof category !== 'string') {
@@ -888,38 +867,30 @@ export const decrementGoalsProgress = async (amount, category) => {
 
     // Normalize category
     const targetCategory = String(category).toLowerCase().trim();
-    console.log('Categoria alvo (normalizada):', targetCategory);
 
     // Get all goals
     const goals = await getGoals();
-    console.log('Total de metas:', goals.length);
 
     // Filter and update only matching goals
     for (const goal of goals) {
         const goalCat = String(goal.category || '').toLowerCase().trim();
 
-        console.log(`Comparando: meta "${goal.name}" categoria="${goalCat}" vs alvo="${targetCategory}"`);
 
         // STRICT comparison - must match exactly
         if (goalCat !== targetCategory) {
-            console.log(`>>> IGNORANDO "${goal.name}" - categorias diferentes`);
             continue;
         }
 
-        console.log(`>>> DECREMENTANDO "${goal.name}"`);
 
         // Calculate new value (minimum 0)
         const oldValue = goal.current || 0;
         const newValue = Math.max(0, oldValue - amount);
 
-        console.log(`Calculo: ${oldValue} - ${amount} = ${newValue}`);
 
         // Update in database
         await updateGoal(goal.id, { current: newValue });
-        console.log(`Meta "${goal.name}" atualizada para ${newValue}`);
     }
 
-    console.log('=== FIM decrementGoalsProgress ===');
 };
 
 /**
@@ -1193,4 +1164,3 @@ export const importUserData = async (data) => {
 
     return true;
 };
-// Cache bust: 1767837001

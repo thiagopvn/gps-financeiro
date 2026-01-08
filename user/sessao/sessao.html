@@ -899,11 +899,6 @@
             const expenses = parseCurrencyValue(inputExpenses.value);
             const totalKm = parseFloat(inputKm.value) || 0;
 
-            console.log('=== ENCERRAMENTO DO TURNO ===');
-            console.log('inputKm.value:', inputKm.value);
-            console.log('totalKm parseado:', totalKm);
-            console.log('earnings:', earnings, 'rides:', rides, 'expenses:', expenses);
-
             if (earnings <= 0) {
                 showToast('Informe o valor faturado', 'error');
                 inputEarnings.focus();
@@ -1193,14 +1188,12 @@
                 const activeSession = await getActiveSession();
 
                 if (activeSession) {
-                    console.log('Sessão encontrada:', activeSession.id, 'Status:', activeSession.status);
                     currentSessionId = activeSession.id;
                     sessionStartTime = activeSession.startTime;
                     sessionPauses = activeSession.pauses || [];
 
                     // Calculate current elapsed time (excluding pauses)
                     const elapsed = calculateElapsedSeconds();
-                    console.log('Tempo real de trabalho:', formatDurationDisplay(elapsed));
 
                     if (activeSession.status === 'paused') {
                         // Session is paused - don't start timer
@@ -1213,7 +1206,6 @@
                         startTimerInterval();
                     }
                 } else {
-                    console.log('Nenhuma sessão ativa');
                     setSessionState('idle');
                 }
             } catch (error) {
