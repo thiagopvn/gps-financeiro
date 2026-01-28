@@ -1,5 +1,5 @@
-// GPS Financeiro Service Worker v4 - Performance Optimized
-const CACHE_NAME = 'gps-financeiro-v4';
+// GPS Financeiro Service Worker v5 - Performance Optimized
+const CACHE_NAME = 'gps-financeiro-v5';
 const OFFLINE_URL = '/offline.html';
 
 // Critical resources to cache immediately
@@ -12,6 +12,8 @@ const PRECACHE_URLS = [
     '/user/transacao/transacao.html',
     '/user/metas/meta.html',
     '/user/configuracoes/config.html',
+    '/user/relatorios/graficos.html',
+    '/admin/usergerenciamento/usergerenciamento.html',
     '/js/firebase-config.js',
     '/js/auth.js',
     '/js/db.js',
@@ -35,7 +37,7 @@ const CDN_CACHE_URLS = [
 
 // Install event - cache essential files
 self.addEventListener('install', (event) => {
-    console.log('[SW] Installing v2...');
+    console.log('[SW] Installing v5...');
 
     event.waitUntil(
         caches.open(CACHE_NAME).then(async (cache) => {
@@ -67,7 +69,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-    console.log('[SW] Activating v2...');
+    console.log('[SW] Activating v5...');
 
     event.waitUntil(
         caches.keys().then((cacheNames) => {
