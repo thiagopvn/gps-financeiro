@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
-    <title>Gerenciar Usuários - GPS Financeiro</title>
+    <title>Gerenciar Usuarios - GPS Financeiro</title>
     <link rel="icon" type="image/png" href="/icons/icon-192x192.png"/>
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
     <!-- Resource Hints -->
@@ -26,27 +26,72 @@
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased">
     <div class="min-h-screen max-w-4xl mx-auto px-4 py-8">
         <!-- Header -->
-        <header class="flex items-center justify-between mb-8">
+        <header class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-4">
                 <a href="/admin/dashadmin/dashadmin.html" class="p-2 rounded-full hover:bg-white/10 transition-colors">
                     <span class="material-symbols-outlined">arrow_back</span>
                 </a>
                 <div>
-                    <h1 class="text-2xl font-bold">Gerenciar Usuários</h1>
-                    <p class="text-slate-400 text-sm">Lista de motoristas cadastrados</p>
+                    <h1 class="text-2xl font-bold">Gerenciar Usuarios</h1>
+                    <p id="userCount" class="text-slate-400 text-sm">Carregando...</p>
                 </div>
             </div>
             <a href="/admin/newuser/newuser.html" class="flex items-center gap-2 px-4 py-2 bg-primary text-background-dark rounded-xl font-semibold hover:bg-primary/90 transition-colors">
                 <span class="material-symbols-outlined text-lg">add</span>
-                <span class="text-sm">Novo Usuário</span>
+                <span class="text-sm hidden sm:block">Novo Usuario</span>
             </a>
         </header>
 
-        <!-- Search -->
-        <div class="mb-6">
-            <div class="relative">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-white/5">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="material-symbols-outlined text-primary text-lg">people</span>
+                    <span class="text-xs text-slate-400">Total</span>
+                </div>
+                <p id="statTotal" class="text-xl font-bold">0</p>
+            </div>
+            <div class="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-white/5">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+                    <span class="text-xs text-slate-400">Ativos</span>
+                </div>
+                <p id="statActive" class="text-xl font-bold text-green-500">0</p>
+            </div>
+            <div class="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-white/5">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="material-symbols-outlined text-amber-500 text-lg">warning</span>
+                    <span class="text-xs text-slate-400">Duplicados</span>
+                </div>
+                <p id="statDuplicates" class="text-xl font-bold text-amber-500">0</p>
+            </div>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="flex flex-col sm:flex-row gap-3 mb-6">
+            <div class="relative flex-1">
                 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
                 <input id="searchInput" type="text" placeholder="Buscar por nome ou email..." class="w-full bg-white dark:bg-surface-dark rounded-xl pl-12 pr-4 py-3 border-none focus:ring-2 focus:ring-primary"/>
+            </div>
+            <div class="flex gap-2">
+                <button id="filterAll" class="filter-btn px-4 py-2 rounded-xl bg-primary text-background-dark font-semibold text-sm" data-filter="all">Todos</button>
+                <button id="filterActive" class="filter-btn px-4 py-2 rounded-xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-slate-600 dark:text-slate-400 font-medium text-sm" data-filter="active">Ativos</button>
+                <button id="filterPending" class="filter-btn px-4 py-2 rounded-xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-slate-600 dark:text-slate-400 font-medium text-sm" data-filter="pending">Pendentes</button>
+                <button id="filterDuplicates" class="filter-btn px-4 py-2 rounded-xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-amber-500 font-medium text-sm" data-filter="duplicates">
+                    <span class="material-symbols-outlined text-sm align-middle mr-1">content_copy</span>
+                    Duplicados
+                </button>
+            </div>
+        </div>
+
+        <!-- Duplicates Warning -->
+        <div id="duplicatesWarning" class="hidden mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-amber-500">warning</span>
+                <div>
+                    <h3 class="font-bold text-amber-500 mb-1">Possiveis contas duplicadas detectadas</h3>
+                    <p class="text-sm text-slate-400">Os usuarios destacados em amarelo possuem nomes identicos. Isso pode indicar a mesma pessoa com multiplas contas.</p>
+                </div>
             </div>
         </div>
 
@@ -62,8 +107,9 @@
     <!-- Delete Modal -->
     <div id="deleteModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
         <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
-            <h3 class="text-lg font-bold mb-2">Excluir usuário?</h3>
-            <p class="text-slate-400 text-sm mb-6">Esta ação não pode ser desfeita. Todos os dados do usuário serão perdidos.</p>
+            <h3 class="text-lg font-bold mb-2">Excluir usuario?</h3>
+            <p id="deleteUserName" class="text-slate-400 text-sm mb-4"></p>
+            <p class="text-red-400 text-xs mb-6">Esta acao nao pode ser desfeita. Todos os dados do usuario serao perdidos.</p>
             <div class="flex gap-3">
                 <button id="cancelDelete" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">Cancelar</button>
                 <button id="confirmDelete" class="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold">Excluir</button>
@@ -81,7 +127,6 @@
         import { getAllUsers, toggleUserActivation, deleteUser } from '/js/db.js';
         import { showToast, formatRelativeDate } from '/js/utils.js';
         import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { db } from '/js/firebase-config.js';
 
         // Check admin auth
         onAuthStateChanged(auth, async (user) => {
@@ -98,6 +143,7 @@
         // State
         let allUsers = [];
         let userToDelete = null;
+        let currentFilter = 'all';
 
         // DOM Elements
         const usersList = document.getElementById('usersList');
@@ -105,57 +151,149 @@
         const deleteModal = document.getElementById('deleteModal');
         const cancelDelete = document.getElementById('cancelDelete');
         const confirmDelete = document.getElementById('confirmDelete');
+        const deleteUserName = document.getElementById('deleteUserName');
+        const userCount = document.getElementById('userCount');
+        const statTotal = document.getElementById('statTotal');
+        const statActive = document.getElementById('statActive');
+        const statDuplicates = document.getElementById('statDuplicates');
+        const duplicatesWarning = document.getElementById('duplicatesWarning');
+        const filterBtns = document.querySelectorAll('.filter-btn');
 
         // Load users
         async function loadUsers() {
             try {
                 allUsers = await getAllUsers();
-                renderUsers(allUsers);
+                updateStats();
+                applyFilters();
             } catch (error) {
                 console.error('Error loading users:', error);
-                usersList.innerHTML = '<div class="flex items-center justify-center py-12 text-red-400">Erro ao carregar usuários</div>';
+                usersList.innerHTML = '<div class="flex items-center justify-center py-12 text-red-400">Erro ao carregar usuarios</div>';
             }
+        }
+
+        // Update stats
+        function updateStats() {
+            const total = allUsers.length;
+            const active = allUsers.filter(u => u.active !== false).length;
+            const duplicates = allUsers.filter(u => u.hasDuplicateName).length;
+
+            statTotal.textContent = total;
+            statActive.textContent = active;
+            statDuplicates.textContent = duplicates;
+            userCount.textContent = `${total} motoristas cadastrados`;
+
+            // Show duplicates warning if any
+            if (duplicates > 0) {
+                duplicatesWarning.classList.remove('hidden');
+            } else {
+                duplicatesWarning.classList.add('hidden');
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const query = searchInput.value.toLowerCase();
+            let filtered = allUsers;
+
+            // Apply search
+            if (query) {
+                filtered = filtered.filter(u =>
+                    (u.name || '').toLowerCase().includes(query) ||
+                    (u.email || '').toLowerCase().includes(query)
+                );
+            }
+
+            // Apply status filter
+            switch (currentFilter) {
+                case 'active':
+                    filtered = filtered.filter(u => u.active !== false);
+                    break;
+                case 'pending':
+                    filtered = filtered.filter(u => u.active === false);
+                    break;
+                case 'duplicates':
+                    filtered = filtered.filter(u => u.hasDuplicateName);
+                    break;
+            }
+
+            renderUsers(filtered);
         }
 
         // Render users
         function renderUsers(users) {
             if (users.length === 0) {
-                usersList.innerHTML = '<div class="flex items-center justify-center py-12 text-slate-400">Nenhum usuário encontrado</div>';
+                usersList.innerHTML = '<div class="flex items-center justify-center py-12 text-slate-400">Nenhum usuario encontrado</div>';
                 return;
             }
 
             let html = '';
+            let currentLetter = '';
+
             users.forEach(user => {
+                // Alphabetical separator
+                const firstLetter = (user.name || 'Z')[0].toUpperCase();
+                if (firstLetter !== currentLetter && currentFilter !== 'duplicates') {
+                    currentLetter = firstLetter;
+                    html += `<div class="px-4 py-2 bg-slate-50 dark:bg-white/5 text-xs font-bold text-slate-500 uppercase tracking-wider">${firstLetter}</div>`;
+                }
+
                 const hasPhoto = user.photoURL ? true : false;
-                const photoStyle = hasPhoto ? 'background-image: url(' + user.photoURL + ')' : '';
+                const photoStyle = hasPhoto ? `background-image: url(${user.photoURL})` : '';
                 const iconHtml = hasPhoto ? '' : '<span class="material-symbols-outlined text-slate-400">person</span>';
                 const dateStr = user.createdAt ? formatRelativeDate(user.createdAt.toDate()) : 'Data desconhecida';
                 const isActive = user.active !== false;
-                const statusClass = isActive ? 'bg-primary/20 text-primary' : 'bg-amber-500/20 text-amber-400';
-                const statusText = isActive ? 'Ativo' : 'Pendente';
-                const statusIcon = isActive ? 'check_circle' : 'hourglass_top';
 
-                html += '<div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5 last:border-0">';
-                html += '<div class="flex items-center gap-3">';
-                html += '<div class="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center bg-cover bg-center" style="' + photoStyle + '">' + iconHtml + '</div>';
-                html += '<div>';
-                html += '<div class="flex items-center gap-2">';
-                html += '<p class="font-semibold">' + (user.name || 'Sem nome') + '</p>';
-                html += '<span class="px-2 py-0.5 text-xs font-medium rounded-full ' + statusClass + '">' + statusText + '</span>';
-                html += '</div>';
-                html += '<p class="text-sm text-slate-400">' + user.email + '</p>';
-                if (user.vehicle) html += '<p class="text-xs text-slate-500">' + user.vehicle + (user.plate ? ' - ' + user.plate : '') + '</p>';
-                html += '</div></div>';
-                html += '<div class="flex items-center gap-1">';
-                html += '<span class="text-xs text-slate-400 hidden md:block mr-2">' + dateStr + '</span>';
-                // Toggle status button
-                html += '<button class="toggle-btn p-2 rounded-full hover:bg-white/10 transition-colors" data-uid="' + user.uid + '" data-active="' + isActive + '" title="' + (isActive ? 'Desativar' : 'Ativar') + '">';
-                html += '<span class="material-symbols-outlined ' + (isActive ? 'text-primary' : 'text-amber-400') + '">' + statusIcon + '</span>';
-                html += '</button>';
-                html += '<button class="delete-btn p-2 rounded-full hover:bg-red-500/10 text-red-400 transition-colors" data-uid="' + user.uid + '" data-name="' + (user.name || user.email) + '">';
-                html += '<span class="material-symbols-outlined">delete</span>';
-                html += '</button></div></div>';
+                // Status badge
+                let statusClass, statusText, statusIcon;
+                if (isActive) {
+                    statusClass = 'bg-green-500/20 text-green-500';
+                    statusText = 'Ativo';
+                    statusIcon = 'check_circle';
+                } else {
+                    statusClass = 'bg-amber-500/20 text-amber-500';
+                    statusText = 'Pendente';
+                    statusIcon = 'hourglass_top';
+                }
+
+                // Duplicate warning
+                const duplicateClass = user.hasDuplicateName ? 'border-l-4 border-amber-500 bg-amber-500/5' : '';
+                const duplicateBadge = user.hasDuplicateName
+                    ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-amber-500/20 text-amber-500" title="${user.duplicateCount} usuarios com este nome">
+                        <span class="material-symbols-outlined text-xs">content_copy</span>
+                        ${user.duplicateCount}x
+                       </span>`
+                    : '';
+
+                html += `
+                    <div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5 last:border-0 ${duplicateClass}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center bg-cover bg-center flex-shrink-0" style="${photoStyle}">${iconHtml}</div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <p class="font-semibold truncate">${user.name || 'Sem nome'}</p>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${statusClass}">
+                                        <span class="material-symbols-outlined text-xs">${statusIcon}</span>
+                                        ${statusText}
+                                    </span>
+                                    ${duplicateBadge}
+                                </div>
+                                <p class="text-sm text-slate-400 truncate">${user.email}</p>
+                                ${user.vehicle ? `<p class="text-xs text-slate-500">${user.vehicle}${user.plate ? ' - ' + user.plate : ''}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            <span class="text-xs text-slate-400 hidden lg:block mr-2">${dateStr}</span>
+                            <button class="toggle-btn p-2 rounded-full hover:bg-white/10 transition-colors" data-uid="${user.uid}" data-active="${isActive}" title="${isActive ? 'Desativar' : 'Ativar'}">
+                                <span class="material-symbols-outlined ${isActive ? 'text-green-500' : 'text-amber-500'}">${isActive ? 'toggle_on' : 'toggle_off'}</span>
+                            </button>
+                            <button class="delete-btn p-2 rounded-full hover:bg-red-500/10 text-red-400 transition-colors" data-uid="${user.uid}" data-name="${user.name || user.email}">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
             });
+
             usersList.innerHTML = html;
 
             // Add toggle status handlers
@@ -165,7 +303,7 @@
                     const currentActive = btn.dataset.active === 'true';
                     try {
                         await toggleUserActivation(uid, !currentActive);
-                        showToast(currentActive ? 'Usuário desativado' : 'Usuário ativado', 'success');
+                        showToast(currentActive ? 'Usuario desativado' : 'Usuario ativado', 'success');
                         loadUsers();
                     } catch (error) {
                         console.error('Error toggling user:', error);
@@ -178,21 +316,35 @@
             document.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     userToDelete = btn.dataset.uid;
+                    deleteUserName.textContent = `Usuario: ${btn.dataset.name}`;
                     deleteModal.classList.remove('hidden');
                     deleteModal.classList.add('flex');
                 });
             });
         }
 
-        // Search
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = allUsers.filter(u =>
-                (u.name || '').toLowerCase().includes(query) ||
-                u.email.toLowerCase().includes(query)
-            );
-            renderUsers(filtered);
+        // Filter button handlers
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentFilter = btn.dataset.filter;
+
+                // Update button styles
+                filterBtns.forEach(b => {
+                    if (b.dataset.filter === currentFilter) {
+                        b.classList.add('bg-primary', 'text-background-dark');
+                        b.classList.remove('bg-white', 'dark:bg-surface-dark', 'border', 'border-gray-200', 'dark:border-white/10', 'text-slate-600', 'dark:text-slate-400');
+                    } else {
+                        b.classList.remove('bg-primary', 'text-background-dark');
+                        b.classList.add('bg-white', 'dark:bg-surface-dark', 'border', 'border-gray-200', 'dark:border-white/10', 'text-slate-600', 'dark:text-slate-400');
+                    }
+                });
+
+                applyFilters();
+            });
         });
+
+        // Search handler
+        searchInput.addEventListener('input', applyFilters);
 
         // Delete modal
         cancelDelete.addEventListener('click', closeModal);
@@ -208,7 +360,7 @@
             if (userToDelete === null) return;
             try {
                 await deleteUser(userToDelete);
-                showToast('Usuário excluído', 'success');
+                showToast('Usuario excluido', 'success');
                 loadUsers();
             } catch (error) {
                 console.error('Error deleting user:', error);

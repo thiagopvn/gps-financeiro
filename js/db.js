@@ -962,18 +962,36 @@ export const checkAndResetGoals = async () => {
 /**
  * Get all users (admin only)
  * @param {number} limitCount - Max users to fetch
+ * @param {string} orderField - Field to order by ('name' or 'createdAt')
  * @returns {Promise<array>} Users array
  */
-export const getAllUsers = async (limitCount = 50) => {
+export const getAllUsers = async (limitCount = 100, orderField = 'name') => {
     const usersRef = collection(db, 'users');
-    const q = query(usersRef, orderBy('createdAt', 'desc'), limit(limitCount));
+    // Ordenar por nome para facilitar identificação de duplicados
+    const q = query(usersRef, orderBy(orderField, orderField === 'createdAt' ? 'desc' : 'asc'), limit(limitCount));
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    const users = snapshot.docs.map(doc => ({
         uid: doc.id,
         ...doc.data(),
         // Garantir que o campo active existe (para usuários antigos)
         active: doc.data().active !== undefined ? doc.data().active : true
+    }));
+
+    // Identificar nomes duplicados (possíveis contas múltiplas)
+    const nameCount = {};
+    users.forEach(user => {
+        const normalizedName = (user.name || '').toLowerCase().trim();
+        if (normalizedName) {
+            nameCount[normalizedName] = (nameCount[normalizedName] || 0) + 1;
+        }
+    });
+
+    // Marcar usuários com nomes duplicados
+    return users.map(user => ({
+        ...user,
+        hasDuplicateName: nameCount[(user.name || '').toLowerCase().trim()] > 1,
+        duplicateCount: nameCount[(user.name || '').toLowerCase().trim()] || 0
     }));
 };
 

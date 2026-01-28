@@ -497,71 +497,160 @@ export const isMobile = () => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 };
 
+// ============================================
+// Timezone Helpers - America/Sao_Paulo (GMT-3)
+// ============================================
+
 /**
- * Get current date at start of day (midnight)
- * @returns {Date} Date at midnight
+ * Get current date/time in São Paulo timezone
+ * This ensures all date operations use the correct local time
+ * @param {Date|string|number} date - Optional date to convert
+ * @returns {Date} Date adjusted to São Paulo timezone
+ */
+export const getDateInSaoPaulo = (date = new Date()) => {
+    const d = new Date(date);
+    // Get the date string in São Paulo timezone
+    const saoPauloStr = d.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' });
+    return new Date(saoPauloStr);
+};
+
+/**
+ * Get current date at start of day (midnight) in São Paulo timezone
+ * @param {Date|string|number} date - Optional date
+ * @returns {Date} Date at midnight in São Paulo time
  */
 export const getStartOfDay = (date = new Date()) => {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    return d;
+    // Convert to São Paulo time first
+    const spDate = getDateInSaoPaulo(date);
+    spDate.setHours(0, 0, 0, 0);
+    return spDate;
 };
 
 /**
- * Get start of week (Monday)
- * @returns {Date} Monday of current week
+ * Get start of week (Monday) in São Paulo timezone
+ * Week starts on Monday (ISO standard) and ends on Sunday
+ * @param {Date|string|number} date - Optional date
+ * @returns {Date} Monday of current week at midnight
  */
 export const getStartOfWeek = (date = new Date()) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    d.setDate(diff);
-    d.setHours(0, 0, 0, 0);
-    return d;
+    const spDate = getDateInSaoPaulo(date);
+    const day = spDate.getDay();
+    // Calculate days to subtract to get to Monday
+    // Sunday (0) -> go back 6 days
+    // Monday (1) -> go back 0 days
+    // Tuesday (2) -> go back 1 day
+    // etc.
+    const daysToMonday = day === 0 ? 6 : day - 1;
+    spDate.setDate(spDate.getDate() - daysToMonday);
+    spDate.setHours(0, 0, 0, 0);
+    return spDate;
 };
 
 /**
- * Get start of month
- * @returns {Date} First day of current month
+ * Get start of month in São Paulo timezone
+ * @param {Date|string|number} date - Optional date
+ * @returns {Date} First day of current month at midnight
  */
 export const getStartOfMonth = (date = new Date()) => {
-    const d = new Date(date);
-    d.setDate(1);
-    d.setHours(0, 0, 0, 0);
-    return d;
+    const spDate = getDateInSaoPaulo(date);
+    spDate.setDate(1);
+    spDate.setHours(0, 0, 0, 0);
+    return spDate;
 };
 
 /**
- * Get end of day (23:59:59.999)
+ * Get end of day (23:59:59.999) in São Paulo timezone
+ * @param {Date|string|number} date - Optional date
  * @returns {Date} End of the given day
  */
 export const getEndOfDay = (date = new Date()) => {
-    const d = new Date(date);
-    d.setHours(23, 59, 59, 999);
-    return d;
+    const spDate = getDateInSaoPaulo(date);
+    spDate.setHours(23, 59, 59, 999);
+    return spDate;
 };
 
 /**
- * Get end of week (Sunday 23:59:59.999)
- * @returns {Date} Sunday of current week
+ * Get end of week (Sunday 23:59:59.999) in São Paulo timezone
+ * @param {Date|string|number} date - Optional date
+ * @returns {Date} Sunday of current week at 23:59:59
  */
 export const getEndOfWeek = (date = new Date()) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = 7 - day; // days until Sunday
-    d.setDate(d.getDate() + (day === 0 ? 0 : diff));
-    d.setHours(23, 59, 59, 999);
-    return d;
+    const spDate = getDateInSaoPaulo(date);
+    const day = spDate.getDay();
+    // Calculate days to add to get to Sunday
+    // Sunday (0) -> add 0 days
+    // Monday (1) -> add 6 days
+    // Tuesday (2) -> add 5 days
+    // etc.
+    const daysToSunday = day === 0 ? 0 : 7 - day;
+    spDate.setDate(spDate.getDate() + daysToSunday);
+    spDate.setHours(23, 59, 59, 999);
+    return spDate;
 };
 
 /**
- * Get end of month
- * @returns {Date} Last day of current month
+ * Get end of month in São Paulo timezone
+ * @param {Date|string|number} date - Optional date
+ * @returns {Date} Last day of current month at 23:59:59
  */
 export const getEndOfMonth = (date = new Date()) => {
-    const d = new Date(date);
-    d.setMonth(d.getMonth() + 1);
-    d.setDate(0); // Last day of previous month (which is current month)
-    d.setHours(23, 59, 59, 999);
-    return d;
+    const spDate = getDateInSaoPaulo(date);
+    spDate.setMonth(spDate.getMonth() + 1);
+    spDate.setDate(0); // Last day of previous month (which is current month)
+    spDate.setHours(23, 59, 59, 999);
+    return spDate;
+};
+
+/**
+ * Get day of week name in Portuguese
+ * @param {Date} date - Date to get day name
+ * @returns {string} Day name in Portuguese
+ */
+export const getDayOfWeekName = (date = new Date()) => {
+    const spDate = getDateInSaoPaulo(date);
+    return spDate.toLocaleDateString('pt-BR', { weekday: 'long' });
+};
+
+/**
+ * Get array of last N days with their dates
+ * @param {number} n - Number of days
+ * @returns {Array} Array of date objects
+ */
+export const getLastNDays = (n = 7) => {
+    const days = [];
+    for (let i = n - 1; i >= 0; i--) {
+        const d = getDateInSaoPaulo();
+        d.setDate(d.getDate() - i);
+        days.push({
+            date: getStartOfDay(d),
+            dayName: d.toLocaleDateString('pt-BR', { weekday: 'short' }),
+            dayNumber: d.getDate()
+        });
+    }
+    return days;
+};
+
+/**
+ * Get array of last N weeks
+ * @param {number} n - Number of weeks
+ * @returns {Array} Array of week objects with start/end dates
+ */
+export const getLastNWeeks = (n = 4) => {
+    const weeks = [];
+    const today = getDateInSaoPaulo();
+
+    for (let i = n - 1; i >= 0; i--) {
+        const weekDate = new Date(today);
+        weekDate.setDate(today.getDate() - (i * 7));
+
+        const startOfWeek = getStartOfWeek(weekDate);
+        const endOfWeek = getEndOfWeek(weekDate);
+
+        weeks.push({
+            start: startOfWeek,
+            end: endOfWeek,
+            label: `${startOfWeek.getDate()}/${startOfWeek.getMonth() + 1} - ${endOfWeek.getDate()}/${endOfWeek.getMonth() + 1}`
+        });
+    }
+    return weeks;
 };

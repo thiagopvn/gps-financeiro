@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+    <title>Estatísticas - GPS Financeiro</title>
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json"/>
+    <meta name="theme-color" content="#FFD700"/>
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png"/>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <!-- Resource Hints -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com"/>
+    <link rel="dns-prefetch" href="//fonts.gstatic.com"/>
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <!-- Theme Persistence -->
+    <script src="/shared/theme.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="/shared/styles.css"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="/shared/tailwind-config.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-background-dark pb-40">
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 pt-safe">
+        <div class="flex items-center p-4 gap-3">
+            <a href="/user/Dashboard/dash.html" class="flex items-center justify-center rounded-full size-10 bg-transparent text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div>
+                <h1 class="text-gray-900 dark:text-white text-lg font-bold">Estatísticas</h1>
+                <p class="text-gray-500 dark:text-gray-400 text-xs">Visualize seus dados</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex flex-col gap-6 p-4 pt-6 max-w-lg mx-auto w-full">
+        <!-- Period Selector -->
+        <div class="flex gap-2 overflow-x-auto no-scrollbar">
+            <button id="filter7d" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-primary text-background-dark" data-period="7d">
+                <span class="material-symbols-outlined text-[16px]">date_range</span>
+                7 dias
+            </button>
+            <button id="filter30d" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="30d">
+                <span class="material-symbols-outlined text-[16px]">calendar_month</span>
+                30 dias
+            </button>
+            <button id="filter90d" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="90d">
+                <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                90 dias
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-12 text-gray-400">
+            <span class="material-symbols-outlined text-4xl mb-2 animate-spin">progress_activity</span>
+            <p class="text-sm">Carregando dados...</p>
+        </div>
+
+        <!-- Main Content (hidden until loaded) -->
+        <div id="mainContent" class="hidden flex flex-col gap-6">
+            <!-- KPIs Row 1 -->
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Lucro por KM -->
+                <div class="relative overflow-hidden flex flex-col gap-2 rounded-xl p-4 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20">
+                    <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-emerald-500/20 blur-2xl"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="size-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-emerald-500 text-[18px]">speed</span>
+                        </div>
+                        <span class="text-gray-600 dark:text-gray-300 text-xs font-medium">Lucro/KM</span>
+                    </div>
+                    <p id="kpiLucroKm" class="text-emerald-500 text-xl font-bold">R$ 0,00</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-[10px]">Ganho por quilometro</p>
+                </div>
+
+                <!-- Media por Hora -->
+                <div class="relative overflow-hidden flex flex-col gap-2 rounded-xl p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                    <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-blue-500/20 blur-2xl"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="size-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-blue-500 text-[18px]">schedule</span>
+                        </div>
+                        <span class="text-gray-600 dark:text-gray-300 text-xs font-medium">Media/Hora</span>
+                    </div>
+                    <p id="kpiMediaHora" class="text-blue-500 text-xl font-bold">R$ 0,00</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-[10px]">Ganho por hora trabalhada</p>
+                </div>
+            </div>
+
+            <!-- KPIs Row 2 -->
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Melhor Dia -->
+                <div class="relative overflow-hidden flex flex-col gap-2 rounded-xl p-4 bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20">
+                    <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-amber-500/20 blur-2xl"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="size-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-amber-500 text-[18px]">star</span>
+                        </div>
+                        <span class="text-gray-600 dark:text-gray-300 text-xs font-medium">Melhor Dia</span>
+                    </div>
+                    <p id="kpiMelhorDia" class="text-amber-500 text-xl font-bold capitalize">-</p>
+                    <p id="kpiMelhorDiaValor" class="text-gray-500 dark:text-gray-400 text-[10px]">Dia mais lucrativo</p>
+                </div>
+
+                <!-- Total Corridas -->
+                <div class="relative overflow-hidden flex flex-col gap-2 rounded-xl p-4 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+                    <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-purple-500/20 blur-2xl"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="size-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-purple-500 text-[18px]">directions_car</span>
+                        </div>
+                        <span class="text-gray-600 dark:text-gray-300 text-xs font-medium">Corridas</span>
+                    </div>
+                    <p id="kpiTotalCorridas" class="text-purple-500 text-xl font-bold">0</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-[10px]">Total no periodo</p>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-3 gap-2">
+                <div class="flex flex-col items-center p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5">
+                    <span class="material-symbols-outlined text-green-500 text-xl mb-1">trending_up</span>
+                    <p id="summaryReceita" class="text-gray-900 dark:text-white text-sm font-bold">R$ 0</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-[10px]">Receita</p>
+                </div>
+                <div class="flex flex-col items-center p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5">
+                    <span class="material-symbols-outlined text-red-500 text-xl mb-1">trending_down</span>
+                    <p id="summaryDespesa" class="text-gray-900 dark:text-white text-sm font-bold">R$ 0</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-[10px]">Despesas</p>
+                </div>
+                <div class="flex flex-col items-center p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5">
+                    <span class="material-symbols-outlined text-primary text-xl mb-1">savings</span>
+                    <p id="summaryLucro" class="text-gray-900 dark:text-white text-sm font-bold">R$ 0</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-[10px]">Lucro</p>
+                </div>
+            </div>
+
+            <!-- Weekly Comparison Chart -->
+            <div class="flex flex-col gap-4 rounded-xl p-4 bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">bar_chart</span>
+                        <h3 class="text-gray-900 dark:text-white font-bold">Receita vs Despesa</h3>
+                    </div>
+                    <span class="text-gray-500 dark:text-gray-400 text-xs">Por semana</span>
+                </div>
+                <div class="h-56">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+                <!-- Legend -->
+                <div class="flex items-center justify-center gap-6">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                        <span class="text-gray-600 dark:text-gray-400 text-xs">Receita</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <span class="text-gray-600 dark:text-gray-400 text-xs">Despesa</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expense Distribution Chart -->
+            <div class="flex flex-col gap-4 rounded-xl p-4 bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">donut_large</span>
+                        <h3 class="text-gray-900 dark:text-white font-bold">Despesas por Categoria</h3>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-40 h-40 flex-shrink-0">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                    <div id="expenseLegend" class="flex flex-col gap-2 flex-1">
+                        <!-- Legend items will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Earnings Chart -->
+            <div class="flex flex-col gap-4 rounded-xl p-4 bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">show_chart</span>
+                        <h3 class="text-gray-900 dark:text-white font-bold">Ganhos Diarios</h3>
+                    </div>
+                </div>
+                <div class="h-48">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Sessions Stats -->
+            <div class="flex flex-col gap-4 rounded-xl p-4 bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">timer</span>
+                    <h3 class="text-gray-900 dark:text-white font-bold">Turnos</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 dark:text-gray-400 text-xs mb-1">Total de Turnos</span>
+                        <span id="statsTurnos" class="text-gray-900 dark:text-white text-xl font-bold">0</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 dark:text-gray-400 text-xs mb-1">Horas Trabalhadas</span>
+                        <span id="statsHoras" class="text-gray-900 dark:text-white text-xl font-bold">0h</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 dark:text-gray-400 text-xs mb-1">KM Rodados</span>
+                        <span id="statsKm" class="text-gray-900 dark:text-white text-xl font-bold">0</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 dark:text-gray-400 text-xs mb-1">Media por Turno</span>
+                        <span id="statsMediaTurno" class="text-gray-900 dark:text-white text-xl font-bold">R$ 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Goals Progress -->
+            <div class="flex flex-col gap-4 rounded-xl p-4 bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">flag</span>
+                        <h3 class="text-gray-900 dark:text-white font-bold">Progresso das Metas</h3>
+                    </div>
+                    <a href="/user/metas/meta.html" class="text-primary text-xs font-medium">Ver todas</a>
+                </div>
+                <div id="goalsStats" class="flex flex-col gap-3">
+                    <!-- Goals will be populated dynamically -->
+                    <p class="text-gray-500 dark:text-gray-400 text-sm text-center py-4">Nenhuma meta cadastrada</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-12 text-center">
+            <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-primary text-4xl">bar_chart</span>
+            </div>
+            <h3 class="text-gray-900 dark:text-white font-bold text-lg mb-2">Sem dados suficientes</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 max-w-xs">Comece a registrar suas transacoes para visualizar estatisticas detalhadas</p>
+            <a href="/user/Lancamento/lancamento.html" class="inline-flex items-center gap-2 bg-primary text-background-dark px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                Novo Lancamento
+            </a>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-surface-light dark:bg-surface-dark border-t border-gray-200 dark:border-white/5 px-6 pt-3 nav-safe">
+        <div class="flex justify-between items-end max-w-lg mx-auto">
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors" href="/user/Dashboard/dash.html">
+                <span class="material-symbols-outlined text-[26px]">home</span>
+                <span class="text-[10px] font-medium">Inicio</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors" href="/user/transacao/transacao.html">
+                <span class="material-symbols-outlined text-[26px]">receipt_long</span>
+                <span class="text-[10px] font-medium">Extrato</span>
+            </a>
+            <!-- Central FAB -->
+            <div class="relative -top-3">
+                <a href="/user/Lancamento/lancamento.html" class="flex items-center justify-center w-14 h-14 rounded-full bg-primary shadow-lg shadow-primary/30 text-background-dark hover:scale-105 active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[32px]">add</span>
+                </a>
+            </div>
+            <a class="flex flex-col items-center gap-1 w-12 text-primary transition-colors" href="/user/relatorios/graficos.html">
+                <span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+                <span class="text-[10px] font-medium">Dados</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 w-12 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors" href="/user/configuracoes/config.html">
+                <span class="material-symbols-outlined text-[26px]">settings</span>
+                <span class="text-[10px] font-medium">Ajustes</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { requireAuth } from '/js/firebase-config.js';
+        import { getTransactions, getSessions, getGoals } from '/js/db.js';
+        import { formatCurrency, getStartOfDay, getDateInSaoPaulo } from '/js/utils.js';
+
+        // Require authentication
+        const user = await requireAuth();
+        if (!user) throw new Error('Not authenticated');
+
+        // Chart instances
+        let weeklyChart = null;
+        let expenseChart = null;
+        let dailyChart = null;
+
+        // Current period state
+        let currentPeriod = '7d';
+
+        // Cache for all data (loaded once, filtered by period)
+        let allTransactions = [];
+        let allSessions = [];
+        let allGoals = [];
+
+        // DOM Elements
+        const loadingState = document.getElementById('loadingState');
+        const mainContent = document.getElementById('mainContent');
+        const emptyState = document.getElementById('emptyState');
+        const periodFilters = document.querySelectorAll('.period-filter');
+
+        // Category colors and labels for expenses
+        const expenseCategories = {
+            'combustivel': { label: 'Combustivel', color: '#f97316' },
+            'manutencao': { label: 'Manutencao', color: '#ef4444' },
+            'alimentacao': { label: 'Alimentacao', color: '#eab308' },
+            'seguro': { label: 'Seguro', color: '#3b82f6' },
+            'impostos': { label: 'Impostos', color: '#8b5cf6' },
+            'estacionamento': { label: 'Estacionamento', color: '#06b6d4' },
+            'pedagio': { label: 'Pedagio', color: '#84cc16' },
+            'outros': { label: 'Outros', color: '#6b7280' }
+        };
+
+        // Get period configuration
+        function getPeriodConfig(period) {
+            const now = getDateInSaoPaulo();
+            let days;
+            switch (period) {
+                case '7d': days = 7; break;
+                case '30d': days = 30; break;
+                case '90d': days = 90; break;
+                default: days = 7;
+            }
+            const startDate = new Date(now);
+            startDate.setDate(startDate.getDate() - days);
+            startDate.setHours(0, 0, 0, 0);
+            return { startDate, endDate: now, days };
+        }
+
+        // Filter data by period
+        function filterByPeriod(data, startDate, endDate, dateField = 'date') {
+            return data.filter(item => {
+                const itemDate = item[dateField] instanceof Date
+                    ? item[dateField]
+                    : new Date(item[dateField]);
+                return itemDate >= startDate && itemDate <= endDate;
+            });
+        }
+
+        // Get last N days array
+        function getLastNDays(n) {
+            const days = [];
+            const now = getDateInSaoPaulo();
+            for (let i = n - 1; i >= 0; i--) {
+                const d = new Date(now);
+                d.setDate(d.getDate() - i);
+                d.setHours(0, 0, 0, 0);
+                days.push({
+                    date: d,
+                    dayName: d.toLocaleDateString('pt-BR', { weekday: 'short' }),
+                    dayNumber: d.getDate(),
+                    fullDate: d.toISOString().split('T')[0]
+                });
+            }
+            return days;
+        }
+
+        // Get last N weeks array
+        function getLastNWeeks(n) {
+            const weeks = [];
+            const now = getDateInSaoPaulo();
+
+            for (let i = n - 1; i >= 0; i--) {
+                const weekEnd = new Date(now);
+                weekEnd.setDate(weekEnd.getDate() - (i * 7));
+                weekEnd.setHours(23, 59, 59, 999);
+
+                const weekStart = new Date(weekEnd);
+                weekStart.setDate(weekStart.getDate() - 6);
+                weekStart.setHours(0, 0, 0, 0);
+
+                weeks.push({
+                    start: weekStart,
+                    end: weekEnd,
+                    label: `${weekStart.getDate()}/${weekStart.getMonth() + 1}`
+                });
+            }
+            return weeks;
+        }
+
+        // Load all data from Firebase (runs once)
+        async function loadAllData() {
+            loadingState.classList.remove('hidden');
+            mainContent.classList.add('hidden');
+            emptyState.classList.add('hidden');
+
+            try {
+                // Load all data in parallel
+                const [transactions, sessions, goals] = await Promise.all([
+                    getTransactions({}), // No filters - get all
+                    getSessions({}),     // No filters - get all
+                    getGoals()
+                ]);
+
+                // Store in cache
+                allTransactions = transactions;
+                allSessions = sessions.filter(s => s.status === 'completed');
+                allGoals = goals;
+
+                console.log('Data loaded:', {
+                    transactions: allTransactions.length,
+                    sessions: allSessions.length,
+                    goals: allGoals.length
+                });
+
+                // Process data for current period
+                processDataForPeriod();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                loadingState.innerHTML = `
+                    <span class="material-symbols-outlined text-red-500 text-4xl mb-2">error</span>
+                    <p class="text-red-400 text-sm">Erro ao carregar dados</p>
+                    <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-primary text-black rounded-lg text-sm font-medium">
+                        Tentar novamente
+                    </button>
+                `;
+            }
+        }
+
+        // Process and display data for selected period
+        function processDataForPeriod() {
+            const { startDate, endDate, days } = getPeriodConfig(currentPeriod);
+
+            console.log('Processing period:', currentPeriod, { startDate, endDate, days });
+
+            // Filter transactions and sessions by period
+            const filteredTransactions = filterByPeriod(allTransactions, startDate, endDate, 'date');
+            const filteredSessions = filterByPeriod(allSessions, startDate, endDate, 'startTime');
+
+            console.log('Filtered data:', {
+                transactions: filteredTransactions.length,
+                sessions: filteredSessions.length
+            });
+
+            // Check if we have any data
+            if (filteredTransactions.length === 0 && filteredSessions.length === 0) {
+                loadingState.classList.add('hidden');
+                mainContent.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            // Calculate stats
+            const stats = calculateStats(filteredTransactions, filteredSessions, days, startDate);
+
+            // Update all UI components
+            updateKPIs(stats);
+            updateSummary(stats);
+            updateWeeklyChart(filteredTransactions, filteredSessions, days);
+            updateExpenseChart(filteredTransactions, filteredSessions);
+            updateDailyChart(filteredTransactions, filteredSessions, Math.min(days, 14));
+            updateSessionStats(filteredSessions);
+            updateGoalsStats(allGoals);
+
+            loadingState.classList.add('hidden');
+            emptyState.classList.add('hidden');
+            mainContent.classList.remove('hidden');
+        }
+
+        // Calculate comprehensive stats
+        function calculateStats(transactions, sessions, days, startDate) {
+            let totalIncome = 0;
+            let totalExpenses = 0;
+            let totalKm = 0;
+            let totalHours = 0;
+            let totalRides = 0;
+            const dailyIncome = {};
+            const expenseByCategory = {};
+
+            // Process transactions
+            transactions.forEach(t => {
+                const date = t.date instanceof Date ? t.date : new Date(t.date);
+                const dateKey = date.toISOString().split('T')[0];
+
+                if (t.type === 'income') {
+                    totalIncome += t.amount || 0;
+                    dailyIncome[dateKey] = (dailyIncome[dateKey] || 0) + (t.amount || 0);
+                } else if (t.type === 'expense') {
+                    totalExpenses += t.amount || 0;
+                    const cat = (t.category || 'outros').toLowerCase();
+                    expenseByCategory[cat] = (expenseByCategory[cat] || 0) + (t.amount || 0);
+                } else if (t.type === 'corridas') {
+                    totalRides += t.amount || 0;
+                } else if (t.type === 'km') {
+                    totalKm += t.amount || 0;
+                }
+            });
+
+            // Process sessions
+            sessions.forEach(s => {
+                totalKm += s.totalKm || 0;
+                totalHours += (s.duration || 0) / 3600;
+                totalRides += s.rides || 0;
+
+                // Session earnings are income
+                if (s.earnings > 0) {
+                    totalIncome += s.earnings;
+                    const sessionDate = s.startTime instanceof Date ? s.startTime : new Date(s.startTime);
+                    const dateKey = sessionDate.toISOString().split('T')[0];
+                    dailyIncome[dateKey] = (dailyIncome[dateKey] || 0) + s.earnings;
+                }
+
+                // Session expenses
+                if (s.expenses > 0) {
+                    totalExpenses += s.expenses;
+                    expenseByCategory['outros'] = (expenseByCategory['outros'] || 0) + s.expenses;
+                }
+            });
+
+            // Calculate best day of week
+            const dayOfWeekIncome = {
+                'domingo': 0, 'segunda-feira': 0, 'terca-feira': 0,
+                'quarta-feira': 0, 'quinta-feira': 0, 'sexta-feira': 0, 'sabado': 0
+            };
+
+            Object.entries(dailyIncome).forEach(([dateStr, amount]) => {
+                const date = new Date(dateStr + 'T12:00:00');
+                const dayName = date.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+                dayOfWeekIncome[dayName] = (dayOfWeekIncome[dayName] || 0) + amount;
+            });
+
+            let bestDay = null;
+            let bestDayAmount = 0;
+            Object.entries(dayOfWeekIncome).forEach(([day, amount]) => {
+                if (amount > bestDayAmount) {
+                    bestDayAmount = amount;
+                    bestDay = day;
+                }
+            });
+
+            // Calculate profit metrics
+            const lucro = totalIncome - totalExpenses;
+            const lucroKm = totalKm > 0 ? lucro / totalKm : 0;
+            const mediaHora = totalHours > 0 ? totalIncome / totalHours : 0;
+
+            return {
+                totalIncome,
+                totalExpenses,
+                totalKm,
+                totalHours,
+                totalRides,
+                lucro,
+                lucroKm,
+                mediaHora,
+                bestDay,
+                bestDayAmount,
+                dailyIncome,
+                expenseByCategory
+            };
+        }
+
+        // Update KPIs
+        function updateKPIs(stats) {
+            document.getElementById('kpiLucroKm').textContent = formatCurrency(stats.lucroKm);
+            document.getElementById('kpiMediaHora').textContent = formatCurrency(stats.mediaHora);
+
+            const melhorDiaEl = document.getElementById('kpiMelhorDia');
+            const melhorDiaValorEl = document.getElementById('kpiMelhorDiaValor');
+
+            if (stats.bestDay && stats.bestDayAmount > 0) {
+                // Capitalize first letter
+                const dayCapitalized = stats.bestDay.charAt(0).toUpperCase() + stats.bestDay.slice(1);
+                melhorDiaEl.textContent = dayCapitalized.split('-')[0]; // Show only first word
+                melhorDiaValorEl.textContent = formatCurrency(stats.bestDayAmount);
+            } else {
+                melhorDiaEl.textContent = '-';
+                melhorDiaValorEl.textContent = 'Dia mais lucrativo';
+            }
+
+            document.getElementById('kpiTotalCorridas').textContent = stats.totalRides.toString();
+        }
+
+        // Update summary cards
+        function updateSummary(stats) {
+            document.getElementById('summaryReceita').textContent = formatCurrency(stats.totalIncome);
+            document.getElementById('summaryDespesa').textContent = formatCurrency(stats.totalExpenses);
+            document.getElementById('summaryLucro').textContent = formatCurrency(stats.lucro);
+        }
+
+        // Update weekly comparison chart
+        function updateWeeklyChart(transactions, sessions, days) {
+            const numWeeks = Math.max(1, Math.ceil(days / 7));
+            const weeks = getLastNWeeks(numWeeks);
+
+            const weeklyData = weeks.map(week => {
+                let income = 0;
+                let expenses = 0;
+
+                // Sum transactions in this week
+                transactions.forEach(t => {
+                    const date = t.date instanceof Date ? t.date : new Date(t.date);
+                    if (date >= week.start && date <= week.end) {
+                        if (t.type === 'income') income += t.amount || 0;
+                        else if (t.type === 'expense') expenses += t.amount || 0;
+                    }
+                });
+
+                // Sum sessions in this week
+                sessions.forEach(s => {
+                    const date = s.startTime instanceof Date ? s.startTime : new Date(s.startTime);
+                    if (date >= week.start && date <= week.end) {
+                        income += s.earnings || 0;
+                        expenses += s.expenses || 0;
+                    }
+                });
+
+                return { label: week.label, income, expenses };
+            });
+
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+
+            if (weeklyChart) weeklyChart.destroy();
+
+            weeklyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: weeklyData.map(w => w.label),
+                    datasets: [
+                        {
+                            label: 'Receita',
+                            data: weeklyData.map(w => w.income),
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                            borderRadius: 6,
+                            barPercentage: 0.6
+                        },
+                        {
+                            label: 'Despesas',
+                            data: weeklyData.map(w => w.expenses),
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderRadius: 6,
+                            barPercentage: 0.6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: isDark ? '#9ca3af' : '#6b7280', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+                            ticks: {
+                                color: isDark ? '#9ca3af' : '#6b7280',
+                                font: { size: 10 },
+                                callback: value => 'R$' + value.toLocaleString('pt-BR')
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update expense distribution chart
+        function updateExpenseChart(transactions, sessions) {
+            const expenseByCategory = {};
+            let totalExpenses = 0;
+
+            // Sum expenses from transactions
+            transactions.filter(t => t.type === 'expense').forEach(t => {
+                const cat = (t.category || 'outros').toLowerCase();
+                const amount = t.amount || 0;
+                expenseByCategory[cat] = (expenseByCategory[cat] || 0) + amount;
+                totalExpenses += amount;
+            });
+
+            // Add session expenses as "outros" if not categorized
+            sessions.forEach(s => {
+                if (s.expenses > 0) {
+                    expenseByCategory['outros'] = (expenseByCategory['outros'] || 0) + s.expenses;
+                    totalExpenses += s.expenses;
+                }
+            });
+
+            const categories = Object.keys(expenseByCategory).sort((a, b) =>
+                expenseByCategory[b] - expenseByCategory[a]
+            );
+            const values = categories.map(cat => expenseByCategory[cat]);
+            const colors = categories.map(cat => expenseCategories[cat]?.color || '#6b7280');
+
+            // Update legend
+            const legendContainer = document.getElementById('expenseLegend');
+            if (categories.length === 0 || totalExpenses === 0) {
+                legendContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-xs">Sem despesas no periodo</p>';
+            } else {
+                legendContainer.innerHTML = categories.slice(0, 5).map((cat, i) => {
+                    const label = expenseCategories[cat]?.label || cat;
+                    const value = expenseByCategory[cat];
+                    const percent = Math.round((value / totalExpenses) * 100);
+                    return `
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${colors[i]}"></div>
+                                <span class="text-gray-600 dark:text-gray-400 text-xs truncate">${label}</span>
+                            </div>
+                            <span class="text-gray-900 dark:text-white text-xs font-semibold flex-shrink-0">${percent}%</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+
+            if (expenseChart) expenseChart.destroy();
+
+            expenseChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: categories.map(cat => expenseCategories[cat]?.label || cat),
+                    datasets: [{
+                        data: values.length > 0 ? values : [1],
+                        backgroundColor: colors.length > 0 ? colors : ['#374151'],
+                        borderWidth: 0,
+                        cutout: '70%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => ` ${formatCurrency(context.raw)}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update daily earnings chart
+        function updateDailyChart(transactions, sessions, numDays) {
+            const days = getLastNDays(numDays);
+
+            const dailyData = days.map(day => {
+                let income = 0;
+
+                // Sum income transactions for this day
+                transactions.forEach(t => {
+                    const tDate = t.date instanceof Date ? t.date : new Date(t.date);
+                    const tDateKey = tDate.toISOString().split('T')[0];
+                    if (tDateKey === day.fullDate && t.type === 'income') {
+                        income += t.amount || 0;
+                    }
+                });
+
+                // Sum session earnings for this day
+                sessions.forEach(s => {
+                    const sDate = s.startTime instanceof Date ? s.startTime : new Date(s.startTime);
+                    const sDateKey = sDate.toISOString().split('T')[0];
+                    if (sDateKey === day.fullDate && s.earnings > 0) {
+                        income += s.earnings;
+                    }
+                });
+
+                return {
+                    label: `${day.dayName} ${day.dayNumber}`,
+                    value: income
+                };
+            });
+
+            const ctx = document.getElementById('dailyChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+
+            if (dailyChart) dailyChart.destroy();
+
+            dailyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dailyData.map(d => d.label),
+                    datasets: [{
+                        data: dailyData.map(d => d.value),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: isDark ? '#18181b' : '#ffffff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => formatCurrency(context.raw)
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: isDark ? '#9ca3af' : '#6b7280',
+                                font: { size: 9 },
+                                maxRotation: 45
+                            }
+                        },
+                        y: {
+                            grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+                            ticks: {
+                                color: isDark ? '#9ca3af' : '#6b7280',
+                                font: { size: 10 },
+                                callback: value => 'R$' + value.toLocaleString('pt-BR')
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update session stats
+        function updateSessionStats(sessions) {
+            const totalSessions = sessions.length;
+            const totalHours = sessions.reduce((acc, s) => acc + (s.duration || 0), 0) / 3600;
+            const totalKm = sessions.reduce((acc, s) => acc + (s.totalKm || 0), 0);
+            const totalEarnings = sessions.reduce((acc, s) => acc + (s.earnings || 0), 0);
+            const avgPerSession = totalSessions > 0 ? totalEarnings / totalSessions : 0;
+
+            document.getElementById('statsTurnos').textContent = totalSessions.toString();
+            document.getElementById('statsHoras').textContent = `${Math.round(totalHours)}h`;
+            document.getElementById('statsKm').textContent = Math.round(totalKm).toLocaleString('pt-BR');
+            document.getElementById('statsMediaTurno').textContent = formatCurrency(avgPerSession);
+        }
+
+        // Update goals stats
+        function updateGoalsStats(goals) {
+            const container = document.getElementById('goalsStats');
+
+            if (!goals || goals.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Nenhuma meta cadastrada</p>
+                        <a href="/user/newmeta/newmeta.html" class="inline-flex items-center gap-1 text-primary text-xs font-medium mt-2">
+                            <span class="material-symbols-outlined text-sm">add</span>
+                            Criar meta
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            const categoryConfig = {
+                receita: { icon: 'trending_up', bgColor: 'bg-emerald-500/20', textColor: 'text-emerald-500', barColor: 'bg-emerald-500' },
+                economia: { icon: 'savings', bgColor: 'bg-amber-500/20', textColor: 'text-amber-500', barColor: 'bg-amber-500' },
+                corridas: { icon: 'directions_car', bgColor: 'bg-blue-500/20', textColor: 'text-blue-500', barColor: 'bg-blue-500' },
+                km: { icon: 'speed', bgColor: 'bg-purple-500/20', textColor: 'text-purple-500', barColor: 'bg-purple-500' }
+            };
+
+            container.innerHTML = goals.slice(0, 4).map(goal => {
+                const progress = Math.min(100, Math.round((goal.current / goal.target) * 100));
+                const config = categoryConfig[goal.category] || {
+                    icon: 'flag',
+                    bgColor: 'bg-gray-500/20',
+                    textColor: 'text-gray-500',
+                    barColor: 'bg-gray-500'
+                };
+                const isCurrency = goal.category === 'receita' || goal.category === 'economia';
+                const currentDisplay = isCurrency ? formatCurrency(goal.current) : Math.round(goal.current);
+                const targetDisplay = isCurrency ? formatCurrency(goal.target) : Math.round(goal.target);
+                const unit = goal.category === 'km' ? ' km' : (goal.category === 'corridas' ? '' : '');
+
+                return `
+                    <div class="flex items-center gap-3">
+                        <div class="size-8 rounded-lg ${config.bgColor} flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined ${config.textColor} text-lg">${config.icon}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-gray-900 dark:text-white text-sm font-medium truncate">${goal.name}</span>
+                                <span class="${config.textColor} text-xs font-bold flex-shrink-0 ml-2">${progress}%</span>
+                            </div>
+                            <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full ${config.barColor} rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                            </div>
+                            <p class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">${currentDisplay}${unit} / ${targetDisplay}${unit}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Period filter UI update
+        function updatePeriodFilterUI(selectedPeriod) {
+            periodFilters.forEach(btn => {
+                const period = btn.dataset.period;
+                if (period === selectedPeriod) {
+                    btn.classList.add('bg-primary', 'text-background-dark', 'font-semibold');
+                    btn.classList.remove('bg-white', 'dark:bg-surface-dark', 'border', 'border-gray-200', 'dark:border-white/10', 'text-gray-600', 'dark:text-gray-400');
+                } else {
+                    btn.classList.remove('bg-primary', 'text-background-dark', 'font-semibold');
+                    btn.classList.add('bg-white', 'dark:bg-surface-dark', 'border', 'border-gray-200', 'dark:border-white/10', 'text-gray-600', 'dark:text-gray-400');
+                }
+            });
+        }
+
+        // Period filter click handlers
+        periodFilters.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const period = btn.dataset.period;
+                if (period === currentPeriod) return;
+
+                currentPeriod = period;
+                updatePeriodFilterUI(period);
+
+                // Show loading briefly for feedback
+                mainContent.style.opacity = '0.5';
+                mainContent.style.pointerEvents = 'none';
+
+                setTimeout(() => {
+                    processDataForPeriod();
+                    mainContent.style.opacity = '1';
+                    mainContent.style.pointerEvents = 'auto';
+                }, 100);
+            });
+        });
+
+        // Handle visibility changes (refresh data when tab becomes visible)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && allTransactions.length > 0) {
+                // Re-process current period (data is already cached)
+                processDataForPeriod();
+            }
+        });
+
+        // Initialize
+        loadAllData();
+    </script>
+</body>
+</html>
