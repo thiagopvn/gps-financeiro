@@ -1,5 +1,5 @@
-// GPS Financeiro Service Worker v7 - Force Refresh
-const CACHE_NAME = 'gps-financeiro-v7';
+// GPS Financeiro Service Worker v8 - Force Refresh
+const CACHE_NAME = 'gps-financeiro-v8';
 const OFFLINE_URL = '/offline.html';
 
 // Critical resources to cache immediately

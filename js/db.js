@@ -965,10 +965,9 @@ export const checkAndResetGoals = async () => {
  * @param {string} orderField - Field to order by ('name' or 'createdAt')
  * @returns {Promise<array>} Users array
  */
-export const getAllUsers = async (limitCount = 100, orderField = 'name') => {
+export const getAllUsers = async (limitCount = 200) => {
     const usersRef = collection(db, 'users');
-    // Ordenar por nome para facilitar identificação de duplicados
-    const q = query(usersRef, orderBy(orderField, orderField === 'createdAt' ? 'desc' : 'asc'), limit(limitCount));
+    const q = query(usersRef, limit(limitCount));
 
     const snapshot = await getDocs(q);
     const users = snapshot.docs.map(doc => ({
@@ -977,6 +976,13 @@ export const getAllUsers = async (limitCount = 100, orderField = 'name') => {
         // Garantir que o campo active existe (para usuários antigos)
         active: doc.data().active !== undefined ? doc.data().active : true
     }));
+
+    // Ordenar alfabeticamente por nome (case-insensitive) no JavaScript
+    users.sort((a, b) => {
+        const nameA = (a.name || 'ZZZ').toLowerCase().trim();
+        const nameB = (b.name || 'ZZZ').toLowerCase().trim();
+        return nameA.localeCompare(nameB, 'pt-BR');
+    });
 
     // Identificar nomes duplicados (possíveis contas múltiplas)
     const nameCount = {};
