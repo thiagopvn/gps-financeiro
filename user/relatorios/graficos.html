@@ -59,6 +59,10 @@
                 <span class="material-symbols-outlined text-[16px]">calendar_today</span>
                 90 dias
             </button>
+            <button id="filterAll" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="all">
+                <span class="material-symbols-outlined text-[16px]">all_inclusive</span>
+                Todo periodo
+            </button>
         </div>
 
         <!-- Loading State -->
@@ -331,16 +335,26 @@
         function getPeriodConfig(period) {
             const now = getDateInSaoPaulo();
             let days;
-            switch (period) {
-                case '7d': days = 7; break;
-                case '30d': days = 30; break;
-                case '90d': days = 90; break;
-                default: days = 7;
+            let startDate;
+
+            if (period === 'all') {
+                // Para "todo periodo", usar data muito antiga como inicio
+                startDate = new Date(2020, 0, 1); // 1 de janeiro de 2020
+                // Calcular dias desde o inicio ate agora
+                days = Math.ceil((now - startDate) / (1000 * 60 * 60 * 24));
+            } else {
+                switch (period) {
+                    case '7d': days = 7; break;
+                    case '30d': days = 30; break;
+                    case '90d': days = 90; break;
+                    default: days = 7;
+                }
+                startDate = new Date(now);
+                startDate.setDate(startDate.getDate() - days);
             }
-            const startDate = new Date(now);
-            startDate.setDate(startDate.getDate() - days);
+
             startDate.setHours(0, 0, 0, 0);
-            return { startDate, endDate: now, days };
+            return { startDate, endDate: now, days, isAllTime: period === 'all' };
         }
 
         // Filter data by period
@@ -435,9 +449,9 @@
 
         // Process and display data for selected period
         function processDataForPeriod() {
-            const { startDate, endDate, days } = getPeriodConfig(currentPeriod);
+            const { startDate, endDate, days, isAllTime } = getPeriodConfig(currentPeriod);
 
-            console.log('Processing period:', currentPeriod, { startDate, endDate, days });
+            console.log('Processing period:', currentPeriod, { startDate, endDate, days, isAllTime });
 
             // Filter transactions and sessions by period
             const filteredTransactions = filterByPeriod(allTransactions, startDate, endDate, 'date');
@@ -459,12 +473,16 @@
             // Calculate stats
             const stats = calculateStats(filteredTransactions, filteredSessions, days, startDate);
 
+            // Determine chart parameters based on period
+            const weeklyChartWeeks = isAllTime ? 12 : Math.max(1, Math.ceil(days / 7));
+            const dailyChartDays = isAllTime ? 30 : Math.min(days, 14);
+
             // Update all UI components
             updateKPIs(stats);
             updateSummary(stats);
-            updateWeeklyChart(filteredTransactions, filteredSessions, days);
+            updateWeeklyChart(filteredTransactions, filteredSessions, weeklyChartWeeks, isAllTime);
             updateExpenseChart(filteredTransactions, filteredSessions);
-            updateDailyChart(filteredTransactions, filteredSessions, Math.min(days, 14));
+            updateDailyChart(filteredTransactions, filteredSessions, dailyChartDays);
             updateSessionStats(filteredSessions);
             updateGoalsStats(allGoals);
 
@@ -594,8 +612,7 @@
         }
 
         // Update weekly comparison chart
-        function updateWeeklyChart(transactions, sessions, days) {
-            const numWeeks = Math.max(1, Math.ceil(days / 7));
+        function updateWeeklyChart(transactions, sessions, numWeeks, isAllTime = false) {
             const weeks = getLastNWeeks(numWeeks);
 
             const weeklyData = weeks.map(week => {
