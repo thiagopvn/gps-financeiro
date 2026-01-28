@@ -163,15 +163,37 @@
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
 
+    <!-- Promote Modal -->
+    <div id="promoteModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl p-6 w-full max-w-sm">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-amber-500 text-2xl">person_add</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold">Usuario ja existe</h3>
+                    <p class="text-slate-400 text-sm">Deseja promover a admin?</p>
+                </div>
+            </div>
+            <p id="promoteEmail" class="text-sm text-slate-300 bg-white/5 rounded-lg px-3 py-2 mb-4 break-all"></p>
+            <p class="text-xs text-slate-500 mb-6">O usuario podera acessar o painel administrativo com a senha atual dele.</p>
+            <div class="flex gap-3">
+                <button id="cancelPromote" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 font-semibold">Cancelar</button>
+                <button id="confirmPromote" class="flex-1 py-3 rounded-xl bg-amber-500 text-black font-semibold">Promover</button>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script type="module">
         import { auth, db } from '/js/firebase-config.js';
         import { isAdmin } from '/js/auth.js';
         import { showToast, isValidEmail } from '/js/utils.js';
         import { onAuthStateChanged, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { doc, setDoc, getDoc, collection, query, where, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Check admin auth
+        let currentAdminUser = null;
         onAuthStateChanged(auth, async (user) => {
             if (user === null) {
                 window.location.href = '/admin/loginadmin/loginadmin.html';
@@ -181,6 +203,7 @@
             if (adminCheck === false) {
                 window.location.href = '/admin/loginadmin/loginadmin.html';
             }
+            currentAdminUser = user;
         });
 
         // DOM Elements
@@ -188,6 +211,13 @@
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
         const submitBtn = document.getElementById('submitBtn');
+        const promoteModal = document.getElementById('promoteModal');
+        const promoteEmail = document.getElementById('promoteEmail');
+        const cancelPromote = document.getElementById('cancelPromote');
+        const confirmPromote = document.getElementById('confirmPromote');
+
+        // State for promotion
+        let pendingPromotion = null;
 
         // Password visibility
         togglePassword.addEventListener('click', () => {
@@ -201,18 +231,123 @@
             }
         });
 
+        // Find user by email in users collection
+        async function findUserByEmail(email) {
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('email', '==', email));
+            const snapshot = await getDocs(q);
+            if (snapshot.empty) return null;
+            const doc = snapshot.docs[0];
+            return { uid: doc.id, ...doc.data() };
+        }
+
+        // Check if already admin
+        async function isAlreadyAdmin(uid) {
+            const adminDoc = await getDoc(doc(db, 'admins', uid));
+            return adminDoc.exists();
+        }
+
+        // Create admin document
+        async function createAdminDoc(uid, data) {
+            await setDoc(doc(db, 'admins', uid), {
+                name: data.name,
+                email: data.email,
+                role: data.role,
+                permissions: data.permissions,
+                active: true,
+                createdAt: serverTimestamp(),
+                createdBy: currentAdminUser ? currentAdminUser.uid : null
+            });
+        }
+
+        // Promote modal handlers
+        cancelPromote.addEventListener('click', () => {
+            promoteModal.classList.add('hidden');
+            promoteModal.classList.remove('flex');
+            pendingPromotion = null;
+            resetButton();
+        });
+
+        confirmPromote.addEventListener('click', async () => {
+            if (!pendingPromotion) return;
+
+            confirmPromote.disabled = true;
+            confirmPromote.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span>';
+
+            try {
+                // Check if user exists in users collection
+                const existingUser = await findUserByEmail(pendingPromotion.email);
+
+                if (existingUser) {
+                    // Check if already admin
+                    if (await isAlreadyAdmin(existingUser.uid)) {
+                        showToast('Este usuario ja e administrador', 'error');
+                        closePromoteModal();
+                        return;
+                    }
+
+                    // Create admin document with existing user's uid
+                    await createAdminDoc(existingUser.uid, pendingPromotion);
+                    showToast('Usuario promovido a administrador!', 'success');
+                } else {
+                    // User exists in Auth but not in users collection
+                    // Create admin doc with email as identifier (will be linked on first login)
+                    const tempId = 'pending_' + pendingPromotion.email.replace(/[^a-zA-Z0-9]/g, '_');
+                    await setDoc(doc(db, 'admins', tempId), {
+                        name: pendingPromotion.name,
+                        email: pendingPromotion.email,
+                        role: pendingPromotion.role,
+                        permissions: pendingPromotion.permissions,
+                        active: true,
+                        pending: true,
+                        createdAt: serverTimestamp(),
+                        createdBy: currentAdminUser ? currentAdminUser.uid : null
+                    });
+                    showToast('Admin criado! Usuario deve fazer login para ativar.', 'success');
+                }
+
+                setTimeout(() => {
+                    window.location.href = '/admin/admins/admins.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error promoting user:', error);
+                showToast('Erro ao promover usuario', 'error');
+                confirmPromote.disabled = false;
+                confirmPromote.textContent = 'Promover';
+            }
+        });
+
+        function closePromoteModal() {
+            promoteModal.classList.add('hidden');
+            promoteModal.classList.remove('flex');
+            pendingPromotion = null;
+            resetButton();
+        }
+
+        function resetButton() {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Criar Admin</span><span class="material-symbols-outlined">arrow_forward</span>';
+        }
+
         // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const role = document.getElementById('role').value;
             const permUsers = document.getElementById('permUsers').checked;
             const permAdmins = document.getElementById('permAdmins').checked;
             const permStats = document.getElementById('permStats').checked;
+
+            // Build permissions array
+            const permissions = [];
+            if (permUsers) permissions.push('manage_users');
+            if (permAdmins) permissions.push('manage_admins');
+            if (permStats) permissions.push('view_stats');
 
             // Validation
             if (!name) {
@@ -221,17 +356,17 @@
             }
 
             if (!isValidEmail(email)) {
-                showToast('Email inválido', 'error');
+                showToast('Email invalido', 'error');
                 return;
             }
 
             if (password.length < 6) {
-                showToast('Senha deve ter no mínimo 6 caracteres', 'error');
+                showToast('Senha deve ter no minimo 6 caracteres', 'error');
                 return;
             }
 
             if (password !== confirmPassword) {
-                showToast('Senhas não conferem', 'error');
+                showToast('Senhas nao conferem', 'error');
                 return;
             }
 
@@ -240,53 +375,42 @@
             submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span>';
 
             try {
-                // Store current admin info
-                const currentAdmin = auth.currentUser;
-
-                // Create user in Firebase Auth
+                // Try to create user in Firebase Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const newAdmin = userCredential.user;
 
-                // Build permissions array
-                const permissions = [];
-                if (permUsers) permissions.push('manage_users');
-                if (permAdmins) permissions.push('manage_admins');
-                if (permStats) permissions.push('view_stats');
-
-                // Create admin document in admins collection
-                await setDoc(doc(db, 'admins', newAdmin.uid), {
-                    name: name,
-                    email: email,
-                    role: role,
-                    permissions: permissions,
-                    active: true,
-                    createdAt: serverTimestamp(),
-                    createdBy: currentAdmin ? currentAdmin.uid : null
-                });
+                // Create admin document
+                await createAdminDoc(newAdmin.uid, { name, email, role, permissions });
 
                 showToast('Administrador criado com sucesso!', 'success');
 
-                // Sign out the newly created admin
+                // Sign out the newly created admin (so current admin stays logged in)
                 await auth.signOut();
 
-                // Redirect to login (admin needs to login again)
+                // Redirect
                 setTimeout(() => {
                     window.location.href = '/admin/loginadmin/loginadmin.html';
                 }, 1500);
 
             } catch (error) {
                 console.error('Error creating admin:', error);
-                let errorMsg = 'Erro ao criar administrador';
+
                 if (error.code === 'auth/email-already-in-use') {
-                    errorMsg = 'Este email já está em uso';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMsg = 'Email inválido';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMsg = 'Senha muito fraca';
+                    // Show promote modal
+                    pendingPromotion = { name, email, role, permissions };
+                    promoteEmail.textContent = email;
+                    promoteModal.classList.remove('hidden');
+                    promoteModal.classList.add('flex');
+                } else {
+                    let errorMsg = 'Erro ao criar administrador';
+                    if (error.code === 'auth/invalid-email') {
+                        errorMsg = 'Email invalido';
+                    } else if (error.code === 'auth/weak-password') {
+                        errorMsg = 'Senha muito fraca';
+                    }
+                    showToast(errorMsg, 'error');
+                    resetButton();
                 }
-                showToast(errorMsg, 'error');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>Criar Admin</span><span class="material-symbols-outlined">arrow_forward</span>';
             }
         });
     </script>
