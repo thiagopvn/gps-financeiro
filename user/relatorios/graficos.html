@@ -47,21 +47,42 @@
     <main class="flex flex-col gap-6 p-4 pt-6 max-w-lg mx-auto w-full">
         <!-- Period Selector -->
         <div class="flex gap-2 overflow-x-auto no-scrollbar">
-            <button id="filter7d" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-primary text-background-dark" data-period="7d">
+            <button id="filterToday" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-primary text-background-dark" data-period="today">
+                <span class="material-symbols-outlined text-[16px]">today</span>
+                Hoje
+            </button>
+            <button id="filterWeek" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="week">
                 <span class="material-symbols-outlined text-[16px]">date_range</span>
-                7 dias
+                Esta Semana
             </button>
-            <button id="filter30d" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="30d">
+            <button id="filterMonth" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="month">
                 <span class="material-symbols-outlined text-[16px]">calendar_month</span>
-                30 dias
+                Este Mes
             </button>
-            <button id="filter90d" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="90d">
-                <span class="material-symbols-outlined text-[16px]">calendar_today</span>
-                90 dias
+            <button id="filterCustom" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="custom">
+                <span class="material-symbols-outlined text-[16px]">edit_calendar</span>
+                Personalizado
             </button>
-            <button id="filterAll" class="period-filter flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all bg-white dark:bg-surface-dark border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-primary/50" data-period="all">
-                <span class="material-symbols-outlined text-[16px]">all_inclusive</span>
-                Todo periodo
+        </div>
+
+        <!-- Custom Date Range Picker (hidden by default) -->
+        <div id="customDatePicker" class="hidden flex flex-col gap-3 p-4 rounded-xl bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-white/5">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="material-symbols-outlined text-primary text-lg">edit_calendar</span>
+                <span class="text-gray-900 dark:text-white font-semibold text-sm">Periodo Personalizado</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Data Inicial</label>
+                    <input type="date" id="customStartDate" class="w-full bg-white dark:bg-background-dark rounded-lg px-3 py-2 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Data Final</label>
+                    <input type="date" id="customEndDate" class="w-full bg-white dark:bg-background-dark rounded-lg px-3 py-2 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary">
+                </div>
+            </div>
+            <button id="applyCustomDate" class="w-full py-2.5 rounded-lg bg-primary text-background-dark font-semibold text-sm hover:bg-primary/90 transition-colors">
+                Aplicar Filtro
             </button>
         </div>
 
@@ -306,7 +327,11 @@
         let dailyChart = null;
 
         // Current period state
-        let currentPeriod = '7d';
+        let currentPeriod = 'today';
+
+        // Custom date range state
+        let customStartDate = null;
+        let customEndDate = null;
 
         // Cache for all data (loaded once, filtered by period)
         let allTransactions = [];
@@ -331,30 +356,65 @@
             'outros': { label: 'Outros', color: '#6b7280' }
         };
 
-        // Get period configuration
+        // Get period configuration - Periodos Fechados
         function getPeriodConfig(period) {
             const now = getDateInSaoPaulo();
-            let days;
             let startDate;
+            let endDate = now;
+            let days;
+            let isCustom = false;
 
-            if (period === 'all') {
-                // Para "todo periodo", usar data muito antiga como inicio
-                startDate = new Date(2020, 0, 1); // 1 de janeiro de 2020
-                // Calcular dias desde o inicio ate agora
-                days = Math.ceil((now - startDate) / (1000 * 60 * 60 * 24));
-            } else {
-                switch (period) {
-                    case '7d': days = 7; break;
-                    case '30d': days = 30; break;
-                    case '90d': days = 90; break;
-                    default: days = 7;
-                }
-                startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - days);
+            switch (period) {
+                case 'today':
+                    // Hoje: do inicio do dia ate agora
+                    startDate = new Date(now);
+                    startDate.setHours(0, 0, 0, 0);
+                    days = 1;
+                    break;
+
+                case 'week':
+                    // Esta Semana: Segunda-feira ate hoje
+                    startDate = new Date(now);
+                    const dayOfWeek = startDate.getDay();
+                    // Se domingo (0), voltar 6 dias; senao, voltar (dia - 1) dias
+                    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    startDate.setDate(startDate.getDate() - daysToMonday);
+                    startDate.setHours(0, 0, 0, 0);
+                    days = daysToMonday + 1;
+                    break;
+
+                case 'month':
+                    // Este Mes: Dia 1 ate hoje
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    startDate.setHours(0, 0, 0, 0);
+                    days = now.getDate();
+                    break;
+
+                case 'custom':
+                    // Personalizado: usar datas customizadas
+                    if (customStartDate && customEndDate) {
+                        startDate = new Date(customStartDate);
+                        startDate.setHours(0, 0, 0, 0);
+                        endDate = new Date(customEndDate);
+                        endDate.setHours(23, 59, 59, 999);
+                        days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+                        isCustom = true;
+                    } else {
+                        // Fallback para hoje se nao tiver datas
+                        startDate = new Date(now);
+                        startDate.setHours(0, 0, 0, 0);
+                        days = 1;
+                    }
+                    break;
+
+                default:
+                    // Fallback: hoje
+                    startDate = new Date(now);
+                    startDate.setHours(0, 0, 0, 0);
+                    days = 1;
             }
 
-            startDate.setHours(0, 0, 0, 0);
-            return { startDate, endDate: now, days, isAllTime: period === 'all' };
+            return { startDate, endDate, days, isCustom };
         }
 
         // Filter data by period
@@ -449,9 +509,9 @@
 
         // Process and display data for selected period
         function processDataForPeriod() {
-            const { startDate, endDate, days, isAllTime } = getPeriodConfig(currentPeriod);
+            const { startDate, endDate, days, isCustom } = getPeriodConfig(currentPeriod);
 
-            console.log('Processing period:', currentPeriod, { startDate, endDate, days, isAllTime });
+            console.log('Processing period:', currentPeriod, { startDate, endDate, days, isCustom });
 
             // Filter transactions and sessions by period
             const filteredTransactions = filterByPeriod(allTransactions, startDate, endDate, 'date');
@@ -474,13 +534,14 @@
             const stats = calculateStats(filteredTransactions, filteredSessions, days, startDate);
 
             // Determine chart parameters based on period
-            const weeklyChartWeeks = isAllTime ? 12 : Math.max(1, Math.ceil(days / 7));
-            const dailyChartDays = isAllTime ? 30 : Math.min(days, 14);
+            const isLongPeriod = days > 14;
+            const weeklyChartWeeks = isLongPeriod ? Math.min(12, Math.ceil(days / 7)) : Math.max(1, Math.ceil(days / 7));
+            const dailyChartDays = Math.min(days, 14);
 
             // Update all UI components
             updateKPIs(stats);
             updateSummary(stats);
-            updateWeeklyChart(filteredTransactions, filteredSessions, weeklyChartWeeks, isAllTime);
+            updateWeeklyChart(filteredTransactions, filteredSessions, weeklyChartWeeks, isLongPeriod);
             updateExpenseChart(filteredTransactions, filteredSessions);
             updateDailyChart(filteredTransactions, filteredSessions, dailyChartDays);
             updateSessionStats(filteredSessions);
@@ -936,14 +997,41 @@
             });
         }
 
+        // Custom date picker elements
+        const customDatePicker = document.getElementById('customDatePicker');
+        const customStartDateInput = document.getElementById('customStartDate');
+        const customEndDateInput = document.getElementById('customEndDate');
+        const applyCustomDateBtn = document.getElementById('applyCustomDate');
+
+        // Set default values for date inputs (last 30 days)
+        const today = getDateInSaoPaulo();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        customEndDateInput.value = today.toISOString().split('T')[0];
+        customStartDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+        customEndDateInput.max = today.toISOString().split('T')[0];
+
         // Period filter click handlers
         periodFilters.forEach(btn => {
             btn.addEventListener('click', () => {
                 const period = btn.dataset.period;
-                if (period === currentPeriod) return;
+
+                // Toggle custom date picker visibility
+                if (period === 'custom') {
+                    customDatePicker.classList.remove('hidden');
+                    // If already on custom, don't re-process
+                    if (period === currentPeriod) return;
+                } else {
+                    customDatePicker.classList.add('hidden');
+                }
+
+                if (period === currentPeriod && period !== 'custom') return;
 
                 currentPeriod = period;
                 updatePeriodFilterUI(period);
+
+                // Don't process for custom until dates are applied
+                if (period === 'custom') return;
 
                 // Show loading briefly for feedback
                 mainContent.style.opacity = '0.5';
@@ -955,6 +1043,40 @@
                     mainContent.style.pointerEvents = 'auto';
                 }, 100);
             });
+        });
+
+        // Apply custom date range
+        applyCustomDateBtn.addEventListener('click', () => {
+            const startVal = customStartDateInput.value;
+            const endVal = customEndDateInput.value;
+
+            if (!startVal || !endVal) {
+                alert('Por favor, selecione as datas inicial e final.');
+                return;
+            }
+
+            const start = new Date(startVal);
+            const end = new Date(endVal);
+
+            if (start > end) {
+                alert('A data inicial deve ser anterior a data final.');
+                return;
+            }
+
+            // Set custom dates
+            customStartDate = start;
+            customEndDate = end;
+            currentPeriod = 'custom';
+
+            // Show loading briefly for feedback
+            mainContent.style.opacity = '0.5';
+            mainContent.style.pointerEvents = 'none';
+
+            setTimeout(() => {
+                processDataForPeriod();
+                mainContent.style.opacity = '1';
+                mainContent.style.pointerEvents = 'auto';
+            }, 100);
         });
 
         // Handle visibility changes (refresh data when tab becomes visible)

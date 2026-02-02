@@ -204,6 +204,54 @@
             </div>
 
             <form id="endSessionForm" class="space-y-4">
+                <!-- Manual Time Input -->
+                <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                    <label class="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-2">
+                        <span class="material-symbols-outlined text-sm">schedule</span>
+                        Tempo Trabalhado *
+                    </label>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                        Ajuste o tempo real que voce trabalhou (importante para estatisticas corretas)
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1">
+                            <div class="relative">
+                                <input
+                                    type="number"
+                                    id="inputHours"
+                                    inputmode="numeric"
+                                    placeholder="0"
+                                    min="0"
+                                    max="24"
+                                    required
+                                    class="w-full bg-white dark:bg-white/10 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-amber-500 text-xl font-bold text-center"
+                                />
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">h</span>
+                            </div>
+                        </div>
+                        <span class="text-slate-400 text-2xl font-bold">:</span>
+                        <div class="flex-1">
+                            <div class="relative">
+                                <input
+                                    type="number"
+                                    id="inputMinutes"
+                                    inputmode="numeric"
+                                    placeholder="0"
+                                    min="0"
+                                    max="59"
+                                    required
+                                    class="w-full bg-white dark:bg-white/10 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-amber-500 text-xl font-bold text-center"
+                                />
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">min</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="timeWarning" class="hidden text-xs text-red-500 mt-2 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">warning</span>
+                        Tempo muito baixo pode gerar estatisticas incorretas
+                    </p>
+                </div>
+
                 <!-- Earnings Input -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
@@ -518,6 +566,9 @@
         const endSessionModal = document.getElementById('endSessionModal');
         const endSessionForm = document.getElementById('endSessionForm');
         const modalDuration = document.getElementById('modalDuration');
+        const inputHours = document.getElementById('inputHours');
+        const inputMinutes = document.getElementById('inputMinutes');
+        const timeWarning = document.getElementById('timeWarning');
         const inputEarnings = document.getElementById('inputEarnings');
         const inputRides = document.getElementById('inputRides');
         const inputExpenses = document.getElementById('inputExpenses');
@@ -861,15 +912,46 @@
         // Show end session modal (shared function)
         const showEndSessionModal = () => {
             const elapsed = calculateElapsedSeconds();
-            modalDuration.textContent = `Duração: ${formatDurationDisplay(elapsed)}`;
+            modalDuration.textContent = `Duração cronometro: ${formatDurationDisplay(elapsed)}`;
+
+            // Pre-fill hours and minutes from elapsed time
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            inputHours.value = hours;
+            inputMinutes.value = minutes;
+
+            // Show warning if time is very low
+            updateTimeWarning(hours, minutes);
+
+            // Clear other inputs
             inputEarnings.value = '';
             inputRides.value = '';
             inputExpenses.value = '';
             inputKm.value = '';
+
             endSessionModal.classList.remove('hidden');
             endSessionModal.classList.add('flex');
             inputEarnings.focus();
         };
+
+        // Update time warning based on input values
+        const updateTimeWarning = (hours, minutes) => {
+            const totalMinutes = (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
+            // Show warning if less than 30 minutes
+            if (totalMinutes < 30 && totalMinutes > 0) {
+                timeWarning.classList.remove('hidden');
+            } else {
+                timeWarning.classList.add('hidden');
+            }
+        };
+
+        // Add input listeners for time warning
+        inputHours.addEventListener('input', () => {
+            updateTimeWarning(inputHours.value, inputMinutes.value);
+        });
+        inputMinutes.addEventListener('input', () => {
+            updateTimeWarning(inputHours.value, inputMinutes.value);
+        });
 
         // Handle end button click (from active state)
         endBtn.addEventListener('click', showEndSessionModal);
@@ -894,10 +976,22 @@
         endSessionForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Get manual time input
+            const manualHours = parseInt(inputHours.value) || 0;
+            const manualMinutes = parseInt(inputMinutes.value) || 0;
+            const manualDurationSeconds = (manualHours * 3600) + (manualMinutes * 60);
+
             const earnings = parseCurrencyValue(inputEarnings.value);
             const rides = parseInt(inputRides.value) || 0;
             const expenses = parseCurrencyValue(inputExpenses.value);
             const totalKm = parseFloat(inputKm.value) || 0;
+
+            // Validate manual time - must be at least 1 minute if earnings > 0
+            if (manualDurationSeconds < 60 && earnings > 0) {
+                showToast('Informe o tempo trabalhado (minimo 1 minuto)', 'error');
+                inputHours.focus();
+                return;
+            }
 
             if (earnings <= 0) {
                 showToast('Informe o valor faturado', 'error');
@@ -905,8 +999,8 @@
                 return;
             }
 
-            // Get final elapsed time
-            const finalElapsedSeconds = calculateElapsedSeconds();
+            // Use manual duration instead of calculated elapsed time
+            const finalElapsedSeconds = manualDurationSeconds;
 
             // Stop timer
             stopTimerInterval();
